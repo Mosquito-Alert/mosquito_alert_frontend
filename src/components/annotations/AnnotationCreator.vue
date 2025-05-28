@@ -15,7 +15,7 @@
           thumbnails: 'w-1/12',
           // thumbnailContent: 'border-l border-white/20 bg-black/80! h-full! max-h-full!',
           thumbnailsViewport: 'flex-1',
-          caption: 'flex top-4! right-2! left-auto! bottom-auto! bg-transparent!',
+          caption: 'flex top-2! right-2! left-auto! bottom-auto! bg-transparent!',
         }">
         <template #item="slotProps">
           <ProgressSpinner class="self-center" v-if="loading" />
@@ -32,6 +32,8 @@
             iconPos="right" @click="startAnnotation" :loading="loading" />
           <div v-if="isStarted" class="flex flex-col ml-auto gap-2">
             <BestPhotoTag />
+            <Button label="Show all" icon="pi pi-external-link" severity="contrast"
+              @click="showGalleriaFullscreen = true" />
           </div>
         </template>
       </Galleria>
@@ -54,6 +56,9 @@
         </div>
       </div>
     </div>
+
+    <AnnotationGalleriaFullScreen :photos="assignment.observation.photos" v-model:visible="showGalleriaFullscreen"
+      :best-photo="activePhoto" />
   </div>
 </template>
 
@@ -63,11 +68,13 @@ import { AssignmentAnnotationType, type Assignment } from 'mosquito-alert';
 
 import AnnotationForm from './AnnotationForm.vue';
 import AnnotationExtendedTag from './AnnotationExtendedTag.vue';
+import AnnotationGalleriaFullScreen from './AnnotationGalleriaFullScreen.vue';
 import BestPhotoTag from '../photos/BestPhotoTag.vue';
 
 const isStarted = ref(false);
 const isFlagged = ref(false);
 const activePhotoIndex = ref(0);
+const showGalleriaFullscreen = ref(false);
 
 const activePhoto = computed(() => {
   return props.assignment.observation.photos[activePhotoIndex.value];
