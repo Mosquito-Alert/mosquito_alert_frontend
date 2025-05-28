@@ -77,6 +77,7 @@ onMounted(async () => {
 })
 
 watch(assignment, (newAssignment) => {
+  observationIsFavorited.value = false;
   if (newAssignment?.observation.uuid && newAssignment.observation.uuid !== route.params.observationUuid) {
     router.push({
       name: 'annotate_identification_task',
