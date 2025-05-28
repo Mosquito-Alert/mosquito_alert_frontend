@@ -1,8 +1,7 @@
 <template>
   <div class="flex flex-wrap justify-center gap-2">
-    <ToggleButton v-for="taxon in [...relevantTaxa].sort((a, b) => a.name.localeCompare(b.name))" :key="taxon.id"
-      :modelValue="selectedTaxon === taxon" :onLabel="taxon.name" :offLabel="taxon.name"
-      :class="{ 'italic': taxon.italicize }" @update:modelValue="(value) => {
+    <ToggleButton v-for="taxon in sortedRelevantTaxa" :key="taxon.id" :modelValue="selectedTaxon === taxon"
+      :onLabel="taxon.name" :offLabel="taxon.name" :class="{ 'italic': taxon.italicize }" @update:modelValue="(value) => {
         selectedTaxonOnTree = undefined; // Reset the tree selection when a taxon is selected
         if (value) selectedTaxon = taxon;
         else if (selectedTaxon === taxon) selectedTaxon = undefined;
@@ -38,9 +37,10 @@
 
 <script setup lang="ts">
 
-import { onMounted, ref, watch, watchEffect } from 'vue';
+import { onMounted, ref, watch, watchEffect, computed } from 'vue';
 
 import type { Taxon } from 'mosquito-alert';
+import { SimpleTaxonRank } from 'mosquito-alert';
 
 import TaxonTreeSelect from './TaxonTreeSelect.vue';
 
@@ -82,5 +82,20 @@ onMounted(async () => {
   }
   relevantTaxa.value = taxaStore.relevant as Taxon[];
 })
+
+const sortedRelevantTaxa = computed(() => {
+  // Complex at the end, sorted by name
+  return [...relevantTaxa.value].sort((a, b) => {
+    const aIsComplex = a.rank === SimpleTaxonRank.SpeciesComplex;
+    const bIsComplex = b.rank === SimpleTaxonRank.SpeciesComplex;
+
+    // Sort by isComplex ascending (true last)
+    if (aIsComplex && !bIsComplex) return 1;
+    if (!aIsComplex && bIsComplex) return -1;
+
+    // Then sort by name ascending
+    return a.name.localeCompare(b.name);
+  });
+});
 
 </script>
