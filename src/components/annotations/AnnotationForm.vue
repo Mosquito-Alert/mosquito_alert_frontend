@@ -62,7 +62,7 @@
 
       <FormField v-slot="$field" v-if="isExtended" name="publicNote" class="flex flex-col gap-2 w-full">
         <div class="flex items-center">
-          <label for="userNote">Public note</label>
+          <label>Public note</label>
           <div class="flex ml-auto gap-1 items-center">
             <span class="text-surface-500 dark:text-surface-300">Templates: </span>
             <Button icon="pi pi-star" severity="help" size="small" variant="outlined"
@@ -80,8 +80,8 @@
         </Message>
       </FormField>
 
-      <FormField v-slot="$field" v-if="isExtended" name="userNote" class="flex flex-col gap-2 w-full">
-        <label>User note <span class="text-surface-500 dark:text-surface-300 italic">(Optional)</span></label>
+      <FormField v-slot="$field" v-if="isExtended" name="internalNote" class="flex flex-col gap-2 w-full">
+        <label>Internal note <span class="text-surface-500 dark:text-surface-300 italic">(Optional)</span></label>
         <Textarea autoResize rows="3" />
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
@@ -199,7 +199,7 @@ const onFormSubmit = ({ valid, values }) => {
       },
       feedback: {
         public_note: values.privateNote,
-        user_note: values.userNote
+        internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
       is_flagged: props.isFlagged,
       is_decisive: values.isDecisive,

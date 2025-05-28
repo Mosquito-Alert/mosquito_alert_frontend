@@ -45,7 +45,7 @@
     </Column>
     <template #expansion="slotProps">
       <p><span class="font-bold">Public note: </span>{{ slotProps.data.feedback.public_note }}</p>
-      <p><span class="font-bold">User note: </span>{{ slotProps.data.feedback.user_note }}</p>
+      <p><span class="font-bold">Internal note: </span>{{ slotProps.data.feedback.internal_note }}</p>
     </template>
   </DataTable>
 </template>

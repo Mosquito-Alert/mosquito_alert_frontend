@@ -39,10 +39,10 @@
         </div>
       </li>
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">User note
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Internal note
         </div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-8/12 md:order-none order-1">{{
-          annotation?.feedback?.user_note }}</div>
+          annotation?.feedback?.internal_note }}</div>
       </li>
     </ul>
   </Panel>
