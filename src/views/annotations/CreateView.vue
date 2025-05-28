@@ -1,8 +1,8 @@
 <template>
-  <div class="rounded-xl flex flex-col h-[calc(100dvh-8rem)]">
+  <div class="flex flex-col flex-1 h-[calc(100dvh-8rem)]">
     <div class="card transition-all duration-500 ease-in-out" :class="{ 'h-0 opacity-0 p-0! m-0!': annotationStarted }">
       <div v-if="!annotationStarted" class="flex flex-row items-center gap-6">
-        <div class="font-medium text-3xl text-surface-500 dark:text-surface-300">
+        <div class="font-medium text-2xl text-surface-500 dark:text-surface-300">
           <span>Observation uuid: </span>
           <span class="text-surface-700 dark:text-surface-0">{{ assignment?.observation.uuid }}</span>
 
@@ -20,7 +20,7 @@
         </div>
       </div>
     </div>
-    <AnnotationCreator v-if="assignment" class="overflow-hidden" :assignment="assignment" :loading="loading"
+    <AnnotationCreator v-if="assignment" class="flex-1 h-px w-full" :assignment="assignment" :loading="loading"
       @on-start-annotation="annotationStarted = true" @on-cancel-annotation="annotationStarted = false"
       @on-submit-annotation="onSubmitAnnotation" />
   </div>
