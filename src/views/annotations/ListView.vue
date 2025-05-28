@@ -1,6 +1,10 @@
 <template>
   <div class="card">
-    <h4 class="m-0">Annotations</h4>
+    <div class="flex flex-row">
+      <h4 class="m-0!">Annotations</h4>
+      <Button class="ml-auto" label="Start annotating" icon="pi pi-arrow-right" iconPos="right"
+        @click="onStartAnnotationClicked" />
+    </div>
     <DataView :value="annotationsArray" dataKey='id' :rows="numRows" :total-records="annotationsTotalCount" lazy
       paginator :rowsPerPageOptions="[5, 10, 25, 50]" @page="onPageChange"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
@@ -19,8 +23,6 @@
             <div class="flex gap-2">
               <div class="flex gap-1">
                 <Button icon="pi pi-refresh" :loading="loading" severity="secondary" @click="fetchData" />
-                <Button label="Start annotating" icon="pi pi-arrow-right" iconPos="right"
-                  @click="onStartAnnotationClicked" />
               </div>
             </div>
           </template>
