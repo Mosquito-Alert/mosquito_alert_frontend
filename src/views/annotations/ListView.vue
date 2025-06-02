@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="flex flex-row">
-      <h4 class="m-0!">Annotations</h4>
+      <h4 class="m-0!">Your annotations</h4>
       <Button class="ml-auto" label="Start annotating" icon="pi pi-arrow-right" iconPos="right"
         @click="onStartAnnotationClicked" />
     </div>
