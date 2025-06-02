@@ -162,16 +162,17 @@ watch(() => props.isFlagged, (newVal) => {
 });
 
 const handleKeyDownTags = (event) => {
-  const input = event.target.value;
-  console.log(selectedTags.value);
-  if (event.key === ',') {
-    event.preventDefault(); // prevent the comma from being typed
-    const value = input.trim().replace(/,$/, '');
-    if (value && !selectedTags.value.includes(value)) {
-      console.log(value);
-      selectedTags.value.push(value);
-    }
-    event.target.value = ''; // clear the input manually
+  const input = event.target.value.trim();
+  switch (event.code) {
+    case 'Comma':
+    case 'Space':
+      event.preventDefault(); // prevent the character from being typed
+      const cleanedInput = input.replace(/[, ]$/, '');
+      if (cleanedInput && !selectedTags.value.includes(cleanedInput)) {
+        selectedTags.value.push(cleanedInput);
+      }
+      event.target.value = ''; // clear the input
+      break;
   }
 };
 
