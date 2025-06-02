@@ -15,7 +15,7 @@
           thumbnails: 'w-1/12',
           // thumbnailContent: 'border-l border-white/20 bg-black/80! h-full! max-h-full!',
           thumbnailsViewport: 'flex-1',
-          caption: 'flex top-2! right-2! left-auto! bottom-auto! bg-transparent!',
+          caption: 'top-0! left-0! right-auto! bottom-auto! bg-transparent! p-0!',
         }">
         <template #item="slotProps">
           <ProgressSpinner class="self-center" v-if="loading" />
@@ -28,12 +28,32 @@
           <img v-if="!loading" :src="slotProps.item.url" class="max-h-full aspect-square object-scale-down" />
         </template>
         <template #caption>
-          <Button v-if="!isStarted" class="ml-auto" label="Annotate this picture" icon="pi pi-arrow-right"
-            iconPos="right" @click="startAnnotation" :loading="loading" />
-          <div v-if="isStarted" class="flex flex-col ml-auto gap-2">
-            <BestPhotoTag />
-            <Button label="Show all" icon="pi pi-external-link" severity="contrast"
-              @click="showGalleriaFullscreen = true" />
+          <div class="flex">
+            <div
+              class="flex flex-row h-min items-center p-2 gap-2 bg-linear-to-r from-(--p-galleria-caption-background) from-80% to-transparent">
+              <div class="font-medium text-md text-gray-300">
+                <span>Observation uuid: </span>
+                <span class="text-gray-200">{{ assignment.observation.uuid }}</span>
+              </div>
+              <Button icon="pi pi-info-circle" class="not-hover:text-gray-200!" rounded variant="text"
+                severity="secondary" roundedaria-label="Info" size="small" @click="observationDialogVisible = true" />
+            </div>
+            <div class="flex flex-col items-center p-4 gap-2 ml-auto">
+              <div class="flex grow">
+                <BestPhotoTag v-if="isStarted" />
+                <div v-if="!isStarted" class="flex gap-2">
+                  <Button label="Not an insect" severity="danger" icon="pi pi-times" outlined
+                    class="not-hover:text-white!" @click="confirmNotInsect($event)"
+                    :loading="isSubmittingNotInsect || loading" />
+                  <Button v-if="!isStarted" label="Annotate this picture" icon="pi pi-arrow-right" iconPos="right"
+                    @click="startAnnotation" :loading="loading" />
+                </div>
+              </div>
+              <div v-if="isStarted" class="flex flex-row ml-auto">
+                <Button label="Show all" icon="pi pi-external-link" severity="contrast"
+                  @click="showGalleriaFullscreen = true" />
+              </div>
+            </div>
           </div>
         </template>
       </Galleria>
@@ -44,15 +64,17 @@
             <h4 class="m-0!">New annotation</h4>
             <AnnotationExtendedTag v-if="isExtended" class="h-min" />
             <div class="flex flex-row ml-auto">
+              <Button :icon="isFavourite ? 'pi pi-heart-fill' : 'pi pi-heart'" severity="danger" variant="text" rounded
+                aria-label="Mark as favorite" @click="isFavourite = !isFavourite" />
               <Button :icon="isFlagged ? 'pi pi-flag-fill' : 'pi pi-flag'" severity="danger" variant="text" rounded
                 aria-label="Mark as flagged" @click="isFlagged = !isFlagged" />
               <Button icon="pi pi-times" severity="secondary" variant="text" rounded aria-label="Cancel"
                 @click="cancelAnnotation" />
-
             </div>
           </div>
           <AnnotationForm v-if="activePhoto" :observation="assignment.observation" :best-photo="activePhoto"
-            :annotation-type="assignment.annotation_type" :isFlagged="isFlagged" @submit="onSubmitAnnotation" />
+            :annotation-type="assignment.annotation_type" :isFlagged="isFlagged" :isFavourite="isFavourite"
+            @submit="onSubmitAnnotation" />
         </div>
       </div>
     </div>
@@ -60,21 +82,37 @@
     <AnnotationGalleriaFullScreen :photos="assignment.observation.photos" v-model:visible="showGalleriaFullscreen"
       :best-photo="activePhoto" />
   </div>
+
+  <Dialog v-model:visible="observationDialogVisible" modal header="Observation info" class="w-150">
+    <ObservationInfoData :observation="assignment!.observation" />
+  </Dialog>
 </template>
 
 <script setup lang='ts'>
 import { computed, ref, watch } from 'vue';
-import { AssignmentAnnotationType, type Assignment } from 'mosquito-alert';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+
+import { AssignmentAnnotationType } from 'mosquito-alert';
+import type { Assignment, AnnotationRequest } from 'mosquito-alert';
 
 import AnnotationForm from './AnnotationForm.vue';
 import AnnotationExtendedTag from './AnnotationExtendedTag.vue';
 import AnnotationGalleriaFullScreen from './AnnotationGalleriaFullScreen.vue';
+import ObservationInfoData from '../observations/ObservationInfoData.vue';
 import BestPhotoTag from '../photos/BestPhotoTag.vue';
+import { identificationTasksApi } from '@/services/apiService';
+
+const confirm = useConfirm();
+const toast = useToast();
 
 const isStarted = ref(false);
 const isFlagged = ref(false);
+const isFavourite = ref(false);
 const activePhotoIndex = ref(0);
 const showGalleriaFullscreen = ref(false);
+const observationDialogVisible = ref(false);
+const isSubmittingNotInsect = ref(false);
 
 const activePhoto = computed(() => {
   return props.assignment.observation.photos[activePhotoIndex.value];
@@ -98,6 +136,7 @@ watch(() => props.assignment, (newAssignment) => {
     activePhotoIndex.value = 0; // Reset to the first photo when assignment changes
     isStarted.value = false; // Reset annotation state
     isFlagged.value = false; // Reset flagged state
+    isFavourite.value = false; // Reset favourite state
   }
 }, { immediate: true });
 
@@ -122,6 +161,40 @@ const onSubmitAnnotation = (shouldContinue: boolean) => {
   if (!shouldContinue) {
     isStarted.value = false
   }
+}
+
+const confirmNotInsect = (event: MouseEvent) => {
+  isSubmittingNotInsect.value = true;
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Are you sure you want to mark this image as not an insect?',
+    icon: 'pi pi-info-circle',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Accept',
+      severity: 'danger'
+    },
+    accept: () => {
+      const annotationRequest = <AnnotationRequest>{
+        classification: null,
+      }
+      identificationTasksApi.annotationsCreate({
+        observationUuid: props.assignment.observation.uuid,
+        annotationRequest: annotationRequest,
+      }).then(() => {
+        toast.add({ severity: 'info', summary: 'Annotation rejected', detail: 'Marked as not an insect', life: 3000 });
+        onSubmitAnnotation(true);
+      }).catch(() => {
+        toast.add({ severity: 'danger', summary: 'Failed', detail: 'Annotation failed', life: 3000 });
+      })
+    },
+    reject: () => { }
+  });
+  isSubmittingNotInsect.value = false;
 }
 
 </script>

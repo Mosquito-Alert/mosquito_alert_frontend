@@ -134,9 +134,11 @@ const props = withDefaults(defineProps<{
   bestPhoto?: SimplePhoto | Photo,
   annotationType: AssignmentAnnotationType,
   isFlagged?: boolean,
+  isFavourite?: boolean,
   canSetIsDecisive?: boolean
 }>(), {
   isFlagged: false,
+  isFavourite: false,
   canSetIsDecisive: true
 });
 
