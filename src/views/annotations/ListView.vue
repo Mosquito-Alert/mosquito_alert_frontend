@@ -48,6 +48,10 @@
               <label for="is_decisive">Decisive</label>
             </FloatLabel>
             <FloatLabel variant="on">
+              <Select id="is_favourite" v-model="isFavourite" class="w-28" :options="[true, false]" showClear />
+              <label for="is_favourite">Favourite</label>
+            </FloatLabel>
+            <FloatLabel variant="on">
               <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
               <label for="taxaFilter">Taxa</label>
             </FloatLabel>
@@ -98,6 +102,7 @@ const selectedCreatedAtDateRange = ref<Date[]>();
 const selectedUpdatedAtDateRange = ref<Date[]>();
 const isDecisive = ref<boolean>();
 const isFlagged = ref<boolean>();
+const isFavourite = ref<boolean>();
 const selectedTaxon = ref<Taxon | null>(null);
 
 const numRows = ref<number>(25);
@@ -130,6 +135,7 @@ function clearFilters() {
   selectedUpdatedAtDateRange.value = undefined;
   isDecisive.value = undefined;
   isFlagged.value = undefined;
+  isFavourite.value = undefined;
   selectedTaxon.value = null;
 }
 
@@ -153,6 +159,7 @@ onMounted(() => {
 
   isDecisive.value = q.isDecisive ? Boolean(JSON.parse(q.isDecisive as string)) : undefined;
   isFlagged.value = q.isFlagged ? Boolean(JSON.parse(q.isFlagged as string)) : undefined;
+  isFavourite.value = q.isFavourite ? Boolean(JSON.parse(q.isFavourite as string)) : undefined;
 
   pageSelected.value = q.page ? Number(q.page) - 1 : 0
   numRows.value = q.pageSize ? Number(q.pageSize) : 25
@@ -188,6 +195,7 @@ watchEffect(async () => {
     updatedAtBefore: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? new Date(new Date(selectedUpdatedAtDateRange.value[1]).setDate(selectedUpdatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
     isDecisive: isDecisive.value ?? undefined,
     isFlagged: isFlagged.value ?? undefined,
+    isFavourite: isFavourite.value ?? undefined,
     classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
     page: pageSelected.value + 1,
     pageSize: numRows.value,

@@ -33,6 +33,12 @@
           :class="{ 'pi-check-circle text-green-500': slotProps.data.is_decisive, 'pi-times-circle text-red-400': !slotProps.data.is_decisive }" />
       </template>
     </Column>
+    <Column field="is_favourite" header="Is Favourite" dataType="boolean" style="min-width: 6rem">
+      <template #body="slotProps">
+        <i class="pi"
+          :class="{ 'pi-check-circle text-green-500': slotProps.data.is_favourite, 'pi-times-circle text-red-400': !slotProps.data.is_favourite }" />
+      </template>
+    </Column>
     <Column header="Created at">
       <template #body="slotProps">
         {{ formatLocalDateTime(slotProps.data.created_at) }}

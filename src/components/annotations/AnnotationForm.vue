@@ -206,6 +206,7 @@ const onFormSubmit = ({ valid, values }) => {
       } as AnnotationFeedbackRequest,
       is_flagged: props.isFlagged,
       is_decisive: values.isDecisive,
+      is_favourite: props.isFavourite,
       tags: selectedTags.value
     }
     identificationTasksApi.annotationsCreate({
