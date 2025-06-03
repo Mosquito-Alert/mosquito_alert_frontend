@@ -179,7 +179,7 @@ const handleKeyDownTags = (event) => {
 const resolver = ({ values }) => {
   const errors = {};
 
-  if (!values.publicNote) {
+  if (!publicNote.value) {
     errors.publicNote = [{ message: 'Public note is required.' }];
   }
 
@@ -201,7 +201,7 @@ const onFormSubmit = ({ valid, values }) => {
           : AnnotationClassificationConfidenceLabel.Probably
       },
       feedback: {
-        public_note: values.privateNote,
+        public_note: publicNote.value,
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
       is_flagged: props.isFlagged,
