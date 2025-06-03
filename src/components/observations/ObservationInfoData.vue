@@ -51,11 +51,11 @@ dayjs.extend(timezone);
 
 import LocationMap from '../locations/LocationMap.vue';
 
-import type { Observation, SimplifiedObservationWithPhotos } from 'mosquito-alert';
+import type { Observation, AssignedObservation } from 'mosquito-alert';
 
 
 defineProps<{
-  observation: Observation | SimplifiedObservationWithPhotos
+  observation: Observation | AssignedObservation
 }>();
 
 </script>

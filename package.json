@@ -18,7 +18,7 @@
     "@primevue/forms": "^4.3.4",
     "@tailwindcss/vite": "^4.1.4",
     "dayjs": "^1.11.13",
-    "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#0.1.12",
+    "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#0.1.13",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.3",

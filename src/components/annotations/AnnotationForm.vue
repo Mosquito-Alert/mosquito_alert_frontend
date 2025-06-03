@@ -62,20 +62,18 @@
 
       <FormField v-slot="$field" v-if="isExtended" name="publicNote" class="flex flex-col gap-2 w-full">
         <div class="flex items-center">
-          <label>Public note</label>
+          <label>
+            Public note
+            <span class="text-surface-500 dark:text-surface-300">(Language: <i
+                :class="`flag flag-${observation.user.locale?.toLowerCase()} rounded-md opacity-70`"
+                style="width: 24px" />)</span>
+          </label>
           <div class="flex ml-auto gap-1 items-center">
-            <span class="text-surface-500 dark:text-surface-300">Templates: </span>
-            <Button icon="pi pi-star" severity="help" size="small" variant="outlined"
-              v-tooltip.top="'Great picture!'" />
-            <Button icon="pi pi-thumbs-up" severity="help" size="small" variant="outlined"
-              v-tooltip.top="'Species pattern found in thorax.'" />
-            <Button icon="pi pi-thumbs-down" severity="help" size="small" variant="outlined"
-              v-tooltip.top="'Species pattern not found.'" />
-            <Button icon="pi pi-times-circle" severity="help" size="small" variant="outlined"
-              v-tooltip.top="'Other insect.'" />
+            <Button icon="pi pi-sparkles" label="Generate" severity="help" @click="generatePublicNote()" rounded
+              variant="outlined" :disabled="!selectedTaxon" size="small" />
           </div>
         </div>
-        <Textarea autoResize rows="5" />
+        <Textarea v-model="publicNote" autoResize rows="5" />
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
@@ -108,7 +106,7 @@ import { ref, watch, computed } from 'vue';
 import { Form } from '@primevue/forms';
 import { useToast } from 'primevue/usetoast';
 
-import type { Observation, SimplifiedObservationWithPhotos, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest } from 'mosquito-alert';
+import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest } from 'mosquito-alert';
 import { AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
 import { AssignmentAnnotationType } from 'mosquito-alert';
 
@@ -116,6 +114,7 @@ import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from './AnnotationSexRadioButton.vue';
 import type { Sex } from './AnnotationSexRadioButton.vue';
 import { identificationTasksApi } from '@/services/apiService';
+import { getPublicNote } from '@/utils/AnnotationUtils';
 
 const toast = useToast();
 
@@ -124,13 +123,14 @@ const isDecisive = ref<boolean>(false);
 const selectedTaxon = ref<Taxon>();
 const selectedSex = ref<Sex>('unknown');
 const selectedTags = ref<string[]>([]);
+const publicNote = ref<string>();
 
 const continueAfterSubmit = ref<boolean>(false);
 
 const isSubmitting = ref<boolean>(false);
 
 const props = withDefaults(defineProps<{
-  observation: Observation | SimplifiedObservationWithPhotos,
+  observation: AssignedObservation,
   bestPhoto?: SimplePhoto | Photo,
   annotationType: AssignmentAnnotationType,
   isFlagged?: boolean,
@@ -219,6 +219,12 @@ const onFormSubmit = ({ valid, values }) => {
     }).finally(() => {
       isSubmitting.value = false;
     });
+  }
+};
+
+const generatePublicNote = () => {
+  if (selectedTaxon.value) {
+    publicNote.value = getPublicNote(selectedTaxon.value, isHighConfidence.value, props.observation.user.locale || 'en');
   }
 };
 
