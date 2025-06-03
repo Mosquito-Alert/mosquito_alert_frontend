@@ -76,7 +76,10 @@ const exportCSV = () => {
 };
 
 const expandAll = () => {
-  expandedRows.value = props.annotations.reduce((acc, p) => (acc[p.id] = true) && acc, {});
+  expandedRows.value = props.annotations.reduce((acc, p) => {
+    acc[p.id] = true;
+    return acc;
+  }, {} as Record<number, boolean>);
 };
 const collapseAll = () => {
   expandedRows.value = {};

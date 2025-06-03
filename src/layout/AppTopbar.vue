@@ -82,7 +82,7 @@ const profileMenuItems = ref([
   }
 ]);
 
-const profileMenuToggle = (event) => {
+const profileMenuToggle = (event: MouseEvent) => {
   profileMenu.value.toggle(event);
 };
 

@@ -51,7 +51,7 @@
 <script setup lang="ts">
 
 import type { Annotation } from 'mosquito-alert';
-import TaxonClassificationTag from './TaxonClassificationTag.vue';
+import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
 
 import { getInitials } from '@/utils/Utils';
 import { formatLocalDateTime } from '@/utils/DateUtils';

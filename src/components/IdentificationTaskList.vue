@@ -72,7 +72,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+import type { ColumnProps } from 'primevue/column';
+import type { DataTableRowClickEvent } from 'primevue';
+
 import type { IdentificationTask } from 'mosquito-alert';
+
 import { getStatusSeverity } from '@/utils/IdentificationTaskUtils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 import { getInitials } from '@/utils/Utils';
@@ -89,18 +94,18 @@ const exportCSV = () => {
   dt.value.exportCSV();
 };
 
-const columns = ref([
+const columns = ref<Partial<ColumnProps>[]>([
   // { field: 'num_annotations', header: 'Annotations' },
   // { field: 'is_flagged', header: 'Is Flagged' },
   { field: 'result.taxon.name', header: 'Result' },
 ]);
 const selectedColumns = ref(columns.value);
 
-const onSelectColumn = (value) => {
+const onSelectColumn = (value: Partial<ColumnProps>[]) => {
   selectedColumns.value = columns.value.filter(col => value.includes(col));
 };
 
-function goToAnnotation(event) {
+function goToAnnotation(event: DataTableRowClickEvent) {
   router.push({ name: 'identification_task', params: { observationUuid: event.data.observation.uuid } });
 }
 

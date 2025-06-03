@@ -168,7 +168,7 @@ const onSubmitAnnotation = (shouldContinue: boolean) => {
 const confirmNotInsect = (event: MouseEvent) => {
   isSubmittingNotInsect.value = true;
   confirm.require({
-    target: event.currentTarget,
+    target: event.currentTarget as HTMLElement,
     message: 'Are you sure you want to mark this image as not an insect?',
     icon: 'pi pi-info-circle',
     rejectProps: {

@@ -107,8 +107,7 @@ import { Form } from '@primevue/forms';
 import { useToast } from 'primevue/usetoast';
 
 import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest } from 'mosquito-alert';
-import { AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
-import { AssignmentAnnotationType } from 'mosquito-alert';
+import { AssignmentAnnotationType, AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
 
 import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from './AnnotationSexRadioButton.vue';
@@ -161,8 +160,11 @@ watch(() => props.isFlagged, (newVal) => {
   }
 });
 
-const handleKeyDownTags = (event) => {
-  const input = event.target.value.trim();
+const handleKeyDownTags = (event: KeyboardEvent) => {
+  const target = event.target as HTMLInputElement | null;
+  if (!target) return;  // handle null case safely
+
+  const input = target.value.trim();
   switch (event.code) {
     case 'Comma':
     case 'Space':
@@ -171,13 +173,13 @@ const handleKeyDownTags = (event) => {
       if (cleanedInput && !selectedTags.value.includes(cleanedInput)) {
         selectedTags.value.push(cleanedInput);
       }
-      event.target.value = ''; // clear the input
+      target.value = ''; // clear the input
       break;
   }
 };
 
-const resolver = ({ values }) => {
-  const errors = {};
+const resolver = ({ values }: { values: Record<string, any> }) => {
+  const errors: Record<string, { message: string }[]> = {};
 
   if (!publicNote.value) {
     errors.publicNote = [{ message: 'Public note is required.' }];
@@ -189,7 +191,7 @@ const resolver = ({ values }) => {
   };
 };
 
-const onFormSubmit = ({ valid, values }) => {
+const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string, any> }) => {
   if (valid) {
     isSubmitting.value = true;
     const annotationRequest = <AnnotationRequest>{

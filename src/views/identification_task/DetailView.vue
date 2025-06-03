@@ -24,7 +24,7 @@
       <Tag v-if='identificationTask?.is_safe' icon="pi pi-shield" value='Safe content' severity="success" />
       <Tag v-if='identificationTask?.is_flagged' icon="pi pi-flag" value='Flagged' severity="danger" />
       <div class="ml-auto text-surface-400 dark:text-surface-400 flex flex-col">
-        <span>Last update: {{ formatLocalDateTime(identificationTask?.updated_at) }}</span>
+        <span>Last update: {{ formatLocalDateTime(identificationTask?.updated_at!) }}</span>
       </div>
     </div>
     <ul v-if="identificationTask?.result.source" class="list-none p-0 m-0">

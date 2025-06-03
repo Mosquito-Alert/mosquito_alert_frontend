@@ -64,7 +64,7 @@ const route = useRoute();
 const isInvalid = ref(false);
 
 
-const onFormSubmit = ({ valid, values }) => {
+const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string, any> }) => {
   if (valid) {
     authStore.login(values.username, values.password).then(() => {
       const nextPath = route.query.next;
@@ -73,7 +73,7 @@ const onFormSubmit = ({ valid, values }) => {
       } else {
         router.push({ name: 'list_annotations' });
       }
-    }).catch((error) => {
+    }).catch(() => {
       isInvalid.value = true;
     });
   }

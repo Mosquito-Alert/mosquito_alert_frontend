@@ -1,13 +1,13 @@
 <template>
   <li :class="{ 'layout-root-menuitem': root, 'active-menuitem': isActiveMenu }">
     <div v-if="root && item.visible !== false" class="layout-menuitem-root-text">{{ item.label }}</div>
-    <a v-if="(!item.to || item.items) && item.visible !== false" :href="item.url"
-      @click="itemClick($event, item, index)" :class="item.class" :target="item.target" tabindex="0">
+    <a v-if="(!item.to || item.items) && item.visible !== false" :href="item.url" @click="itemClick($event, item)"
+      :class="item.class" :target="item.target" tabindex="0">
       <i :class="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text">{{ item.label }}</span>
       <i class="pi pi-fw pi-angle-down layout-submenu-toggler" v-if="item.items"></i>
     </a>
-    <router-link v-if="item.to && !item.items && item.visible !== false" @click="itemClick($event, item, index)"
+    <router-link v-if="item.to && !item.items && item.visible !== false" @click="itemClick($event, item)"
       :class="[item.class, { 'active-route': checkActiveRoute(item) }]" tabindex="0" :to="item.to">
       <i :class="item.icon" class="layout-menuitem-icon"></i>
       <span class="layout-menuitem-text">{{ item.label }}</span>
@@ -15,7 +15,7 @@
     </router-link>
     <Transition v-if="item.items && item.visible !== false" name="layout-submenu">
       <ul v-show="root ? true : isActiveMenu" class="layout-submenu">
-        <app-menu-item v-for="(child, i) in item.items" :key="child" :index="i" :item="child" :parentItemKey="itemKey"
+        <app-menu-item v-for="(child, i) in item.items" :key="i" :index="i" :item="child" :parentItemKey="itemKey"
           :root="false"></app-menu-item>
       </ul>
     </Transition>
@@ -24,8 +24,22 @@
 
 <script setup lang="ts">
 import { useLayout } from '@/layout/composables/layout';
-import { onBeforeMount, ref, watch } from 'vue';
+import { onBeforeMount, ref, watch, type PropType } from 'vue';
 import { useRoute } from 'vue-router';
+
+export type MenuItem = {
+  label: string;
+  icon?: string;
+  to?: { name: string };
+  visible?: boolean;
+  items?: MenuItem[];
+  separator?: boolean;
+  class?: string;
+  target?: string;
+  url?: string;
+  disabled?: boolean;
+  command?: (event: { originalEvent: MouseEvent; item: MenuItem }) => void;
+};
 
 const route = useRoute();
 
@@ -33,7 +47,7 @@ const { layoutState, setActiveMenuItem, toggleMenu } = useLayout();
 
 const props = defineProps({
   item: {
-    type: Object,
+    type: Object as PropType<MenuItem>,
     default: () => ({})
   },
   index: {
@@ -51,7 +65,7 @@ const props = defineProps({
 });
 
 const isActiveMenu = ref<boolean>(false);
-const itemKey = ref<string | null>(null);
+const itemKey = ref<string>();
 
 onBeforeMount(() => {
   itemKey.value = props.parentItemKey ? props.parentItemKey + '-' + props.index : String(props.index);
@@ -68,7 +82,7 @@ watch(
   }
 );
 
-function itemClick(event, item) {
+function itemClick(event: MouseEvent, item: MenuItem) {
   if (item.disabled) {
     event.preventDefault();
     return;
@@ -87,8 +101,8 @@ function itemClick(event, item) {
   setActiveMenuItem(foundItemKey);
 }
 
-function checkActiveRoute(item) {
-  return route.name === item.to.name;
+function checkActiveRoute(item: MenuItem) {
+  return route.name === item.to?.name;
 }
 </script>
 
