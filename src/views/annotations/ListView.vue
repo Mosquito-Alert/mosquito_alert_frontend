@@ -30,14 +30,8 @@
         <Panel v-show="showFilters" header="Filters" class="mt-4">
           <div class="flex gap-2">
             <FloatLabel variant="on">
-              <DatePicker id="created_at_filter" v-model="selectedCreatedAtDateRange" showIcon iconDisplay="input"
-                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="created_at_filter">Created at</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <DatePicker id="updated_at_filter" v-model="selectedUpdatedAtDateRange" showIcon iconDisplay="input"
-                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="updated_at_filter">Updated at</label>
+              <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
+              <label for="taxaFilter">Taxa</label>
             </FloatLabel>
             <FloatLabel variant="on">
               <Select id="is_flagged" v-model="isFlagged" class="w-28" :options="[true, false]" showClear />
@@ -52,10 +46,15 @@
               <label for="is_favourite">Favourite</label>
             </FloatLabel>
             <FloatLabel variant="on">
-              <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
-              <label for="taxaFilter">Taxa</label>
+              <DatePicker id="created_at_filter" v-model="selectedCreatedAtDateRange" showIcon iconDisplay="input"
+                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
+              <label for="created_at_filter">Created at</label>
             </FloatLabel>
-
+            <FloatLabel variant="on">
+              <DatePicker id="updated_at_filter" v-model="selectedUpdatedAtDateRange" showIcon iconDisplay="input"
+                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
+              <label for="updated_at_filter">Updated at</label>
+            </FloatLabel>
             <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
           </div>
         </Panel>
