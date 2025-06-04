@@ -9,6 +9,11 @@
     </template>
     <Column expander style="width: 5rem" />
     <Column field="observation_uuid" header="Observation UUID" />
+    <Column header="Type">
+      <template #body="slotProps">
+        <AnnotationTypeTag :type="slotProps.data.type" />
+      </template>
+    </Column>
     <Column header="Best image">
       <template #body="slotProps">
         <Image v-if="slotProps.data.best_photo" :src="`${slotProps.data.best_photo.url}`" preview
@@ -60,7 +65,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Annotation } from 'mosquito-alert';
+import { AnnotationType } from 'mosquito-alert';
 import { formatLocalDateTime } from '@/utils/DateUtils';
+import AnnotationTypeTag from './AnnotationTypeTag.vue';
 import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
 
 const props = defineProps<{

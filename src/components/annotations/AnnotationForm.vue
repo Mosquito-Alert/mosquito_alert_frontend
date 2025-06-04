@@ -107,7 +107,7 @@ import { Form } from '@primevue/forms';
 import { useToast } from 'primevue/usetoast';
 
 import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest } from 'mosquito-alert';
-import { AssignmentAnnotationType, AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
+import { AnnotationType, AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
 
 import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from './AnnotationSexRadioButton.vue';
@@ -131,7 +131,7 @@ const isSubmitting = ref<boolean>(false);
 const props = withDefaults(defineProps<{
   observation: AssignedObservation,
   bestPhoto?: SimplePhoto | Photo,
-  annotationType: AssignmentAnnotationType,
+  annotationType: AnnotationType,
   isFlagged?: boolean,
   isFavourite?: boolean,
   canSetIsDecisive?: boolean
@@ -146,7 +146,7 @@ const emit = defineEmits<{
 }>();
 
 const isExtended = computed(() => {
-  return props.annotationType === AssignmentAnnotationType.Long;
+  return props.annotationType === AnnotationType.Long;
 });
 
 const isFemale = computed(() => {

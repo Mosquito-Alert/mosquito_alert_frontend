@@ -63,7 +63,7 @@
         <div v-if="isStarted" class="flex flex-col h-full">
           <div class="flex flex-row gap-2 items-center mb-4 ">
             <h4 class="m-0!">New annotation</h4>
-            <AnnotationExtendedTag v-if="isExtended" class="h-min" />
+            <AnnotationTypeTag v-if="isExtended" class="h-min" :type="assignment.annotation_type" />
             <div class="flex flex-row ml-auto">
               <Button :icon="isFavourite ? 'pi pi-heart-fill' : 'pi pi-heart'" severity="danger" variant="text" rounded
                 aria-label="Mark as favorite" @click="isFavourite = !isFavourite" />
@@ -95,11 +95,11 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import { Magnifier } from 'vue3-zoomer';
 
-import { AssignmentAnnotationType } from 'mosquito-alert';
+import { AnnotationType } from 'mosquito-alert';
 import type { Assignment, AnnotationRequest } from 'mosquito-alert';
 
 import AnnotationForm from './AnnotationForm.vue';
-import AnnotationExtendedTag from './AnnotationExtendedTag.vue';
+import AnnotationTypeTag from './AnnotationTypeTag.vue';
 import AnnotationGalleriaFullScreen from './AnnotationGalleriaFullScreen.vue';
 import ObservationInfoData from '../observations/ObservationInfoData.vue';
 import BestPhotoTag from '../photos/BestPhotoTag.vue';
@@ -121,7 +121,7 @@ const activePhoto = computed(() => {
 });
 
 const isExtended = computed(() => {
-  return props.assignment.annotation_type === AssignmentAnnotationType.Long;
+  return props.assignment.annotation_type === AnnotationType.Long;
 });
 
 defineOptions({ inheritAttrs: false })

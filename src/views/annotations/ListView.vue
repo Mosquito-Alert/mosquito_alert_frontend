@@ -30,6 +30,10 @@
         <Panel v-show="showFilters" header="Filters" class="mt-4">
           <div class="flex gap-2">
             <FloatLabel variant="on">
+              <AnnotationTypeSelect v-model="selectedType" />
+              <label for="type">Type</label>
+            </FloatLabel>
+            <FloatLabel variant="on">
               <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
               <label for="taxaFilter">Taxa</label>
             </FloatLabel>
@@ -73,11 +77,12 @@ import { useRoute, useRouter } from 'vue-router'
 import type { DataViewPageEvent } from 'primevue/dataview'
 import { useToast } from "primevue/usetoast";
 
-import { IdentificationtasksListOrderByParameter } from 'mosquito-alert';
+import { IdentificationtasksListOrderByParameter, AnnotationType } from 'mosquito-alert';
 import type { Annotation, IdentificationTasksApiAnnotationsListMineRequest, Taxon } from 'mosquito-alert';
 
 import AnnotationDataTable from '@/components/annotations/AnnotationDataTable.vue';
 import TaxonTreeSelect from '@/components/taxa/TaxonTreeSelect.vue';
+import AnnotationTypeSelect from '@/components/annotations/AnnotationTypeSelect.vue';
 import { identificationTasksApi } from '@/services/apiService';
 import { useAssignmentStore } from '@/stores/assignmentStore';
 
@@ -103,6 +108,7 @@ const isDecisive = ref<boolean>();
 const isFlagged = ref<boolean>();
 const isFavourite = ref<boolean>();
 const selectedTaxon = ref<Taxon | null>(null);
+const selectedType = ref<AnnotationType>();
 
 const numRows = ref<number>(25);
 const onPageChange = (event: DataViewPageEvent) => {
@@ -136,6 +142,7 @@ function clearFilters() {
   isFlagged.value = undefined;
   isFavourite.value = undefined;
   selectedTaxon.value = null;
+  selectedType.value = undefined;
 }
 
 onMounted(() => {
@@ -196,6 +203,7 @@ watchEffect(async () => {
     isFlagged: isFlagged.value ?? undefined,
     isFavourite: isFavourite.value ?? undefined,
     classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
+    type: selectedType.value ?? undefined,
     page: pageSelected.value + 1,
     pageSize: numRows.value,
     orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
