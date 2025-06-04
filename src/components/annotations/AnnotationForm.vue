@@ -65,9 +65,9 @@
         <div class="flex items-center">
           <label>
             Public note
-            <span class="text-surface-500 dark:text-surface-300">(Language: <i
-                :class="`flag flag-${observation.user.locale?.toLowerCase()} rounded-md opacity-70`"
-                style="width: 24px" />)</span>
+            <span v-if="observation.user.locale" class="text-surface-500 dark:text-surface-300">
+              (Language: {{ getLanguageName(observation.user.locale) }})
+            </span>
           </label>
           <div class="flex ml-auto gap-1 items-center">
             <Button icon="pi pi-sparkles" label="Generate" severity="help" @click="generatePublicNote()" rounded
@@ -114,6 +114,7 @@ import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from './AnnotationSexRadioButton.vue';
 import { identificationTasksApi } from '@/services/apiService';
 import { getPublicNote } from '@/utils/AnnotationUtils';
+import { getLanguageName } from '@/utils/Utils';
 
 const toast = useToast();
 
