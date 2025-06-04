@@ -13,12 +13,12 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="isExecutive" :initial-value="false" class="flex ml-auto items-center gap-2">
+        <!-- <FormField v-slot="$field" name="isExecutive" :initial-value="false" class="flex ml-auto items-center gap-2">
           <label>Is executive?</label>
           <ToggleSwitch v-model="isExecutive" :disabled="isFlagged" />
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
-        </FormField>
+        </FormField> -->
       </div>
 
       <div v-if="isExtended" class="flex flex-col w-full">
@@ -207,7 +207,7 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
       is_flagged: props.isFlagged,
-      is_decisive: values.isExecutive,
+      is_decisive: isExecutive.value,
       is_favourite: props.isFavourite,
       tags: selectedTags.value
     }

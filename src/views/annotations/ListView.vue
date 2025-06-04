@@ -41,10 +41,10 @@
               <Select id="is_flagged" v-model="isFlagged" class="w-28" :options="[true, false]" showClear />
               <label for="is_flagged">Flag</label>
             </FloatLabel>
-            <FloatLabel variant="on">
+            <!-- <FloatLabel variant="on">
               <Select id="is_executive" v-model="isExecutive" class="w-28" :options="[true, false]" showClear />
               <label for="is_executive">Executive</label>
-            </FloatLabel>
+            </FloatLabel> -->
             <FloatLabel variant="on">
               <Select id="is_favourite" v-model="isFavourite" class="w-28" :options="[true, false]" showClear />
               <label for="is_favourite">Favourite</label>
