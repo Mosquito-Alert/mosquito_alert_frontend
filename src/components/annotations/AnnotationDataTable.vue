@@ -44,12 +44,7 @@
           :class="{ 'pi-check-circle text-green-500': slotProps.data.is_favourite, 'pi-times-circle text-red-400': !slotProps.data.is_favourite }" />
       </template>
     </Column>
-    <Column header="Created at">
-      <template #body="slotProps">
-        {{ formatLocalDateTime(slotProps.data.created_at) }}
-      </template>
-    </Column>
-    <Column header="Last updated">
+    <Column header="Date">
       <template #body="slotProps">
         {{ formatLocalDateTime(slotProps.data.updated_at) }}
       </template>
@@ -65,7 +60,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Annotation } from 'mosquito-alert';
-import { AnnotationType } from 'mosquito-alert';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
 import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';

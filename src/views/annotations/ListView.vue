@@ -50,14 +50,9 @@
               <label for="is_favourite">Favourite</label>
             </FloatLabel>
             <FloatLabel variant="on">
-              <DatePicker id="created_at_filter" v-model="selectedCreatedAtDateRange" showIcon iconDisplay="input"
+              <DatePicker id="date_filter" v-model="selectedDateRange" showIcon iconDisplay="input"
                 :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="created_at_filter">Created at</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <DatePicker id="updated_at_filter" v-model="selectedUpdatedAtDateRange" showIcon iconDisplay="input"
-                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="updated_at_filter">Updated at</label>
+              <label for="date_filter">Date</label>
             </FloatLabel>
             <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
           </div>
@@ -102,8 +97,7 @@ const loading = ref<boolean>(false);
 const showFilters = ref<boolean>(false);
 
 // Filters
-const selectedCreatedAtDateRange = ref<Date[]>();
-const selectedUpdatedAtDateRange = ref<Date[]>();
+const selectedDateRange = ref<Date[]>();
 const isDecisive = ref<boolean>();
 const isFlagged = ref<boolean>();
 const isFavourite = ref<boolean>();
@@ -120,14 +114,12 @@ const selectedOrderBy = ref<{
   value: IdentificationtasksListOrderByParameter,
   label: string
 }>({
-  value: IdentificationtasksListOrderByParameter.MinusCreatedAt,
-  label: 'Last created'
+  value: IdentificationtasksListOrderByParameter.MinusUpdatedAt,
+  label: 'Last annotated'
 })
 const orderByArray = ref<Array<{ value: IdentificationtasksListOrderByParameter; label: string }>>([
-  { value: IdentificationtasksListOrderByParameter.MinusCreatedAt, label: 'Last created' },
-  { value: IdentificationtasksListOrderByParameter.MinusUpdatedAt, label: 'Last updated' },
-  { value: IdentificationtasksListOrderByParameter.CreatedAt, label: 'First created' },
-  { value: IdentificationtasksListOrderByParameter.UpdatedAt, label: 'First updated' },
+  { value: IdentificationtasksListOrderByParameter.MinusUpdatedAt, label: 'Last annotated' },
+  { value: IdentificationtasksListOrderByParameter.UpdatedAt, label: 'First annotated' },
 ]);
 
 const annotationsTotalCount = ref<number>(0);
@@ -136,8 +128,7 @@ const annotationsArray = ref<Annotation[]>([]);
 const listRequest = ref<IdentificationTasksApiAnnotationsListMineRequest>();
 
 function clearFilters() {
-  selectedCreatedAtDateRange.value = undefined;
-  selectedUpdatedAtDateRange.value = undefined;
+  selectedDateRange.value = undefined;
   isDecisive.value = undefined;
   isFlagged.value = undefined;
   isFavourite.value = undefined;
@@ -149,15 +140,8 @@ onMounted(() => {
   // Initialize filters from route query params
   const q = route.query
 
-  if (q.createdAtAfter && q.createdAtBefore) {
-    selectedCreatedAtDateRange.value = [
-      new Date(q.createdAtAfter as string),
-      new Date(q.createdAtBefore as string),
-    ] as Date[];
-  }
-
   if (q.updatedAtAfter && q.updatedAtBefore) {
-    selectedUpdatedAtDateRange.value = [
+    selectedDateRange.value = [
       new Date(q.updatedAtAfter as string),
       new Date(q.updatedAtBefore as string),
     ] as Date[];
@@ -195,10 +179,8 @@ watch(listRequest, async () => {
 
 watchEffect(async () => {
   listRequest.value = {
-    createdAtAfter: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? selectedCreatedAtDateRange.value[0].toISOString() : undefined,
-    createdAtBefore: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? new Date(new Date(selectedCreatedAtDateRange.value[1]).setDate(selectedCreatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
-    updatedAtAfter: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? selectedUpdatedAtDateRange.value[0].toISOString() : undefined,
-    updatedAtBefore: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? new Date(new Date(selectedUpdatedAtDateRange.value[1]).setDate(selectedUpdatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
+    updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
+    updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
     isDecisive: isDecisive.value ?? undefined,
     isFlagged: isFlagged.value ?? undefined,
     isFavourite: isFavourite.value ?? undefined,
