@@ -22,7 +22,7 @@
           <!-- <Image v-if="!loading" :src="slotProps.item.url" imageClass="max-h-full object-contain" :pt="{
             root: 'h-full flex items-center justify-center',
           }" /> -->
-          <Magnifier v-if="!loading" :src="slotProps.item.url" class="h-full" />
+          <Magnifier v-if="!loading" :src="slotProps.item.url" class="h-full" :zoom-scale="5" :size="250" />
           <!-- <img v-if="!loading" :src="slotProps.item.url" class="max-h-full object-contain" /> -->
         </template>
         <template #thumbnail="slotProps">
