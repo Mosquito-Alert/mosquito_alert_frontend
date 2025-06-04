@@ -15,6 +15,7 @@ const router = createRouter({
       path: '/',
       component: AppLayout,
       name: 'home',
+      redirect: { name: 'list_annotations' },
       children: [
         {
           path: 'annotations',
