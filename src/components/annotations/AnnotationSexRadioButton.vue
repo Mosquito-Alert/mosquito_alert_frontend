@@ -1,9 +1,9 @@
 <template>
   <div class="flex justify-center gap-4">
-    <div v-for="option in options" :key="option.value">
-      <RadioButton :modelValue="modelValue" @update:modelValue="updateValue" :inputId="option.value"
+    <div v-for="(option, index) in options" :key="index">
+      <RadioButton :modelValue="modelValue" @update:modelValue="updateValue" :inputId="String(option.value)"
         :value="option.value" class="hidden" unstyled />
-      <label :for="option.value"
+      <label :for="String(option.value)"
         class="w-20 h-20 flex flex-col items-center justify-center border rounded-lg cursor-pointer transition-all"
         :class="{
           'bg-primary-500 text-white border-primary-500': modelValue === option.value,
@@ -18,26 +18,25 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
-
-export type Sex = 'male' | 'female' | 'unknown'
+import { AnnotationCharacteristicsSex } from 'mosquito-alert';
 
 defineProps({
   modelValue: {
-    type: String as PropType<Sex>,
+    type: String as PropType<AnnotationCharacteristicsSex | null>,
     required: false,
   },
 })
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Sex): void
+  (e: 'update:modelValue', value: AnnotationCharacteristicsSex | null): void
 }>()
 
-const updateValue = (value: Sex) => {
+const updateValue = (value: AnnotationCharacteristicsSex | null) => {
   emit('update:modelValue', value)
 }
 
-const options: { value: Sex; label: string; icon: string }[] = [
-  { value: 'unknown', label: 'Unknown', icon: 'pi pi-question' },
-  { value: 'male', label: 'Male', icon: 'pi pi-mars' },
-  { value: 'female', label: 'Female', icon: 'pi pi-venus' },
+const options: { value: AnnotationCharacteristicsSex | null; label: string; icon: string }[] = [
+  { value: null, label: 'Unknown', icon: 'pi pi-question' },
+  { value: AnnotationCharacteristicsSex.Male, label: 'Male', icon: 'pi pi-mars' },
+  { value: AnnotationCharacteristicsSex.Female, label: 'Female', icon: 'pi pi-venus' },
 ]
 </script>

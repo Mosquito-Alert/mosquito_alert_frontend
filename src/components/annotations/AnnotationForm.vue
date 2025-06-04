@@ -1,5 +1,6 @@
 <template>
-  <Form :resolver @submit="onFormSubmit" class="flex flex-col gap-4 h-full overflow-hidden" @keydown.enter.prevent>
+  <Form ref="form" :resolver @submit="onFormSubmit" class="flex flex-col gap-4 h-full overflow-hidden"
+    @keydown.enter.prevent>
     <div class="flex flex-col overflow-auto gap-3 h-full">
       <TaxonTagSelector v-model="selectedTaxon">
         <template #selectedIcon>
@@ -38,8 +39,8 @@
               <Divider layout="vertical" />
               <div v-show="isFemale" class="flex justify-center items-center w-full">
                 <div class="flex flex-col gap-2 w-full">
-                  <FormField v-slot="$field" name="bloodFeed" :initialValue="false" class="flex flex-row gap-1">
-                    <label>Is blood feed?</label>
+                  <FormField v-slot="$field" name="bloodFed" :initialValue="false" class="flex flex-row gap-1">
+                    <label>Is blood fed?</label>
                     <ToggleSwitch />
                     <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{
                       $field.error?.message }}
@@ -106,21 +107,22 @@ import { ref, watch, computed } from 'vue';
 import { Form } from '@primevue/forms';
 import { useToast } from 'primevue/usetoast';
 
-import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest } from 'mosquito-alert';
-import { AnnotationType, AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
+import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest, AnnotationCharacteristicsRequest } from 'mosquito-alert';
+import { AnnotationType, AnnotationClassificationConfidenceLabel, AnnotationCharacteristicsSex } from 'mosquito-alert';
 
 import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from './AnnotationSexRadioButton.vue';
-import type { Sex } from './AnnotationSexRadioButton.vue';
 import { identificationTasksApi } from '@/services/apiService';
 import { getPublicNote } from '@/utils/AnnotationUtils';
 
 const toast = useToast();
 
+const form = ref();
+
 const isHighConfidence = ref<boolean>(false);
 const isExecutive = ref<boolean>(false);
 const selectedTaxon = ref<Taxon>();
-const selectedSex = ref<Sex>('unknown');
+const selectedSex = ref<AnnotationCharacteristicsSex | null>(null);
 const selectedTags = ref<string[]>([]);
 const publicNote = ref<string>();
 
@@ -141,6 +143,17 @@ const props = withDefaults(defineProps<{
   canSetIsExecutive: true
 });
 
+watch(
+  selectedSex,
+  (newSex) => {
+    if (!form.value) return
+    if (newSex !== AnnotationCharacteristicsSex.Female) {
+      form.value.setFieldValue('bloodFed', false)
+      form.value.setFieldValue('isGravid', false)
+    }
+  }
+)
+
 const emit = defineEmits<{
   (e: 'submit', shouldContinue: boolean): void
 }>();
@@ -150,7 +163,7 @@ const isExtended = computed(() => {
 });
 
 const isFemale = computed(() => {
-  return selectedSex.value === 'female';
+  return selectedSex.value === AnnotationCharacteristicsSex.Female;
 })
 
 // Watch for isFlagged changes
@@ -206,6 +219,11 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
         public_note: publicNote.value,
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
+      characteristics: {
+        sex: selectedSex.value,
+        blood_fed: values.bloodFed || false,
+        is_gravid: values.isGravid || false
+      } as AnnotationCharacteristicsRequest,
       is_flagged: props.isFlagged,
       is_decisive: isExecutive.value,
       is_favourite: props.isFavourite,
