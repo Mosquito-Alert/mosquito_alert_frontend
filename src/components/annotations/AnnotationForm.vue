@@ -13,9 +13,9 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-slot="$field" name="isDecisive" :initial-value="false" class="flex ml-auto items-center gap-2">
-          <label>Is decisive?</label>
-          <ToggleSwitch v-model="isDecisive" :disabled="isFlagged" />
+        <FormField v-slot="$field" name="isExecutive" :initial-value="false" class="flex ml-auto items-center gap-2">
+          <label>Is executive?</label>
+          <ToggleSwitch v-model="isExecutive" :disabled="isFlagged" />
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
@@ -118,7 +118,7 @@ import { getPublicNote } from '@/utils/AnnotationUtils';
 const toast = useToast();
 
 const isHighConfidence = ref<boolean>(false);
-const isDecisive = ref<boolean>(false);
+const isExecutive = ref<boolean>(false);
 const selectedTaxon = ref<Taxon>();
 const selectedSex = ref<Sex>('unknown');
 const selectedTags = ref<string[]>([]);
@@ -134,11 +134,11 @@ const props = withDefaults(defineProps<{
   annotationType: AnnotationType,
   isFlagged?: boolean,
   isFavourite?: boolean,
-  canSetIsDecisive?: boolean
+  canSetIsExecutive?: boolean
 }>(), {
   isFlagged: false,
   isFavourite: false,
-  canSetIsDecisive: true
+  canSetIsExecutive: true
 });
 
 const emit = defineEmits<{
@@ -156,7 +156,7 @@ const isFemale = computed(() => {
 // Watch for isFlagged changes
 watch(() => props.isFlagged, (newVal) => {
   if (newVal) {
-    isDecisive.value = false;
+    isExecutive.value = false;
   }
 });
 
@@ -207,7 +207,7 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
       is_flagged: props.isFlagged,
-      is_decisive: values.isDecisive,
+      is_decisive: values.isExecutive,
       is_favourite: props.isFavourite,
       tags: selectedTags.value
     }

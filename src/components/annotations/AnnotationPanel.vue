@@ -5,7 +5,7 @@
         <Avatar icon="pi pi-user" shape="circle" :label="getInitials(annotation?.user.full_name || '')" />
         <span class="font-bold">{{ annotation?.user.full_name }}</span>
         <Tag v-if="annotation?.is_flagged" icon="pi pi-flag" severity="danger" value="Flagged" rounded />
-        <Tag v-if="annotation?.is_decisive" severity="contrast" value="Decisive" rounded
+        <Tag v-if="annotation?.is_decisive" severity="contrast" value="Executive" rounded
           v-tooltip.top="'This annotation determines the final identification task result.'">
           <template #icon>
             <!-- <i class="fa fa-gavel" /> -->

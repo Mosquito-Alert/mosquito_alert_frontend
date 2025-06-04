@@ -42,8 +42,8 @@
               <label for="is_flagged">Flag</label>
             </FloatLabel>
             <FloatLabel variant="on">
-              <Select id="is_decisive" v-model="isDecisive" class="w-28" :options="[true, false]" showClear />
-              <label for="is_decisive">Decisive</label>
+              <Select id="is_executive" v-model="isExecutive" class="w-28" :options="[true, false]" showClear />
+              <label for="is_executive">Executive</label>
             </FloatLabel>
             <FloatLabel variant="on">
               <Select id="is_favourite" v-model="isFavourite" class="w-28" :options="[true, false]" showClear />
@@ -98,7 +98,7 @@ const showFilters = ref<boolean>(false);
 
 // Filters
 const selectedDateRange = ref<Date[]>();
-const isDecisive = ref<boolean>();
+const isExecutive = ref<boolean>();
 const isFlagged = ref<boolean>();
 const isFavourite = ref<boolean>();
 const selectedTaxon = ref<Taxon | null>(null);
@@ -129,7 +129,7 @@ const listRequest = ref<IdentificationTasksApiAnnotationsListMineRequest>();
 
 function clearFilters() {
   selectedDateRange.value = undefined;
-  isDecisive.value = undefined;
+  isExecutive.value = undefined;
   isFlagged.value = undefined;
   isFavourite.value = undefined;
   selectedTaxon.value = null;
@@ -147,7 +147,7 @@ onMounted(() => {
     ] as Date[];
   }
 
-  isDecisive.value = q.isDecisive ? Boolean(JSON.parse(q.isDecisive as string)) : undefined;
+  isExecutive.value = q.isDecisive ? Boolean(JSON.parse(q.isDecisive as string)) : undefined;
   isFlagged.value = q.isFlagged ? Boolean(JSON.parse(q.isFlagged as string)) : undefined;
   isFavourite.value = q.isFavourite ? Boolean(JSON.parse(q.isFavourite as string)) : undefined;
 
@@ -181,7 +181,7 @@ watchEffect(async () => {
   listRequest.value = {
     updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
     updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
-    isDecisive: isDecisive.value ?? undefined,
+    isDecisive: isExecutive.value ?? undefined,
     isFlagged: isFlagged.value ?? undefined,
     isFavourite: isFavourite.value ?? undefined,
     classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
