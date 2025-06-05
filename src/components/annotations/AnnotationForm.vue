@@ -89,7 +89,8 @@
 
       <FormField v-slot="$field" name="tags" :initial-value="[]" class="flex flex-col gap-2 w-full">
         <label>Tags <span class="text-surface-500 dark:text-surface-300 italic">(Optional)</span></label>
-        <AutoComplete v-model="selectedTags" :typeahead="false" multiple fluid @keydown="handleKeyDownTags" />
+        <AutoComplete ref="tagInputFieldRef" v-model="selectedTags" :typeahead="false" multiple fluid
+          @keydown="handleKeyDownTags" />
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
       </FormField>
@@ -119,6 +120,7 @@ import { getLanguageName } from '@/utils/Utils';
 const toast = useToast();
 
 const form = ref();
+const tagInputFieldRef = ref();
 
 const isHighConfidence = ref<boolean>(false);
 const isExecutive = ref<boolean>(false);
@@ -175,19 +177,11 @@ watch(() => props.isFlagged, (newVal) => {
 });
 
 const handleKeyDownTags = (event: KeyboardEvent) => {
-  const target = event.target as HTMLInputElement | null;
-  if (!target) return;  // handle null case safely
-
-  const input = target.value.trim();
   switch (event.code) {
     case 'Comma':
     case 'Space':
       event.preventDefault(); // prevent the character from being typed
-      const cleanedInput = input.replace(/[, ]$/, '');
-      if (cleanedInput && !selectedTags.value.includes(cleanedInput)) {
-        selectedTags.value.push(cleanedInput);
-      }
-      target.value = ''; // clear the input
+      tagInputFieldRef.value?.onEnterKey(event);
       break;
   }
 };
