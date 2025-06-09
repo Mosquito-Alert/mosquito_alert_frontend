@@ -46,45 +46,7 @@
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
         <h5>Observation</h5>
-        <ul class="list-none p-0 m-0">
-          <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-            <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">UUID</div>
-            <div class="text-surface-900 dark:text-surface-0 w-full md:w-10/12 md:order-none order-1">
-              {{ identificationTask?.observation.uuid }}
-            </div>
-          </li>
-          <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-            <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Created at
-            </div>
-            <div class="text-surface-900 dark:text-surface-0 w-full md:w-10/12 md:order-none order-1">{{
-              dayjs.utc(
-                identificationTask?.observation.created_at
-              ).tz(
-                identificationTask?.observation.location.timezone!
-              ).format('YYYY-MM-DD hh:mm:ss')
-            }}</div>
-          </li>
-          <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-            <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Location</div>
-            <div class="text-surface-900 dark:text-surface-0 w-full md:w-10/12 md:order-none order-1">
-              {{ identificationTask?.observation.location.display_name }}
-            </div>
-          </li>
-          <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-            <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">GPS</div>
-            <div class="text-surface-900 dark:text-surface-0 w-full md:w-10/12 md:order-none order-1">
-              {{ identificationTask?.observation.location.point.longitude.toFixed(4) }},
-              {{ identificationTask?.observation.location.point.latitude.toFixed(4) }}
-            </div>
-          </li>
-
-          <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-            <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Note</div>
-            <div class="text-surface-900 dark:text-surface-0 w-full md:w-10/12 md:order-none order-1">{{
-              identificationTask?.observation.note }}</div>
-          </li>
-        </ul>
-        <Divider />
+        <ObservationInfoData v-if="identificationTask?.observation" :observation="identificationTask?.observation" />
       </div>
 
       <div class="card">
@@ -93,7 +55,7 @@
           <RouterLink class='ml-auto'
             :to="{ name: 'annotate_identification_task', params: { observationUuid: props.observationUuid } }">
             <!-- TODO: if user is in list, do not show button -->
-            <Button class="ml-auto" icon="pi pi-plus" label="Add" />
+            <!-- <Button class="ml-auto" icon="pi pi-plus" label="Add" /> -->
           </RouterLink>
         </div>
         <div class="flex flex-col items-center mb-4 gap-2">
@@ -102,25 +64,32 @@
         </div>
       </div>
 
-      <div class="card">
-        <h5 class="my-0"><i class="pi pi-microchip-ai" /> Predictions</h5>
-        <div class="flex flex-col items-center mb-4 gap-2">
-        </div>
-      </div>
-
-
     </div>
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
         <h5>Photos</h5>
-        <Galleria :value="identificationTask?.observation.photos" :numVisible="5" :circular="true"
-          :showItemNavigators="true" :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true">
+        <Galleria :value="photosWithPrediction" :numVisible="5" :circular="true" :showItemNavigators="true"
+          :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true">
           <template #item="slotProps">
             <figure class="relative">
               <Image :src="slotProps.item.url" class="w-full h-full" preview />
+              <!-- TODO: show prediction bbox -->
+              <!-- <div v-if="slotProps.item.prediction" class="absolute border-2 border-red-500" :style="{
+                top: '20%',
+                left: '20%',
+                width: '20%',
+                height: '20%',
+              }">
+                <div class="absolute -top-5 left-0 bg-red-500 text-white text-xs px-1 rounded">
+                  {{ slotProps.item.prediction.predicted_class }}
+                </div>
+              </div> -->
               <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
                 class="absolute top-2 right-2 p-2 rounded-md">
                 <Tag icon="pi pi-sparkles" severity="success" value="Best photo" />
+              </figcaption>
+              <figcaption v-if="slotProps.item.prediction" class="absolute top-2 left-2 p-2 rounded-md">
+                <PhotoPredictionTag :prediction="slotProps.item.prediction" />
               </figcaption>
             </figure>
           </template>
@@ -151,13 +120,15 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { identificationTasksApi } from '@/services/apiService';
-import type { IdentificationTask, SimplePhoto, Annotation } from 'mosquito-alert';
+import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction } from 'mosquito-alert';
 
 import { getStatusSeverity } from '@/utils/IdentificationTaskUtils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
 import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
 import IdentificationTaskResultTag from '@/components/IdentificationTaskResultTag.vue';
+import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
+import PhotoPredictionTag from '@/components/predictions/PhotoPredictionTag.vue';
 
 const props = withDefaults(defineProps<{
   observationUuid: string,
@@ -167,15 +138,26 @@ const props = withDefaults(defineProps<{
 })
 
 const loading = ref<boolean>(false);
-const images = ref<SimplePhoto[]>([]);
 const identificationTask = ref<IdentificationTask>();
 const annotations = ref<Annotation[]>([]);
+const photoPredictions = ref<PhotoPrediction[]>([]);
 
 const sortedAnnotations = computed(() =>
   [...annotations.value].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   )
 )
+
+const photosWithPrediction = computed<(SimplePhoto & { prediction: PhotoPrediction | null })[]>(() => {
+  const photos = identificationTask.value?.observation.photos ?? [];
+  return photos.map(photo => {
+    const prediction = photoPredictions.value.find(p => p.photo.uuid === photo.uuid) || null;
+    return {
+      ...photo,
+      prediction,
+    };
+  });
+})
 
 const showCreateStepper = ref<boolean>(props.annotating);
 // Update showStepper when annotating changes
@@ -197,6 +179,7 @@ const responsiveOptions = ref([
 onMounted(() => {
   fetchIdentificationTask();
   fetchAnnotations();
+  fetchPhotoPredictions();
 });
 
 function fetchIdentificationTask() {
@@ -217,6 +200,19 @@ function fetchAnnotations() {
   identificationTasksApi.annotationsList({ observationUuid: props.observationUuid }).then(
     (response) => {
       annotations.value = response.data.results || [];
+      loading.value = false;
+    }
+  ).catch((error) => {
+    console.error(error);
+    loading.value = false;  // Ensure loading is set to false even if there is an error
+  });
+}
+
+function fetchPhotoPredictions() {
+  loading.value = true;
+  identificationTasksApi.predictionsList({ observationUuid: props.observationUuid }).then(
+    (response) => {
+      photoPredictions.value = response.data.results || [];
       loading.value = false;
     }
   ).catch((error) => {

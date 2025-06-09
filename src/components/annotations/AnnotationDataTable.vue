@@ -8,7 +8,16 @@
       </div>
     </template>
     <Column expander style="width: 5rem" />
-    <Column field="observation_uuid" header="Observation UUID" />
+    <Column header="Observation UUID">
+      <template #body="slotProps">
+        <Button asChild variant="link">
+          <RouterLink
+            :to="{ name: 'identification_task', params: { observationUuid: slotProps.data.observation_uuid } }">
+            {{ slotProps.data.observation_uuid }}
+          </RouterLink>
+        </Button>
+      </template>
+    </Column>
     <Column header="Type">
       <template #body="slotProps">
         <AnnotationTypeTag :type="slotProps.data.type" />
