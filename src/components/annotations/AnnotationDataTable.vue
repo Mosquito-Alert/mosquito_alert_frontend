@@ -1,13 +1,5 @@
 <template>
-  <DataTable v-model:expandedRows="expandedRows" :value="annotations" ref="dt" stripedRows :loading="loading"
-    data-key="id" class="overflow-y-auto">
-    <template #header>
-      <div class="flex flex-wrap justify-end gap-2">
-        <Button text icon="pi pi-plus" label="Expand All" severity="secondary" @click="expandAll" />
-        <Button text icon="pi pi-minus" label="Collapse All" severity="secondary" @click="collapseAll" />
-      </div>
-    </template>
-    <Column expander style="width: 5rem" />
+  <DataTable :value="annotations" ref="dt" stripedRows :loading="loading" data-key="id" class="overflow-y-auto">
     <Column header="Observation UUID">
       <template #body="slotProps">
         <Button asChild variant="link">
@@ -73,26 +65,14 @@ import { formatLocalDateTime } from '@/utils/DateUtils';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
 import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
 
-const props = defineProps<{
+defineProps<{
   annotations: Annotation[],
   loading: boolean
 }>()
 
-const expandedRows = ref({});
-
 const dt = ref();
 const exportCSV = () => {
   dt.value.exportCSV();
-};
-
-const expandAll = () => {
-  expandedRows.value = props.annotations.reduce((acc, p) => {
-    acc[p.id] = true;
-    return acc;
-  }, {} as Record<number, boolean>);
-};
-const collapseAll = () => {
-  expandedRows.value = {};
 };
 
 defineExpose({
