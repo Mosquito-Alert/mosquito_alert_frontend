@@ -4,8 +4,10 @@
       <template #body="slotProps">
         <Button asChild variant="link">
           <RouterLink
-            :to="{ name: 'identification_task', params: { observationUuid: slotProps.data.observation_uuid } }">
-            {{ slotProps.data.observation_uuid }}
+            :to="{ name: 'identification_task', params: { observationUuid: slotProps.data.observation_uuid } }"
+            class="flex gap-2">
+            <span class="hover:underline">{{ slotProps.data.observation_uuid }}</span>
+            <i class="pi pi-link" />
           </RouterLink>
         </Button>
       </template>
