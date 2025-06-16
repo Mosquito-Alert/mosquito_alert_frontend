@@ -137,10 +137,12 @@ const props = withDefaults(defineProps<{
   observation: AssignedObservation,
   bestPhoto?: SimplePhoto | Photo,
   annotationType: AnnotationType,
+  isVisible?: boolean,
   isFlagged?: boolean,
   isFavourite?: boolean,
   canSetIsExecutive?: boolean
 }>(), {
+  isVisible: true,
   isFlagged: false,
   isFavourite: false,
   canSetIsExecutive: true
@@ -221,7 +223,10 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
       } as AnnotationCharacteristicsRequest,
       is_flagged: props.isFlagged,
       is_decisive: isExecutive.value,
-      is_favourite: props.isFavourite,
+      observation_flags: {
+        is_favourite: props.isFavourite,
+        is_visible: props.isVisible
+      },
       tags: selectedTags.value
     }
     identificationTasksApi.annotationsCreate({

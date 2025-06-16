@@ -44,7 +44,7 @@
     <Column field="is_favourite" header="Is Favourite" dataType="boolean" style="min-width: 6rem">
       <template #body="slotProps">
         <i class="pi"
-          :class="{ 'pi-check-circle text-green-500': slotProps.data.is_favourite, 'pi-times-circle text-red-400': !slotProps.data.is_favourite }" />
+          :class="{ 'pi-check-circle text-green-500': slotProps.data.observation_flags.is_favourite, 'pi-times-circle text-red-400': !slotProps.data.observation_flags.is_favourite }" />
       </template>
     </Column>
     <Column header="Date">

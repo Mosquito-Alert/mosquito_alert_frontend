@@ -65,17 +65,23 @@
             <h4 class="m-0!">New annotation</h4>
             <AnnotationTypeTag v-if="isExtended" class="h-min" :type="assignment.annotation_type" />
             <div class="flex flex-row ml-auto">
+              <Button :icon="isVisible ? 'pi pi-eye' : 'pi pi-eye-slash'" severity="secondary" variant="text" rounded
+                @click="isVisible = !isVisible; isFlagged = false"
+                v-tooltip.top="isVisible ? 'Mark as hidden' : 'Mark as visible'" />
+              <Button :icon="isFlagged ? 'pi pi-flag-fill' : 'pi pi-flag'"
+                :severity="isFlagged ? 'danger' : 'secondary'" variant="text" rounded
+                @click="isFlagged = !isFlagged; isVisible = true"
+                v-tooltip.top="isFlagged ? 'Mark as unflagged' : 'Mark as flagged'" />
               <Button :icon="isFavourite ? 'pi pi-heart-fill' : 'pi pi-heart'" severity="danger" variant="text" rounded
-                aria-label="Mark as favorite" @click="isFavourite = !isFavourite" />
-              <Button :icon="isFlagged ? 'pi pi-flag-fill' : 'pi pi-flag'" severity="danger" variant="text" rounded
-                aria-label="Mark as flagged" @click="isFlagged = !isFlagged" />
+                @click="isFavourite = !isFavourite"
+                v-tooltip.top="isFavourite ? 'Remove from favourites' : 'Add to favourites'" />
               <Button icon="pi pi-times" severity="secondary" variant="text" rounded aria-label="Cancel"
                 @click="cancelAnnotation" />
             </div>
           </div>
           <AnnotationForm v-if="activePhoto" :observation="assignment.observation" :best-photo="activePhoto"
-            :annotation-type="assignment.annotation_type" :isFlagged="isFlagged" :isFavourite="isFavourite"
-            @submit="onSubmitAnnotation" />
+            :annotation-type="assignment.annotation_type" :isVisible="isVisible" :isFlagged="isFlagged"
+            :isFavourite="isFavourite" @submit="onSubmitAnnotation" />
         </div>
       </div>
     </div>
@@ -110,6 +116,7 @@ const toast = useToast();
 
 const isStarted = ref(false);
 const isFlagged = ref(false);
+const isVisible = ref(true);
 const isFavourite = ref(false);
 const activePhotoIndex = ref(0);
 const showGalleriaFullscreen = ref(false);
