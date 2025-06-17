@@ -3,6 +3,7 @@
     <l-map :zoom="13" :options="{ zoomControl: false }" class="rounded-xl" :center="latlon">
       <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap" />
       <l-marker :lat-lng="latlon" />
+      <slot></slot>
     </l-map>
   </div>
 </template>
