@@ -15,7 +15,7 @@
     </div>
   </div>
   <div v-else class="absolute top-2 left-2">
-    <Tag v-if="showLabel" icon="pi pi-microchip-ai" severity="info" value="Unclassified" />
+    <Tag v-if="showLabel" icon="pi pi-microchip-ai" severity="info" :value="prediction.taxon?.name || 'Unclassified'" />
   </div>
 </template>
 
