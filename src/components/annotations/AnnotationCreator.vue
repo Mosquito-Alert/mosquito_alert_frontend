@@ -22,7 +22,8 @@
           <!-- <Image v-if="!loading" :src="slotProps.item.url" imageClass="max-h-full object-contain" :pt="{
             root: 'h-full flex items-center justify-center',
           }" /> -->
-          <Magnifier v-if="!loading" :src="slotProps.item.url" class="h-full" :zoom-scale="5" :size="250" />
+          <VueMagnifier v-if="!loading" :src="slotProps.item.url" height="100%" width="auto" :zoomFactor="1.5"
+            :mgWidth="300" :mgHeight="300" mgCornerBgColor="transparent" />
           <!-- <img v-if="!loading" :src="slotProps.item.url" class="max-h-full object-contain" /> -->
         </template>
         <template #thumbnail="slotProps">
@@ -99,7 +100,8 @@
 import { computed, ref, watch } from 'vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
-import { Magnifier } from 'vue3-zoomer';
+import VueMagnifier from '@websitebeaver/vue-magnifier';
+import '@websitebeaver/vue-magnifier/styles.css'
 
 import { AnnotationType } from 'mosquito-alert';
 import type { Assignment, AnnotationRequest } from 'mosquito-alert';
