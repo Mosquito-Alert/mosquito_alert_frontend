@@ -60,7 +60,7 @@
         </div>
         <div class="flex flex-col items-center mb-4 gap-2">
           <AnnotationPanel v-for="annotation in sortedAnnotations" :key="annotation.id" :annotation="annotation"
-            class="w-full" />
+            :collapsed="!(annotation.feedback?.public_note || annotation.feedback?.internal_note)" class="w-full" />
         </div>
       </div>
 

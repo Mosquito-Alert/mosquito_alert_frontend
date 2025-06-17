@@ -1,5 +1,5 @@
 <template>
-  <Panel toggleable collapsed>
+  <Panel toggleable :collapsed="collapsed">
     <template #header>
       <div class="flex items-center gap-2">
         <Avatar icon="pi pi-user" shape="circle" :label="getInitials(annotation?.user.full_name || '')" />
@@ -59,10 +59,11 @@ import AnnotationTypeTag from './AnnotationTypeTag.vue';
 import { getInitials } from '@/utils/Utils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
-defineProps<{
-  annotation: Annotation
-}>()
-
-
+withDefaults(defineProps<{
+  annotation: Annotation,
+  collapsed?: boolean
+}>(), {
+  collapsed: true
+});
 
 </script>
