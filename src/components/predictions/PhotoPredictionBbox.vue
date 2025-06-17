@@ -8,7 +8,7 @@
     <!-- Border -->
     <div class="size-full border-2 border-2 border-(--p-tag-info-background)">
       <!-- Tag positioned above -->
-      <div class="absolute -top-5 left-0">
+      <div class="absolute -top-4 left-0">
         <Tag v-if="showLabel" icon="pi pi-microchip-ai" severity="info" :value="prediction.taxon?.name"
           class="pb-0! rounded-b-none!" />
       </div>

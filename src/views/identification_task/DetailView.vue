@@ -71,26 +71,34 @@
         <Galleria :value="photosWithPrediction" :numVisible="5" :circular="true" :showItemNavigators="true"
           :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true">
           <template #item="slotProps">
-            <figure class="relative">
-              <Image :src="slotProps.item.url" class="w-full h-full" preview />
-              <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction" />
-              <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
-                class="absolute top-2 right-2 p-2 rounded-md">
-                <Tag icon="pi pi-sparkles" severity="success" value="Best photo" />
-              </figcaption>
-            </figure>
+            <Image :src="slotProps.item.url" class="w-full h-full" preview>
+              <template #image>
+                <figure class="relative">
+                  <img :src="slotProps.item.url" class="w-full h-full" />
+                  <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction" />
+                  <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
+                    class="absolute top-2 right-2 p-2 rounded-md">
+                    <Tag icon="pi pi-sparkles" severity="success" value="Best photo" />
+                  </figcaption>
+                </figure>
+              </template>
+            </Image>
           </template>
           <template #thumbnail="slotProps">
             <!-- <img :src="slotProps.item.url" class="h-32 object-cover" /> -->
-            <figure class="relative">
-              <Image :src="slotProps.item.url" image-class="h-32 object-cover" />
-              <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction"
-                :showLabel="false" />
-              <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
-                class="absolute top-2 right-2 rounded-md">
-                <Tag icon="pi pi-sparkles" severity="success" rounded />
-              </figcaption>
-            </figure>
+            <Image :src="slotProps.item.url">
+              <template #image>
+                <figure class="relative">
+                  <img :src="slotProps.item.url" class="h-32 object-cover" />
+                  <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction"
+                    :showLabel="false" />
+                  <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
+                    class="absolute top-2 right-2 p-2 rounded-md">
+                    <Tag icon="pi pi-sparkles" severity="success" rounded />
+                  </figcaption>
+                </figure>
+              </template>
+            </Image>
           </template>
         </Galleria>
       </div>
