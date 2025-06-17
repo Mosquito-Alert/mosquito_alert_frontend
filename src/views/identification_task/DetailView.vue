@@ -73,23 +73,10 @@
           <template #item="slotProps">
             <figure class="relative">
               <Image :src="slotProps.item.url" class="w-full h-full" preview />
-              <!-- TODO: show prediction bbox -->
-              <!-- <div v-if="slotProps.item.prediction" class="absolute border-2 border-red-500" :style="{
-                top: '20%',
-                left: '20%',
-                width: '20%',
-                height: '20%',
-              }">
-                <div class="absolute -top-5 left-0 bg-red-500 text-white text-xs px-1 rounded">
-                  {{ slotProps.item.prediction.predicted_class }}
-                </div>
-              </div> -->
+              <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction" />
               <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
                 class="absolute top-2 right-2 p-2 rounded-md">
                 <Tag icon="pi pi-sparkles" severity="success" value="Best photo" />
-              </figcaption>
-              <figcaption v-if="slotProps.item.prediction" class="absolute top-2 left-2 p-2 rounded-md">
-                <PhotoPredictionTag :prediction="slotProps.item.prediction" />
               </figcaption>
             </figure>
           </template>
@@ -97,6 +84,8 @@
             <!-- <img :src="slotProps.item.url" class="h-32 object-cover" /> -->
             <figure class="relative">
               <Image :src="slotProps.item.url" image-class="h-32 object-cover" />
+              <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction"
+                :showLabel="false" />
               <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
                 class="absolute top-2 right-2 rounded-md">
                 <Tag icon="pi pi-sparkles" severity="success" rounded />
@@ -128,7 +117,7 @@ import { formatLocalDateTime } from '@/utils/DateUtils';
 import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
 import IdentificationTaskResultTag from '@/components/IdentificationTaskResultTag.vue';
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
-import PhotoPredictionTag from '@/components/predictions/PhotoPredictionTag.vue';
+import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 
 const props = withDefaults(defineProps<{
   observationUuid: string,

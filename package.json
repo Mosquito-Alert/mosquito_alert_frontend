@@ -19,7 +19,7 @@
     "@tailwindcss/vite": "^4.1.4",
     "@websitebeaver/vue-magnifier": "^1.1.0",
     "dayjs": "^1.11.13",
-    "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#0.1.17",
+    "mosquito-alert": "github:mosquito-alert/mosquito-alert-typescript-sdk#0.1.18",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.3",
