@@ -38,7 +38,10 @@
     </li>
   </ul>
   <Divider />
-  <LocationMap height="300px" :location="observation.location" />
+  <LocationMap height="300px" :location="observation.location">
+    <PhotoGpsLeafletLayer :photos="observation.photos" />
+    <l-control-layers :hide-single-base="true" position="bottomleft" />
+  </LocationMap>
 </template>
 
 <script setup lang="ts">
@@ -49,10 +52,11 @@ import timezone from 'dayjs/plugin/timezone';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-import LocationMap from '../locations/LocationMap.vue';
-
+import { LControlLayers } from "@vue-leaflet/vue-leaflet";
 import type { Observation, AssignedObservation, SimplifiedObservationWithPhotos } from 'mosquito-alert';
 
+import LocationMap from '../locations/LocationMap.vue';
+import PhotoGpsLeafletLayer from '../photos/PhotoGpsLeafletLayer.vue';
 
 defineProps<{
   observation: Observation | AssignedObservation | SimplifiedObservationWithPhotos
