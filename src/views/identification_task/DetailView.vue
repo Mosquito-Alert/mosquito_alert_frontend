@@ -49,7 +49,7 @@
         <ObservationInfoData v-if="identificationTask?.observation" :observation="identificationTask?.observation" />
       </div>
 
-      <div class="card">
+      <div v-if="sortedAnnotations.length" class="card">
         <div class="flex items-center mb-4">
           <h5 class="my-0"><i class="pi pi-users" /> Annotations</h5>
           <RouterLink class='ml-auto'
