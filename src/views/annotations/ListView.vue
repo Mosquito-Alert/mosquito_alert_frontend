@@ -5,7 +5,7 @@
       <Button class="ml-auto" label="Start annotating" icon="pi pi-arrow-right" iconPos="right"
         @click="onStartAnnotationClicked" />
     </div>
-    <DataView :value="annotationsArray" dataKey='id' :rows="numRows" :total-records="annotationsTotalCount" lazy
+    <DataView :value="annotationsArray" dataKey='id' v-model:rows="numRows" :total-records="annotationsTotalCount" lazy
       paginator :rowsPerPageOptions="[5, 10, 25, 50]" @page="onPageChange"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
       currentPageReportTemplate="({totalRecords} items)">

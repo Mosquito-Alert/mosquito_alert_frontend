@@ -72,7 +72,7 @@
         <Button icon="pi pi-filter-slash" label="Clear" />
       </div>
     </Panel>
-    <DataView :value="identificationTasksArray" dataKey='observation.uuid' :rows="numRows"
+    <DataView :value="identificationTasksArray" dataKey='observation.uuid' v-model:rows="numRows"
       :total-records="identificationTasksTotalCount" :layout="layout" lazy paginator
       :rowsPerPageOptions="[5, 10, 25, 50]" @page="onPageChange"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
