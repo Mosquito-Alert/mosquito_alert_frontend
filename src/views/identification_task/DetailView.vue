@@ -71,7 +71,7 @@
         <Galleria :value="photosWithPrediction" :numVisible="5" :circular="true" :showItemNavigators="true"
           :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true">
           <template #item="slotProps">
-            <Image :src="slotProps.item.url" class="w-full h-full" preview>
+            <Image :src="slotProps.item.url" class="justify-center w-full h-full" preview>
               <template #image>
                 <figure class="relative">
                   <img :src="slotProps.item.url" class="w-full h-full" />
