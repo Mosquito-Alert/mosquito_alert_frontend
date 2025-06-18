@@ -1,5 +1,5 @@
 <template>
-  <Galleria v-model:visible="isVisible" :value="photos" :numVisible="9" containerStyle="height: 90%" circular fullScreen
+  <Galleria v-model:visible="isVisible" :value="photos" containerStyle="height: 90%" circular fullScreen
     showItemNavigators :showThumbnails="false" :showIndicators="true" :changeItemOnIndicatorHover="true"
     showIndicatorsOnItem :pt="{
       content: 'h-full',

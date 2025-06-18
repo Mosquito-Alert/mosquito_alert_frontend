@@ -1,14 +1,14 @@
 <template>
   <div v-bind="$attrs">
     <div class="flex size-full rounded-xl! bg-white">
-      <Galleria :activeIndex="activePhotoIndex" :value="assignment.observation.photos" :numVisible="5"
-        thumbnailsPosition="right" :containerClass="{
+      <Galleria :activeIndex="activePhotoIndex" :value="assignment.observation.photos" :numVisible="numVisible"
+        thumbnailsPosition="right" :showThumbnailNavigators="assignment.observation.photos.length > numVisible"
+        :containerClass="{
           'w-full': true,
           'h-full': true,
           'border-0!': true,
           'rounded-r-none!': isStarted
-        }" circular :showThumbnails="!isStarted" :showThumbnailNavigators="!isStarted" :showItemNavigators="!isStarted"
-        :showItemNavigatorsOnHover="!isStarted" :pt="{
+        }" circular :showThumbnails="!isStarted" :showItemNavigators="!isStarted" :pt="{
           content: 'bg-black/80! h-full',
           itemsContainer: 'h-full w-full items-center justify-center',
           items: 'flex-1 w-full items-center justify-center',
@@ -115,6 +115,8 @@ import { identificationTasksApi } from '@/services/apiService';
 
 const confirm = useConfirm();
 const toast = useToast();
+
+const numVisible = ref(7);
 
 const isStarted = ref(false);
 const isFlagged = ref(false);

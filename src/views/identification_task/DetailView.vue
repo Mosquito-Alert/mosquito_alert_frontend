@@ -68,8 +68,9 @@
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
         <h5>Photos</h5>
-        <Galleria :value="photosWithPrediction" :numVisible="5" :circular="true" :showItemNavigators="true"
-          :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true">
+        <Galleria :value="photosWithPrediction" :numVisible="numVisible" :circular="true" :showItemNavigators="true"
+          :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true"
+          :showThumbnailNavigators="photosWithPrediction.length > numVisible">
           <template #item="slotProps">
             <Image :src="slotProps.item.url" class="justify-center w-full h-full" preview>
               <template #image>
@@ -134,6 +135,7 @@ const props = withDefaults(defineProps<{
   annotating: false
 })
 
+const numVisible = ref(7);
 const loading = ref<boolean>(false);
 const identificationTask = ref<IdentificationTask>();
 const annotations = ref<Annotation[]>([]);
