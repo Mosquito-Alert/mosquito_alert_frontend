@@ -14,7 +14,7 @@
           observation.created_at
         ).tz(
           observation.location.timezone!
-        ).format('YYYY-MM-DD hh:mm:ss')
+        ).format('YYYY-MM-DD HH:mm:ss')
       }}</div>
     </li>
     <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
