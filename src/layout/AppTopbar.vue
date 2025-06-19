@@ -35,7 +35,7 @@
           <Button class="p-2!" icon="pi pi-user" :label="username" rounded variant="outlined" severity="secondary"
             @click="profileMenuToggle">
             <template #icon>
-              <Avatar icon="pi pi-user" shape="circle" :label="getInitials(username || '')" />
+              <UserAvatar :user="userStore.user" />
             </template>
           </Button>
           <Menu ref="profileMenu" id="overlay_menu" :model="profileMenuItems" :popup="true" />
@@ -51,7 +51,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useLayout } from './composables/layout';
-import { getInitials } from '@/utils/Utils';
+import UserAvatar from '@/components/users/UserAvatar.vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useUserStore } from '@/stores/userStore';
 

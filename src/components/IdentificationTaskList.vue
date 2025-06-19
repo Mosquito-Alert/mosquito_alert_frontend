@@ -28,9 +28,8 @@
     <Column header="Assignations">
       <template #body="slotProps">
         <AvatarGroup>
-          <Avatar v-for="assignment, index in slotProps.data.assignments" :key="index" icon="pi pi-user" shape="circle"
-            :label="getInitials(assignment.user.full_name)"
-            v-tooltip.top="assignment.annotation_id === null ? `${assignment.user.full_name} (Pending)` : assignment.user.full_name"
+          <UserAvatar v-for="assignment, index in slotProps.data.assignments" :key="index" :user="assignment.user"
+            v-tooltip.top="assignment.annotation_id === null ? `${assignment.user.full_name || assignment.user.username} (Pending)` : assignment.user.full_name || assignment.user.username"
             :class="assignment.annotation_id ? '' : 'border-(--p-tag-warn-color)! bg-(--p-tag-warn-background)! text-(--p-tag-warn-color)!'" />
         </AvatarGroup>
       </template>
@@ -78,9 +77,10 @@ import type { DataTableRowClickEvent } from 'primevue';
 
 import type { IdentificationTask } from 'mosquito-alert';
 
+import UserAvatar from './users/UserAvatar.vue';
+
 import { getStatusSeverity } from '@/utils/IdentificationTaskUtils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
-import { getInitials } from '@/utils/Utils';
 
 defineProps<{
   tasks: IdentificationTask[],

@@ -2,8 +2,8 @@
   <Panel toggleable :collapsed="collapsed">
     <template #header>
       <div class="flex items-center gap-2">
-        <Avatar icon="pi pi-user" shape="circle" :label="getInitials(annotation?.user.full_name || '')" />
-        <span class="font-bold">{{ annotation?.user.full_name }}</span>
+        <UserAvatar :user="annotation?.user" />
+        <span class="font-bold">{{ annotation?.user.full_name || annotation?.user.username }}</span>
         <AnnotationTypeTag v-if="annotation.type === AnnotationType.Long" :type="annotation.type" />
         <Tag v-if="annotation?.is_flagged" icon="pi pi-flag" severity="danger" value="Flagged" rounded />
         <Tag v-if="annotation?.is_decisive" severity="contrast" value="Executive" rounded
@@ -54,9 +54,9 @@
 import type { Annotation } from 'mosquito-alert';
 import { AnnotationType } from 'mosquito-alert';
 import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
+import UserAvatar from '../users/UserAvatar.vue';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
 
-import { getInitials } from '@/utils/Utils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
 withDefaults(defineProps<{
