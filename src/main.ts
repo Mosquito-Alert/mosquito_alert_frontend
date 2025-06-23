@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { abilitiesPlugin } from '@casl/vue'
 
 import PrimeVue from 'primevue/config'
 import Aura from '@primeuix/themes/aura'
@@ -19,6 +20,7 @@ import '@/assets/css/tailwind.css'
 import '@/assets/css/flags/css/flag-css.css'
 import { useUserStore } from './stores/userStore'
 import { useAuthStore } from './stores/authStore'
+import { usePermissionsStore } from './stores/permissionsStore'
 
 const app = createApp(App)
 
@@ -70,6 +72,12 @@ async function initUser() {
     }
   }
 }
+
+const permissionsStore = usePermissionsStore()
+
+app.use(abilitiesPlugin, permissionsStore.ability, {
+  useGlobalProperties: true,
+})
 
 initUser().finally(() => {
   app.use(router)

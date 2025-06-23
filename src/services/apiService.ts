@@ -5,6 +5,7 @@ import {
   Configuration,
   CountriesApi,
   IdentificationTasksApi,
+  PermissionsApi,
   TaxaApi,
   UsersApi,
 } from 'mosquito-alert'
@@ -29,5 +30,6 @@ export const identificationTasksApi = new IdentificationTasksApi(
   undefined,
   axiosInstance,
 )
+export const permissionsApi = new PermissionsApi(apiConfig, undefined, axiosInstance)
 export const taxaApi = new TaxaApi(apiConfig, undefined, axiosInstance)
 export const userApi = new UsersApi(apiConfig, undefined, axiosInstance)

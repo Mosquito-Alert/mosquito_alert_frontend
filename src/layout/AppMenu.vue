@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import { useAbility } from '@casl/vue';
+
+import type { AppAbility } from '@/services/ability';
 import AppMenuItem from './AppMenuItem.vue';
 import type { MenuItem } from './AppMenuItem.vue'
 
+const { can } = useAbility<AppAbility>();
 
 const model = ref<MenuItem[]>([
   // {
@@ -14,8 +18,9 @@ const model = ref<MenuItem[]>([
     label: 'Annotation tool',
     items: [
       // { label: 'Tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } },
-      { label: 'Annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } },
-      // { label: 'Your annotations', icon: 'pi pi-fw pi-images', to: { name: 'list_identification_tasks' } },
+      ...(can('view', 'Annotation')
+        ? [{ label: 'Annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } }]
+        : []),
     ]
   },
 
