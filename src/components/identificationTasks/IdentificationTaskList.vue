@@ -22,7 +22,7 @@
     </Column>
     <Column header="Taxon">
       <template #body="slotProps">
-        <IdentificationTaskResultTag :result="slotProps.data.result" />
+        <IdentificationTaskResultTag v-if="slotProps.data.result" :result="slotProps.data.result" />
       </template>
     </Column>
     <Column header="Country">

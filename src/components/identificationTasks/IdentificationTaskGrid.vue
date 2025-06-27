@@ -22,7 +22,7 @@
           <figcaption class="absolute top-2 right-2 text-white p-2 rounded-md">
 
           </figcaption>
-          <figcaption v-if="item.result.source" class="absolute bottom-2 left-2">
+          <figcaption v-if="item.result" class="absolute bottom-2 left-2">
             <IdentificationTaskResultTag class="bg-white/80!" :result="item.result" />
           </figcaption>
         </figure>

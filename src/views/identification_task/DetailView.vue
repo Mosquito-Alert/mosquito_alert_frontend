@@ -26,12 +26,12 @@
         <span>Last update: {{ formatLocalDateTime(identificationTask?.updated_at!) }}</span>
       </div>
     </div>
-    <ul v-if="identificationTask?.result.source" class="list-none p-0 m-0">
+    <ul v-if="identificationTask?.result" class="list-none p-0 m-0">
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
         <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Classification
         </div>
         <div class="flex text-surface-900 dark:text-surface-0 w-full md:w-10/12 md:order-none order-1">
-          <IdentificationTaskResultTag :result="identificationTask?.result" />
+          <IdentificationTaskResultTag :result="identificationTask.result" />
         </div>
       </li>
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
