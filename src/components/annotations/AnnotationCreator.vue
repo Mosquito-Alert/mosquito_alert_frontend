@@ -44,9 +44,8 @@
               <div class="flex grow">
                 <BestPhotoTag v-if="isStarted" />
                 <div v-if="!isStarted" class="flex gap-2">
-                  <Button label="Not an insect" severity="danger" icon="pi pi-times" outlined
-                    class="not-hover:text-white!" @click="confirmNotInsect($event)"
-                    :loading="isSubmittingNotInsect || loading" />
+                  <AnnotationNotAnInsectButton :observation="assignment.observation" :loading="loading"
+                    @on-submit-success="onSubmitAnnotation(true)" />
                   <Button v-if="!isStarted" label="Annotate this picture" icon="pi pi-arrow-right" iconPos="right"
                     @click="startAnnotation" :loading="loading" />
                 </div>
@@ -98,23 +97,18 @@
 
 <script setup lang='ts'>
 import { computed, ref, watch } from 'vue';
-import { useConfirm } from "primevue/useconfirm";
-import { useToast } from "primevue/usetoast";
 import VueMagnifier from '@websitebeaver/vue-magnifier';
 import '@websitebeaver/vue-magnifier/styles.css'
 
 import { AnnotationType } from 'mosquito-alert';
-import type { Assignment, AnnotationRequest } from 'mosquito-alert';
+import type { Assignment } from 'mosquito-alert';
 
 import AnnotationForm from './AnnotationForm.vue';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
 import AnnotationGalleriaFullScreen from './AnnotationGalleriaFullScreen.vue';
+import AnnotationNotAnInsectButton from './AnnotationNotAnInsectButton.vue';
 import ObservationInfoData from '../observations/ObservationInfoData.vue';
 import BestPhotoTag from '../photos/BestPhotoTag.vue';
-import { identificationTasksApi } from '@/services/apiService';
-
-const confirm = useConfirm();
-const toast = useToast();
 
 const numVisible = ref(7);
 
@@ -125,7 +119,6 @@ const isFavourite = ref(false);
 const activePhotoIndex = ref(0);
 const showGalleriaFullscreen = ref(false);
 const observationDialogVisible = ref(false);
-const isSubmittingNotInsect = ref(false);
 
 const activePhoto = computed(() => {
   return props.assignment.observation.photos[activePhotoIndex.value];
@@ -174,40 +167,6 @@ const onSubmitAnnotation = (shouldContinue: boolean) => {
   if (!shouldContinue) {
     isStarted.value = false
   }
-}
-
-const confirmNotInsect = (event: MouseEvent) => {
-  isSubmittingNotInsect.value = true;
-  confirm.require({
-    target: event.currentTarget as HTMLElement,
-    message: 'Are you sure you want to mark this image as not an insect?',
-    icon: 'pi pi-info-circle',
-    rejectProps: {
-      label: 'Cancel',
-      severity: 'secondary',
-      outlined: true
-    },
-    acceptProps: {
-      label: 'Accept',
-      severity: 'danger'
-    },
-    accept: () => {
-      const annotationRequest = <AnnotationRequest>{
-        classification: null,
-      }
-      identificationTasksApi.annotationsCreate({
-        observationUuid: props.assignment.observation.uuid,
-        annotationRequest: annotationRequest,
-      }).then(() => {
-        toast.add({ severity: 'info', summary: 'Annotation rejected', detail: 'Marked as not an insect', life: 3000 });
-        onSubmitAnnotation(true);
-      }).catch(() => {
-        toast.add({ severity: 'danger', summary: 'Failed', detail: 'Annotation failed', life: 3000 });
-      })
-    },
-    reject: () => { }
-  });
-  isSubmittingNotInsect.value = false;
 }
 
 </script>
