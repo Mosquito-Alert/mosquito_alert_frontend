@@ -7,7 +7,7 @@ import type { AppAbility } from '@/services/ability';
 import AppMenuItem from './AppMenuItem.vue';
 import type { MenuItem } from './AppMenuItem.vue'
 
-const { can } = useAbility<AppAbility>();
+const ability = useAbility<AppAbility>();
 
 const model = ref<MenuItem[]>([
   // {
@@ -17,13 +17,14 @@ const model = ref<MenuItem[]>([
   {
     label: 'Annotation tool',
     items: [
-      // { label: 'Tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } },
-      ...(can('view', 'Annotation')
+      ...(ability.rulesFor('view', 'Annotation').length > 0
         ? [{ label: 'Annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } }]
+        : []),
+      ...(ability.rulesFor('view', 'IdentificationTask').length > 0
+        ? [{ label: 'Tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } }]
         : []),
     ]
   },
-
 ]);
 </script>
 

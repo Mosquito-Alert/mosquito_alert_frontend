@@ -2,8 +2,7 @@
   <div class="card">
     <div class="flex flex-row">
       <h4 class="m-0!">Your annotations</h4>
-      <Button class="ml-auto" label="Start annotating" icon="pi pi-arrow-right" iconPos="right"
-        @click="onStartAnnotationClicked" />
+      <AnnotationStartButton class="ml-auto" />
     </div>
     <DataView :value="annotationsArray" dataKey='id' v-model:rows="numRows" :total-records="annotationsTotalCount" lazy
       paginator :rowsPerPageOptions="[5, 10, 25, 50]" @page="onPageChange"
@@ -70,24 +69,18 @@ import { ref, watch, watchEffect, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import type { DataViewPageEvent } from 'primevue/dataview'
-import { useToast } from "primevue/usetoast";
 
 import { IdentificationtasksListOrderByParameter, AnnotationType } from 'mosquito-alert';
 import type { Annotation, IdentificationTasksApiAnnotationsListMineRequest, Taxon } from 'mosquito-alert';
 
 import AnnotationDataTable from '@/components/annotations/AnnotationDataTable.vue';
+import AnnotationStartButton from '@/components/annotations/AnnotationStartButton.vue';
 import TaxonTreeSelect from '@/components/taxa/TaxonTreeSelect.vue';
 import AnnotationTypeSelect from '@/components/annotations/AnnotationTypeSelect.vue';
 import { identificationTasksApi } from '@/services/apiService';
-import { useAssignmentStore } from '@/stores/assignmentStore';
 
 const route = useRoute()
 const router = useRouter()
-
-const toast = useToast();
-
-const assignmentStore = useAssignmentStore();
-
 
 const annotationsList = ref();
 
@@ -199,30 +192,5 @@ watchEffect(async () => {
 
   router.replace({ query })
 })
-
-const onStartAnnotationClicked = async () => {
-  // TODO: loading
-  try {
-    await assignmentStore.fetchNewAssignment();
-  } catch (error) {
-    toast.add(
-      { severity: 'error', summary: 'Error', detail: error, life: 3000 }
-    )
-  }
-
-  const assignment = assignmentStore.assignment
-  if (assignment) {
-    router.push({
-      name: 'annotate_identification_task',
-      params: {
-        observationUuid: assignment.observation.uuid
-      }
-    })
-  } else {
-    toast.add(
-      { severity: 'info', summary: 'Task queue empty', detail: 'No identification tasks available at the moment', life: 3000 }
-    )
-  }
-}
 
 </script>

@@ -14,12 +14,13 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <!-- <FormField v-slot="$field" name="isExecutive" :initial-value="false" class="flex ml-auto items-center gap-2">
+        <FormField v-if="$can('change', annotationSubject, 'is_decisive')" v-slot="$field" name="isExecutive"
+          :initial-value="false" class="flex ml-auto items-center gap-2">
           <label>Is executive?</label>
           <ToggleSwitch v-model="isExecutive" :disabled="isFlagged" />
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
-        </FormField> -->
+        </FormField>
       </div>
 
       <div v-if="isExtended" class="flex flex-col w-full">
@@ -108,6 +109,8 @@ import { ref, watch, computed } from 'vue';
 import { Form } from '@primevue/forms';
 import { useToast } from 'primevue/usetoast';
 
+import { subject } from '@casl/ability';
+
 import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest, AnnotationCharacteristicsRequest } from 'mosquito-alert';
 import { AnnotationType, AnnotationClassificationConfidenceLabel, AnnotationCharacteristicsSex } from 'mosquito-alert';
 
@@ -147,6 +150,18 @@ const props = withDefaults(defineProps<{
   isFavourite: false,
   canSetIsExecutive: true
 });
+
+const annotationSubject = computed(() =>
+  subject('Annotation', {
+    observation: {
+      location: {
+        country: {
+          id: props.observation.location.country?.id
+        }
+      }
+    }
+  })
+)
 
 watch(
   selectedSex,

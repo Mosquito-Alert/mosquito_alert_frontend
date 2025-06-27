@@ -1,6 +1,15 @@
-import { IdentificationTaskStatus } from 'mosquito-alert'
+<template>
+  <Tag :value="status.toUpperCase()" :severity="getStatusSeverity(status)" />
+</template>
 
-export const getStatusSeverity = (status: string) => {
+<script setup lang="ts">
+import { IdentificationTaskStatus } from 'mosquito-alert';
+
+defineProps<{
+  status: IdentificationTaskStatus;
+}>();
+
+const getStatusSeverity = (status: IdentificationTaskStatus) => {
   switch (status) {
     case IdentificationTaskStatus.Open:
       return 'info'
@@ -16,3 +25,5 @@ export const getStatusSeverity = (status: string) => {
       return 'default' // optional fallback
   }
 }
+
+</script>

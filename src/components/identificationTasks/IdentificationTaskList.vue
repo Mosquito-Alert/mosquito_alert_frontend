@@ -1,28 +1,34 @@
 <template>
   <DataTable :value="tasks" ref="dt" stripedRows :loading="loading" data-key="observation.uuid" row-hover
     selectionMode="single" @rowClick="goToAnnotation">
-    <template #header>
+    <!-- <template #header>
       <div style="text-align:left">
         <MultiSelect id="column_select" :modelValue="selectedColumns" :options="columns" optionLabel="header"
           @update:modelValue="onSelectColumn" display="chip" :maxSelectedLabels="0" filter selectedItemsLabel="Columns"
           placeholder="Columns" />
       </div>
-    </template>
+    </template> -->
     <Column field="observation.uuid" header="UUID" />
+    <Column header="Status">
+      <template #body="slotProps">
+        <IdentificationTaskStatusTag :status="slotProps.data.status" />
+      </template>
+    </Column>
     <Column header="Image">
       <template #body="slotProps">
         <Image :src="`${slotProps.data.public_photo.url}`" preview
           imageClass="aspect-square object-cover rounded w-16" />
       </template>
     </Column>
-
+    <Column header="Taxon">
+      <template #body="slotProps">
+        <IdentificationTaskResultTag :result="slotProps.data.result" />
+      </template>
+    </Column>
     <Column header="Country">
       <template #body="slotProps">
-        <div class="flex items-center gap-2">
-          <i :class="`flag flag-${slotProps.data.observation.location.country?.iso3_code.toLowerCase()} rounded`"
-            style="width: 24px" />
-          <span>{{ slotProps.data.observation.location.country?.name_en }}</span>
-        </div>
+        <CountryTag v-if="slotProps.data.observation.location.country"
+          :country="slotProps.data.observation.location.country" />
       </template>
     </Column>
     <Column header="Assignations">
@@ -43,17 +49,12 @@
     <Column field="is_safe" header="Is Safe" dataType="boolean" style="min-width: 6rem">
       <template #body="slotProps">
         <i v-if='slotProps.data.is_safe' class="pi pi-shield text-green-500" />
-
       </template>
     </Column>
-    <Column v-for="(col, index) of selectedColumns" :field="col.field" :header="col.header"
+    <!-- <Column v-for="(col, index) of selectedColumns" :field="col.field" :header="col.header"
       :key="col.field + '_' + index">
-    </Column>
-    <Column header="Status">
-      <template #body="slotProps">
-        <Tag :value="slotProps.data.status.toUpperCase()" :severity="getStatusSeverity(slotProps.data.status)" />
-      </template>
-    </Column>
+    </Column> -->
+
     <Column header="Created at">
       <template #body="slotProps">
         {{ formatLocalDateTime(slotProps.data.created_at) }}
@@ -77,9 +78,11 @@ import type { DataTableRowClickEvent } from 'primevue';
 
 import type { IdentificationTask } from 'mosquito-alert';
 
-import UserAvatar from './users/UserAvatar.vue';
+import CountryTag from '@/components/countries/CountryTag.vue';
+import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
+import IdentificationTaskResultTag from '@/components/identificationTasks/IdentificationTaskResultTag.vue';
+import UserAvatar from '@/components/users/UserAvatar.vue';
 
-import { getStatusSeverity } from '@/utils/IdentificationTaskUtils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
 defineProps<{

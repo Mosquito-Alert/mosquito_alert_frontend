@@ -2,10 +2,7 @@
   <MultiSelect v-model="selectedCountries" :options="sortedCountries" optionLabel="name_en" :loading="loading"
     display="chip" dropdown-icon="pi pi-plus-circle" filter showClear resetFilterOnClear :maxSelectedLabels="3">
     <template #option="slotProps">
-      <div class="flex items-center gap-2">
-        <i :class="`flag flag-${slotProps.option.iso3_code.toLowerCase()} rounded`" style="width: 24px" />
-        <span>{{ slotProps.option.name_en }}</span>
-      </div>
+      <CountryTag :country="slotProps.option" />
     </template>
   </MultiSelect>
 </template>
@@ -14,17 +11,29 @@
 import { ref, onMounted, computed } from 'vue';
 
 import { useCountryStore } from '@/stores/countryStore';
+import CountryTag from './CountryTag.vue';
 
 import type { Country } from 'mosquito-alert';
 
 const selectedCountries = defineModel<Country[]>();
+
+const props = defineProps<{
+  allowedCountryIds?: number[];
+}>();
 
 const loading = ref<boolean>(false);
 
 const countries = ref<Country[]>();
 const sortedCountries = computed<Country[]>(() => {
   if (!countries.value) return [];
-  return [...countries.value].sort((a, b) => a.name_en.localeCompare(b.name_en));
+
+  let filtered = countries.value;
+
+  if (props.allowedCountryIds?.length) {
+    filtered = filtered.filter(country => props.allowedCountryIds?.includes(country.id));
+  }
+
+  return [...filtered].sort((a, b) => a.name_en.localeCompare(b.name_en));
 })
 
 const countryStore = useCountryStore();
@@ -34,7 +43,7 @@ onMounted(async () => {
 })
 
 async function fetchCountries() {
-  if (!countryStore.countries) {
+  if (countryStore.countries.length === 0) {
     loading.value = true
     await countryStore.fetchCountries();
     loading.value = false

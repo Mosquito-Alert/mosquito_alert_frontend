@@ -1,4 +1,9 @@
-import { AbilityBuilder, createMongoAbility, type MongoAbility } from '@casl/ability'
+import {
+  AbilityBuilder,
+  createMongoAbility,
+  type ForcedSubject,
+  type MongoAbility,
+} from '@casl/ability'
 import type {
   UserPermission,
   AnnotationPermission,
@@ -17,10 +22,10 @@ type Subjects =
   | 'Country'
   | 'IdentificationTask'
 
-export type AppAbility = MongoAbility<[Actions, Subjects]>
+export type AppAbility = MongoAbility<[Actions, Subjects | ForcedSubject<Exclude<Subjects, 'all'>>]>
 
 export default function defineAbilityFor(userPermission: UserPermission | null) {
-  const { can, build } = new AbilityBuilder<AppAbility>(createMongoAbility)
+  const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility)
 
   function grantAnnotationPermissions(perms: AnnotationPermission, countryId?: number) {
     if (perms.add) {
@@ -29,12 +34,18 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
       can('add', 'IdentificationTask', ['annotations'], buildCountryCondition(countryId))
     }
     if (perms.change) can('change', 'Annotation', buildCountryCondition(countryId))
-    if (perms.view) can('view', 'Annotation', buildCountryCondition(countryId))
+    if (perms.view) {
+      can('view', 'Annotation', buildCountryCondition(countryId))
+      can('view', 'IdentificationTask', buildCountryCondition(countryId))
+    }
     if (perms.delete) can('delete', 'Annotation', buildCountryCondition(countryId))
+
     if (perms.mark_as_decisive) {
-      can('add', 'Annotation', ['is_decisive'], buildCountryCondition(countryId))
-      // can('add_annotation', 'IdentificationTask', ['is_decisive'], buildCountryCondition(countryId))
-      can('add', 'IdentificationTask', ['is_decisive'], buildCountryCondition(countryId))
+      can('change', 'Annotation', ['is_decisive'], buildCountryCondition(countryId))
+      can('change', 'IdentificationTask', ['is_decisive'], buildCountryCondition(countryId))
+    } else {
+      cannot('change', 'Annotation', ['is_decisive'], buildCountryCondition(countryId))
+      cannot('change', 'IdentificationTask', ['is_decisive'], buildCountryCondition(countryId))
     }
   }
 
@@ -55,8 +66,8 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   if (!userPermission) return build()
 
   const { general, countries = [] } = userPermission
-  const annotationPerms = general?.permissions?.annotation ?? {}
-  const taskPerms = general?.permissions?.identification_task ?? {}
+  const annotationPerms = general.permissions.annotation ?? {}
+  const taskPerms = general.permissions.identification_task ?? {}
 
   if (general?.is_staff) {
     can('view', 'Annotation')
@@ -68,11 +79,11 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
 
   for (const { country, permissions } of countries) {
     const countryId = country.id
-    const countryAnnotationPerms = permissions?.annotation ?? {}
+    const countryAnnotationPerms = permissions.annotation ?? {}
+    const countryTaskPerms = permissions.identification_task ?? {}
 
-    can('view', 'Country', { id: countryId })
     grantAnnotationPermissions(countryAnnotationPerms, countryId)
-    grantIdentificationTaskPermissions(taskPerms, countryId)
+    grantIdentificationTaskPermissions(countryTaskPerms, countryId)
   }
 
   return build()

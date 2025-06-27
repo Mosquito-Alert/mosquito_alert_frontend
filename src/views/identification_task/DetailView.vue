@@ -6,8 +6,7 @@
         <span class="text-surface-900 dark:text-surface-0">{{ identificationTask?.observation.uuid }}</span>
       </div>
       <div class="ml-auto">
-        <Tag v-if='identificationTask?.status' :value="identificationTask?.status?.toUpperCase()"
-          :severity="getStatusSeverity(identificationTask?.status)" />
+        <IdentificationTaskStatusTag v-if="identificationTask?.status" :status="identificationTask?.status" />
       </div>
     </div>
 
@@ -120,11 +119,11 @@ dayjs.extend(timezone);
 import { identificationTasksApi } from '@/services/apiService';
 import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction } from 'mosquito-alert';
 
-import { getStatusSeverity } from '@/utils/IdentificationTaskUtils';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
 import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
-import IdentificationTaskResultTag from '@/components/IdentificationTaskResultTag.vue';
+import IdentificationTaskResultTag from '@/components/identificationTasks/IdentificationTaskResultTag.vue';
+import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 
