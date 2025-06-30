@@ -10,13 +10,13 @@ import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 
 import { identificationTasksApi } from '@/services/apiService';
-import type { Observation, AssignedObservation, AnnotationRequest } from 'mosquito-alert';
+import type { Observation, AssignedObservation, SimplifiedObservationWithPhotos, AnnotationRequest } from 'mosquito-alert';
 
 const confirm = useConfirm();
 const toast = useToast();
 
 const props = withDefaults(defineProps<{
-  observation: Observation | AssignedObservation,
+  observation: Observation | AssignedObservation | SimplifiedObservationWithPhotos,
   loading?: boolean
 }>(), {
   loading: false

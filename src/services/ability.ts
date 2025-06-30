@@ -8,6 +8,7 @@ import type {
   UserPermission,
   AnnotationPermission,
   IdentificationTaskPermission,
+  ReviewPermission,
   Annotation,
   Country,
   IdentificationTask,
@@ -19,6 +20,7 @@ type Subjects =
   | Country
   | IdentificationTask
   | 'Annotation'
+  | 'Review'
   | 'Country'
   | 'IdentificationTask'
 
@@ -59,6 +61,13 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
     if (perms.delete) can('delete', 'IdentificationTask', buildCountryCondition(countryId))
   }
 
+  function grantReviewPermissions(perms: ReviewPermission, countryId?: number) {
+    if (perms.add) can('add', 'Review', buildCountryCondition(countryId))
+    if (perms.change) can('change', 'Review', buildCountryCondition(countryId))
+    if (perms.view) can('view', 'Review', buildCountryCondition(countryId))
+    if (perms.delete) can('delete', 'Review', buildCountryCondition(countryId))
+  }
+
   function buildCountryCondition(countryId?: number) {
     return countryId ? { 'observation.location.country.id': countryId } : undefined
   }
@@ -68,22 +77,27 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   const { general, countries = [] } = userPermission
   const annotationPerms = general.permissions.annotation ?? {}
   const taskPerms = general.permissions.identification_task ?? {}
+  const reviewPerms = general.permissions.review ?? {}
 
   if (general?.is_staff) {
     can('view', 'Annotation')
     can('view', 'IdentificationTask')
+    can('view', 'Review')
   }
 
   grantAnnotationPermissions(annotationPerms)
   grantIdentificationTaskPermissions(taskPerms)
+  grantReviewPermissions(reviewPerms)
 
   for (const { country, permissions } of countries) {
     const countryId = country.id
     const countryAnnotationPerms = permissions.annotation ?? {}
     const countryTaskPerms = permissions.identification_task ?? {}
+    const countryReviewPerms = permissions.review ?? {}
 
     grantAnnotationPermissions(countryAnnotationPerms, countryId)
     grantIdentificationTaskPermissions(countryTaskPerms, countryId)
+    grantReviewPermissions(countryReviewPerms, countryId)
   }
 
   return build()

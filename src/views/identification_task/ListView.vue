@@ -79,7 +79,7 @@
         <IdentificationTaskList ref='taskListRef' :tasks="slotProps.items" :loading="loading" />
       </template>
       <template #grid="slotProps">
-        <IdentificationTaskGrid :tasks="slotProps.items" />
+        <IdentificationTaskGrid :tasks="slotProps.items" @on-change="fetchData" />
       </template>
 
     </DataView>
