@@ -11,15 +11,7 @@
     </div>
 
     <div class="flex items-center mb-4 gap-2">
-      <Tag :severity="identificationTask?.review ? 'info' : 'warn'"
-        :value="identificationTask?.review ? formatLocalDateTime(identificationTask.review.created_at) : 'Not reviewed'"
-        v-tooltip.bottom="identificationTask?.review ? 'Review datetime' : undefined">
-        <template #icon>
-          <span class="material-symbols-outlined p-tag-icon">
-            {{ identificationTask?.review ? 'verified' : 'verified_off' }}
-          </span>
-        </template>
-      </Tag>
+      <IdentificationTaskReviewTag v-if="identificationTask" :identification-task="identificationTask" />
       <Tag v-if='identificationTask?.is_safe' icon="pi pi-shield" value='Safe content' severity="success" />
       <Tag v-if='identificationTask?.is_flagged' icon="pi pi-flag" value='Flagged' severity="danger" />
       <div class="ml-auto text-surface-400 dark:text-surface-400 flex flex-col">
@@ -123,6 +115,7 @@ import { formatLocalDateTime } from '@/utils/DateUtils';
 
 import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
 import IdentificationTaskResultTag from '@/components/identificationTasks/IdentificationTaskResultTag.vue';
+import IdentificationTaskReviewTag from '@/components/identificationTasks/IdentificationTaskReviewTag.vue';
 import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
