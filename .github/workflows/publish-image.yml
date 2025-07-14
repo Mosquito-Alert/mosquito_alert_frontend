@@ -10,6 +10,7 @@ on:
       - beta
     tags:
       - 'v*'
+      - demo
 
 # Defines two custom environment variables for the workflow.
 # These are used for the Container registry domain, and a
@@ -38,9 +39,19 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
+            type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
+
+      - name: Determine VITE_API_BASE_URL value
+        id: build_args
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/demo ]]; then
+            echo "api_url=https://apidev.mosquitoalert.com/v1" >> $GITHUB_OUTPUT
+          else
+            echo "api_url=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -63,3 +74,5 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VITE_API_BASE_URL=${{ steps.build_args.outputs.api_url }}

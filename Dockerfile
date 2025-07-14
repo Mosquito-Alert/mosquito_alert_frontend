@@ -3,6 +3,11 @@ FROM node:lts-alpine AS build-stage
 # Set the working directory inside the container
 WORKDIR /app
 
+# inject all environment vars we'll need
+ARG VITE_API_BASE_URL
+# expose the variable to the finished cotainer
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 # Copy package.json and package-lock.json into the container
 COPY package*.json package-lock.json ./
 
