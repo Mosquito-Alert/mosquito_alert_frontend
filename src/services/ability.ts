@@ -4,14 +4,15 @@ import {
   type ForcedSubject,
   type MongoAbility,
 } from '@casl/ability'
-import type {
-  UserPermission,
-  AnnotationPermission,
-  IdentificationTaskPermission,
-  ReviewPermission,
-  Annotation,
-  Country,
-  IdentificationTask,
+import {
+  type UserPermission,
+  type AnnotationPermission,
+  type IdentificationTaskPermission,
+  type ReviewPermission,
+  type Annotation,
+  type Country,
+  type IdentificationTask,
+  IdentificationTaskStatus,
 } from 'mosquito-alert'
 
 type Actions = 'add' | 'view' | 'change' | 'delete'
@@ -62,7 +63,28 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   }
 
   function grantReviewPermissions(perms: ReviewPermission, countryId?: number) {
-    if (perms.add) can('add', 'Review', buildCountryCondition(countryId))
+    if (perms.add) {
+      const countryCondition = buildCountryCondition(countryId)
+      const remappedCountryCondition = countryCondition
+        ? Object.fromEntries(
+            Object.entries(countryCondition).map(([key, value]) => [
+              `identification_task.${key}`,
+              value,
+            ]),
+          )
+        : {}
+      can('add', 'Review', {
+        'identification_task.status': {
+          $in: [
+            IdentificationTaskStatus.Conflict,
+            IdentificationTaskStatus.Done,
+            IdentificationTaskStatus.Review,
+          ],
+        },
+        'identification_task.review': null,
+        ...remappedCountryCondition,
+      })
+    }
     if (perms.change) can('change', 'Review', buildCountryCondition(countryId))
     if (perms.view) can('view', 'Review', buildCountryCondition(countryId))
     if (perms.delete) can('delete', 'Review', buildCountryCondition(countryId))

@@ -97,6 +97,9 @@
     </div>
   </div>
 
+  <ReviewDialog v-if="identificationTask && identificationTask.review === null"
+    :identification-task="identificationTask" />
+
 </template>
 
 <script setup lang="ts">
@@ -119,6 +122,7 @@ import IdentificationTaskReviewTag from '@/components/identificationTasks/Identi
 import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
+import ReviewDialog from '@/components/reviews/ReviewDialog.vue';
 
 const props = withDefaults(defineProps<{
   observationUuid: string,
