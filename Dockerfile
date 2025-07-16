@@ -3,10 +3,8 @@ FROM node:lts-alpine AS build-stage
 # Set the working directory inside the container
 WORKDIR /app
 
-# inject all environment vars we'll need
-ARG VITE_API_BASE_URL
-# expose the variable to the finished cotainer
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# inject all vars we'll need
+ARG BUILD_MODE=production
 
 # Copy package.json and package-lock.json into the container
 COPY package*.json package-lock.json ./
@@ -18,7 +16,7 @@ RUN npm install
 COPY ./ ./
 
 # Build the app for production
-RUN npm run build
+RUN npm run build -- --mode $BUILD_MODE
 
 ################################
 #### PRODUCTION ENVIRONMENT ####

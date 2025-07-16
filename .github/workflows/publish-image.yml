@@ -44,15 +44,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
 
-      - name: Determine VITE_API_BASE_URL value
-        id: build_args
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/demo ]]; then
-            echo "api_url=https://apidev.mosquitoalert.com/v1" >> $GITHUB_OUTPUT
-          else
-            echo "api_url=" >> $GITHUB_OUTPUT
-          fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -75,4 +66,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_BASE_URL=${{ steps.build_args.outputs.api_url }}
+            BUILD_MODE=${{ github.ref == 'refs/tags/demo' && 'demo' || 'production' }}
