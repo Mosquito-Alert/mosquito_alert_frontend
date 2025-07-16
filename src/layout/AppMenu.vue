@@ -21,7 +21,7 @@ const model = ref<MenuItem[]>([
         ? [{ label: 'Annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } }]
         : []),
       ...(ability.rulesFor('view', 'IdentificationTask').length > 0
-        ? [{ label: 'Tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } }]
+        ? [{ label: 'Identification tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } }]
         : []),
     ]
   },
