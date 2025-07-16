@@ -3,6 +3,9 @@ FROM node:lts-alpine AS build-stage
 # Set the working directory inside the container
 WORKDIR /app
 
+# inject all vars we'll need
+ARG BUILD_MODE=production
+
 # Copy package.json and package-lock.json into the container
 COPY package*.json package-lock.json ./
 
@@ -13,7 +16,7 @@ RUN npm install
 COPY ./ ./
 
 # Build the app for production
-RUN npm run build
+RUN npm run build -- --mode $BUILD_MODE
 
 ################################
 #### PRODUCTION ENVIRONMENT ####

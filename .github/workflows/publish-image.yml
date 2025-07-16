@@ -10,6 +10,7 @@ on:
       - beta
     tags:
       - 'v*'
+      - demo
 
 # Defines two custom environment variables for the workflow.
 # These are used for the Container registry domain, and a
@@ -38,6 +39,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
+            type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
@@ -63,3 +65,5 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_MODE=${{ github.ref == 'refs/tags/demo' && 'demo' || 'production' }}
