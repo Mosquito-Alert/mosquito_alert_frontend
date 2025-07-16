@@ -6,8 +6,8 @@
         <ProgressSpinner />
       </div>
       <Image :src="task.public_photo.url"
-        image-class="aspect-square object-cover transition-all duration-300 cursor-pointer"
-        class="w-full h-full group-hover:brightness-50" />
+        image-class="aspect-square object-cover w-full transition-all duration-300 cursor-pointer"
+        class="group-hover:brightness-50" />
     </router-link>
     <figcaption class="absolute top-2 left-2 text-white rounded-md gap-1">
       <IdentificationTaskStatusTag v-if="task.status" :status="task.status" />
