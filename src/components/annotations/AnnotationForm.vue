@@ -60,8 +60,8 @@
           </div>
         </div>
       </div>
-      <Divider v-if="isExtended" />
 
+      <Divider />
       <FormField v-slot="$field" v-if="isExtended" name="publicNote" class="flex flex-col gap-2 w-full">
         <div class="flex items-center">
           <label>
@@ -80,8 +80,12 @@
         </Message>
       </FormField>
 
-      <FormField v-slot="$field" v-if="isExtended" name="internalNote" class="flex flex-col gap-2 w-full">
-        <label>Internal note <span class="text-surface-500 dark:text-surface-300 italic">(Optional)</span></label>
+      <FormField v-slot="$field" name="internalNote" class="flex flex-col gap-2 w-full">
+        <label>Internal note
+          <span v-if="!isInternalNoteRequired" class="text-surface-500 dark:text-surface-300 italic">
+            (Optional)
+          </span>
+        </label>
         <Textarea autoResize rows="3" />
         <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
         </Message>
@@ -186,6 +190,10 @@ const isFemale = computed(() => {
   return selectedSex.value === AnnotationCharacteristicsSex.Female;
 })
 
+const isInternalNoteRequired = computed(() =>
+  !props.isVisible || props.isFlagged
+)
+
 // Watch for isFlagged changes
 watch(() => props.isFlagged, (newVal) => {
   if (newVal) {
@@ -208,6 +216,10 @@ const resolver = ({ values }: { values: Record<string, any> }) => {
 
   if (!publicNote.value) {
     errors.publicNote = [{ message: 'Public note is required.' }];
+  }
+
+  if (isInternalNoteRequired.value && !values.internalNote) {
+    errors.internalNote = [{ message: 'Internal note is required.' }];
   }
 
   return {
