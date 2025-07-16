@@ -51,7 +51,8 @@
                 </div>
               </div>
               <div v-if="isStarted" class="flex flex-row ml-auto">
-                <Button label="Show all" icon="pi pi-external-link" severity="contrast"
+                <Button v-if="assignment.observation.photos && assignment.observation.photos.length > 1"
+                  label="Show all" icon="pi pi-external-link" severity="contrast"
                   @click="showGalleriaFullscreen = true" />
               </div>
             </div>
