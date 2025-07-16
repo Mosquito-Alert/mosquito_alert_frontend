@@ -70,7 +70,7 @@
                   <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction" />
                   <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
                     class="absolute top-2 right-2 p-2 rounded-md">
-                    <Tag icon="pi pi-sparkles" severity="success" value="Best photo" />
+                    <BestPhotoTag />
                   </figcaption>
                 </figure>
               </template>
@@ -118,6 +118,7 @@ import IdentificationTaskResultTag from '@/components/identificationTasks/Identi
 import IdentificationTaskReviewTag from '@/components/identificationTasks/IdentificationTaskReviewTag.vue';
 import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
+import BestPhotoTag from '@/components/photos/BestPhotoTag.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 
 const props = withDefaults(defineProps<{
