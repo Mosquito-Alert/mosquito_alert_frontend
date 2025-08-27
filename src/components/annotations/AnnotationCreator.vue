@@ -143,7 +143,7 @@ watch(() => props.assignment, (newAssignment) => {
     activePhotoIndex.value = 0; // Reset to the first photo when assignment changes
     isStarted.value = false; // Reset annotation state
     isFlagged.value = false; // Reset flagged state
-    isVisible.value = false; // Reset visible state
+    isVisible.value = true; // Reset visible state
     isFavourite.value = false; // Reset favourite state
   }
 }, { immediate: true });
