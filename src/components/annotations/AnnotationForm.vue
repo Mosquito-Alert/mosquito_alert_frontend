@@ -132,7 +132,7 @@ const tagInputFieldRef = ref();
 const isHighConfidence = ref<boolean>(false);
 const isExecutive = ref<boolean>(false);
 const selectedTaxon = ref<Taxon>();
-const selectedSex = ref<AnnotationCharacteristicsSex | null>(null);
+const selectedSex = ref<AnnotationCharacteristicsSex | null | undefined>(undefined);
 const selectedTags = ref<string[]>([]);
 const publicNote = ref<string>();
 
@@ -220,6 +220,10 @@ const resolver = ({ values }: { values: Record<string, any> }) => {
 
   if (isInternalNoteRequired.value && !values.internalNote) {
     errors.internalNote = [{ message: 'Internal note is required.' }];
+  }
+
+  if (selectedSex.value === undefined) {
+    errors.sex = [{ message: 'Sex is required.' }];
   }
 
   return {
