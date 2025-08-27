@@ -1,7 +1,7 @@
 <template>
   <MultiSelect v-model="selectedIdentificationTaskResultSource" display="chip" :options="options" optionValue="value"
-    optionLabel="label" data-key="value" :maxSelectedLabels="3" dropdown-icon="pi pi-plus-circle" filter showClear
-    resetFilterOnClear>
+    optionLabel="label" data-key="value" :maxSelectedLabels="3" dropdown-icon="pi pi-plus-circle" :showToggleAll="false"
+    showClear resetFilterOnClear>
     <template #option="slotProps">
       <div class="flex items-center gap-2">
         <i :class="slotProps.option.icon"></i>
