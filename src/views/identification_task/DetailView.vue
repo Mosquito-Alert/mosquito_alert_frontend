@@ -11,7 +11,7 @@
     </div>
 
     <div class="flex items-center mb-4 gap-2">
-      <IdentificationTaskReviewTag v-if="identificationTask" :identification-task="identificationTask" />
+      <IdentificationTaskReviewTag v-if="identificationTask" :review="identificationTask.review" />
       <Tag v-if='identificationTask?.is_safe' icon="pi pi-shield" value='Safe content' severity="success" />
       <Tag v-if='identificationTask?.is_flagged' icon="pi pi-flag" value='Flagged' severity="danger" />
       <div class="ml-auto text-surface-400 dark:text-surface-400 flex flex-col">
