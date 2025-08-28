@@ -12,6 +12,7 @@ import type {
   Annotation,
   Country,
   IdentificationTask,
+  Notification,
 } from 'mosquito-alert'
 
 type Actions = 'add' | 'view' | 'change' | 'delete'
@@ -19,10 +20,12 @@ type Subjects =
   | Annotation
   | Country
   | IdentificationTask
+  | Notification
   | 'Annotation'
   | 'Review'
   | 'Country'
   | 'IdentificationTask'
+  | 'Notification'
 
 export type AppAbility = MongoAbility<[Actions, Subjects | ForcedSubject<Exclude<Subjects, 'all'>>]>
 
@@ -61,6 +64,13 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
     if (perms.delete) can('delete', 'IdentificationTask', buildCountryCondition(countryId))
   }
 
+  function grantNotificationPermissions(perms: Notification, countryId?: number) {
+    if (perms.add) can('add', 'IdentificationTask', buildCountryCondition(countryId))
+    if (perms.change) can('change', 'IdentificationTask', buildCountryCondition(countryId))
+    if (perms.view) can('view', 'IdentificationTask', buildCountryCondition(countryId))
+    if (perms.delete) can('delete', 'IdentificationTask', buildCountryCondition(countryId))
+  }
+
   function grantReviewPermissions(perms: ReviewPermission, countryId?: number) {
     if (perms.add) can('add', 'Review', buildCountryCondition(countryId))
     if (perms.change) can('change', 'Review', buildCountryCondition(countryId))
@@ -83,6 +93,7 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
     can('view', 'Annotation')
     can('view', 'IdentificationTask')
     can('view', 'Review')
+    can('add', 'Notification')
   }
 
   grantAnnotationPermissions(annotationPerms)

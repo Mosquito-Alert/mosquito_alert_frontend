@@ -49,6 +49,22 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: 'notifications',
+          children: [
+            {
+              path: '',
+              name: 'list_sent_notifications',
+              component: () => import('@/views/notifications/ListSentView.vue'),
+            },
+            {
+              path: 'new',
+              name: 'send_notifications',
+              component: () => import('@/views/notifications/NewView.vue'),
+              props: true,
+            },
+          ],
+        },
       ],
     },
   ],
