@@ -69,7 +69,7 @@
                   <img :src="slotProps.item.url" class="w-full h-full" />
                   <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction" />
                   <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
-                    class="absolute top-2 right-2 p-2 rounded-md">
+                    class="absolute top-2 right-2 rounded-md">
                     <BestPhotoTag />
                   </figcaption>
                 </figure>
@@ -85,7 +85,7 @@
                   <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction"
                     :showLabel="false" />
                   <figcaption v-if="slotProps.item.uuid === identificationTask?.public_photo.uuid"
-                    class="absolute top-2 right-2 p-2 rounded-md">
+                    class="absolute top-2 right-2 rounded-md">
                     <Tag icon="pi pi-sparkles" severity="success" rounded />
                   </figcaption>
                 </figure>
@@ -142,13 +142,18 @@ const sortedAnnotations = computed(() =>
 
 const photosWithPrediction = computed<(SimplePhoto & { prediction: PhotoPrediction | null })[]>(() => {
   const photos = identificationTask.value?.observation.photos ?? [];
-  return photos.map(photo => {
+  const bestPhotoUuid = identificationTask.value?.public_photo?.uuid;
+  const mappedPhotos = photos.map(photo => {
     const prediction = photoPredictions.value.find(p => p.photo.uuid === photo.uuid) || null;
     return {
       ...photo,
       prediction,
     };
   });
+  // Move the public photo to the first position
+  mappedPhotos.sort((a, b) => (a.uuid === bestPhotoUuid ? -1 : b.uuid === bestPhotoUuid ? 1 : 0));
+
+  return mappedPhotos;
 })
 
 const showCreateStepper = ref<boolean>(props.annotating);
