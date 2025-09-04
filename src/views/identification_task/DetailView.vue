@@ -4,7 +4,8 @@
   }">
     <span>Review mode</span>
     <div class="flex ml-auto gap-2">
-      <Button label="Cancel" severity="secondary" icon="pi pi-times" outlined @click="isReviewing = false" />
+      <Button label="Cancel" severity="secondary" icon="pi pi-times" outlined :loading="isSubmittingReview || loading"
+        @click="isReviewing = false" />
       <Button severity="primary" label="Submit changes" icon="pi pi-check" :loading="isSubmittingReview || loading"
         @click="submitReview(CreateOverwriteReviewRequestAction.Overwrite)" />
     </div>
