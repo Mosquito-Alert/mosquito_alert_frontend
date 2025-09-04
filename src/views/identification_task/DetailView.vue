@@ -155,8 +155,7 @@
     </div>
   </div>
 
-  <ReviewDialog
-    v-if="identificationTask?.review === null && $can('add', subject('Review', { 'identification_task': identificationTask }))"
+  <ReviewDialog v-if="$can('add', subject('Review', { 'identification_task': identificationTask }))"
     :identification-task="identificationTask" :visible="!isReviewing" :loading="isSubmittingReview || loading"
     @agree="submitReview(CreateAgreeReviewRequestAction.Agree)" @disagree="isReviewing = true" />
 
