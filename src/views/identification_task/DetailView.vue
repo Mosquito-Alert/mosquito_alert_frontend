@@ -24,7 +24,8 @@
     <div class="flex items-center mb-4 gap-2">
       <IdentificationTaskReviewTag v-if="identificationTask" :review="identificationTask.review" />
 
-      <IdentificationTaskIsSafeSelect v-if="isReviewing" v-model="editIdentificationTask!.is_safe" />
+      <IdentificationTaskIsSafeSelect v-if="isReviewing" v-model="editIdentificationTask!.is_safe"
+        :disabled="isReviewNotInsect" />
       <IdentificationTaskIsSafeTag v-else :is-safe="identificationTask?.is_safe || false" />
 
       <Tag v-if='identificationTask?.is_flagged' icon="pi pi-flag" value='Flagged' severity="danger" />
@@ -41,7 +42,8 @@
             <div class="flex flex-col gap-2 w-full">
               <div class="flex gap-2">
                 <TaxonTagSelector :model-value="editIdentificationTask!.result?.taxon"
-                  :disabled="editIdentificationTask!.result == null">
+                  @update:model-value="val => editIdentificationTask!.result!.taxon = <SimpleTaxon>val"
+                  :disabled="isReviewNotInsect">
                   <template #selectedIcon>
                     <i v-if="editIdentificationTask!.result?.is_high_confidence"
                       class="pi pi-angle-double-up text-green-700" />
@@ -53,12 +55,12 @@
                   <span>High confidence?</span>
                   <ToggleSwitch :model-value="editIdentificationTask!.result?.is_high_confidence"
                     @update:model-value="val => editIdentificationTask!.result!.is_high_confidence = val"
-                    :disabled="editIdentificationTask!.result == null" />
+                    :disabled="isReviewNotInsect" />
                 </div>
                 <div class="flex flex-row items-center gap-2 ml-auto">
-                  <span :class="editIdentificationTask!.result == null ? 'text-red-500' : ''">Not a mosquito</span>
-                  <ToggleSwitch :model-value="editIdentificationTask!.result == null"
-                    @update:model-value="val => val ? editIdentificationTask!.result = null : editIdentificationTask!.result = identificationTask?.result || null" />
+                  <span :class="isReviewNotInsect ? 'text-red-500' : ''">Not an insect</span>
+                  <ToggleSwitch :model-value="editIdentificationTask!.result?.taxon == null"
+                    @update:model-value="val => isReviewNotInsect = val" />
                 </div>
               </div>
             </div>
@@ -173,7 +175,7 @@ import { useToast } from "primevue/usetoast";
 
 import { identificationTasksApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
-import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest } from 'mosquito-alert';
+import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
 import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
@@ -202,6 +204,7 @@ const props = withDefaults(defineProps<{
 })
 
 const isReviewing = ref<boolean>(false);
+const isReviewNotInsect = ref<boolean>(false);
 const isSubmittingReview = ref<boolean>(false);
 const editIdentificationTask = ref<IdentificationTask>();
 
@@ -211,6 +214,16 @@ watch(isReviewing, (newValue) => {
   } else {
     editIdentificationTask.value = undefined;
   }
+  isReviewNotInsect.value = editIdentificationTask.value?.result?.taxon == null;
+});
+
+watch(isReviewNotInsect, (newValue) => {
+  if (newValue) {
+    editIdentificationTask.value!.result!.taxon = null
+  } else {
+    editIdentificationTask.value!.result!.taxon = identificationTask?.value!.result?.taxon || null;
+  }
+  editIdentificationTask.value!.is_safe = !newValue
 });
 
 const numVisible = ref(7);
@@ -218,6 +231,11 @@ const loading = ref<boolean>(false);
 const identificationTask = ref<IdentificationTask>();
 const annotations = ref<Annotation[]>([]);
 const photoPredictions = ref<PhotoPrediction[]>([]);
+
+watch(identificationTask, () => {
+  fetchAnnotations();
+  fetchPhotoPredictions();
+})
 
 const sortedAnnotations = computed(() =>
   [...annotations.value].sort(
@@ -264,8 +282,6 @@ const responsiveOptions = ref([
 
 onMounted(() => {
   fetchIdentificationTask();
-  fetchAnnotations();
-  fetchPhotoPredictions();
 });
 
 function fetchIdentificationTask() {
@@ -325,7 +341,7 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
         public_photo_uuid: editIdentificationTask.value!.public_photo.uuid,
         is_safe: editIdentificationTask.value!.is_safe,
         public_note: editIdentificationTask.value!.public_note,
-        result: editIdentificationTask.value!.result ? {
+        result: editIdentificationTask.value!.result?.taxon ? {
           taxon_id: editIdentificationTask.value!.result.taxon!.id,
           confidence_label: editIdentificationTask.value!.result.is_high_confidence
             ? AnnotationClassificationConfidenceLabel.Definitely
