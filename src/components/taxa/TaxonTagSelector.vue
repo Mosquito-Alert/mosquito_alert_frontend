@@ -49,9 +49,9 @@ import { useTaxaStore } from '@/stores/taxaStore';
 
 const taxaStore = useTaxaStore();
 
-const relevantTaxa = ref<Taxon[] | SimpleTaxon[]>([]);
-const selectedTaxonOnTree = ref<Taxon | SimpleTaxon>();
-const selectedTaxon = ref<Taxon | SimpleTaxon>();
+const relevantTaxa = ref<Taxon[]>([]);
+const selectedTaxonOnTree = ref<Taxon>();
+const selectedTaxon = ref<Taxon>();
 
 const props = defineProps<({
   modelValue?: Taxon | SimpleTaxon | null;
@@ -59,7 +59,7 @@ const props = defineProps<({
 })>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Taxon | SimpleTaxon | undefined): void
+  (e: 'update:modelValue', value: Taxon | undefined): void
 }>()
 
 watch(selectedTaxon, (newValue) => {
@@ -73,8 +73,8 @@ watchEffect(() => {
     taxon => taxon.id === modelValue?.id
   )
 
-  selectedTaxon.value = modelValue as SimpleTaxon
-  selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : modelValue as SimpleTaxon
+  selectedTaxon.value = modelValue as Taxon
+  selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : modelValue as Taxon
 })
 
 onMounted(async () => {
