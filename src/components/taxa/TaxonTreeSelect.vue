@@ -14,7 +14,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import type { TreeNode } from 'primevue/treenode';
 import type { TreeExpandedKeys } from 'primevue/tree';
 
-import type { Taxon, TaxonTreeNode } from 'mosquito-alert';
+import type { Taxon, SimpleTaxon, TaxonTreeNode } from 'mosquito-alert';
 
 import { useTaxaStore } from '@/stores/taxaStore';
 
@@ -26,12 +26,12 @@ const taxonTreeNode = ref<TaxonTreeNode>();
 const selectedValue = ref<Record<number, boolean> | null>(null);
 
 const props = defineProps<{
-  modelValue?: Taxon | null,
+  modelValue?: Taxon | SimpleTaxon | null,
   placeholder?: string | null
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Taxon | undefined): void,
+  (e: 'update:modelValue', value: Taxon | SimpleTaxon | undefined): void,
   (e: 'onChange', value: Taxon | undefined): void
 }>()
 

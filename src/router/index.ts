@@ -45,12 +45,6 @@ const router = createRouter({
                   component: () => import('@/views/annotations/CreateView.vue'),
                   props: true,
                 },
-                {
-                  path: 'reviews/new',
-                  name: 'review_identification_task',
-                  component: () => import('@/views/reviews/CreateView.vue'),
-                  props: true,
-                },
               ],
             },
           ],
