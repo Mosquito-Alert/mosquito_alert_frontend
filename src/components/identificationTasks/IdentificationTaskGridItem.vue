@@ -25,8 +25,9 @@
     </figcaption>
     <figcaption v-else-if="$can('add', 'Review') && !task.review"
       class="absolute bottom-0 left-0 p-2 flex gap-2 w-full bg-linear-to-t from-black to-transparent">
-      <TaxonTreeSelect class="flex-1" placeholder="Select taxon" @on-change="(taxon) => submitReview(taxon)" />
-      <AnnotationNotAnInsectButton :observation="task.observation" />
+      <TaxonTreeSelect class="flex-1" placeholder="Select taxon"
+        @on-change="(taxon) => taxon ? submitReview(taxon) : null" />
+      <AnnotationNotAnInsectButton :observation="task.observation" @confirm="submitReview(null)" />
     </figcaption>
   </figure>
 </template>
@@ -36,14 +37,16 @@
 import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 
-import type { IdentificationTask, Taxon, AnnotationRequest, AnnotationClassificationRequest } from 'mosquito-alert';
-import { AnnotationClassificationConfidenceLabel } from 'mosquito-alert';
+import type { IdentificationTask, Taxon, IdentificationTasksApiReviewCreateRequest } from 'mosquito-alert';
+import { AnnotationClassificationConfidenceLabel, CreateOverwriteReviewRequestAction } from 'mosquito-alert';
 
 import CountryTag from '@/components/countries/CountryTag.vue';
 import AnnotationNotAnInsectButton from '@/components/annotations/AnnotationNotAnInsectButton.vue';
 import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
 import IdentificationTaskResultTag from '@/components/identificationTasks/IdentificationTaskResultTag.vue';
 import TaxonTreeSelect from '@/components/taxa/TaxonTreeSelect.vue';
+
+import { getPublicNote } from '@/utils/AnnotationUtils';
 
 import { identificationTasksApi } from '@/services/apiService';
 
@@ -60,26 +63,23 @@ const emit = defineEmits<{
 
 const isSubmittingReview = ref<boolean>(false);
 
-const submitReview = (taxon: Taxon | undefined) => {
-  if (!taxon) return;
-
+const submitReview = (taxon: Taxon | null) => {
   isSubmittingReview.value = true;
-  const annotationRequest = <AnnotationRequest>{
-    best_photo_uuid: props.task.public_photo.uuid,
-    classification: <AnnotationClassificationRequest>{
-      taxon_id: taxon.id,
-      confidence_label: AnnotationClassificationConfidenceLabel.Definitely
-    },
-    is_decisive: true,
-    observation_flags: {
-      is_visible: true
-    },
-  }
-  identificationTasksApi.annotationsCreate({
+  const request: IdentificationTasksApiReviewCreateRequest = {
     observationUuid: props.task.observation.uuid,
-    annotationRequest: annotationRequest,
-  }).then(() => {
-    toast.add({ severity: 'success', summary: 'Success', detail: `Annotated as '${taxon.name}''`, life: 3000 });
+    metaCreateIdentificationTaskReviewRequest: {
+      action: CreateOverwriteReviewRequestAction.Overwrite,
+      public_photo_uuid: props.task.public_photo.uuid,
+      is_safe: taxon != null,
+      public_note: taxon ? getPublicNote(taxon, true, 'en') : null, // TODO: get locale from user.
+      result: taxon ? {
+        taxon_id: taxon.id,
+        confidence_label: AnnotationClassificationConfidenceLabel.Definitely
+      } : null,
+    }
+  }
+  identificationTasksApi.reviewCreate(request).then(() => {
+    toast.add({ severity: 'success', summary: 'Success', detail: `Annotated as '${taxon ? taxon.name : "Not an insect"}'`, life: 3000 });
     emit('onReviewSuccess')
   }).catch(() => {
     toast.add({ severity: 'danger', summary: 'Failed', detail: 'Annotation failed', life: 3000 });
