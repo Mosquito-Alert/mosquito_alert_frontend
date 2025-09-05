@@ -73,8 +73,8 @@ watchEffect(() => {
     taxon => taxon.id === modelValue?.id
   )
 
-  selectedTaxon.value = modelValue as Taxon
-  selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : modelValue as Taxon
+  selectedTaxon.value = modelValue ? modelValue as Taxon : undefined
+  selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : selectedTaxon.value
 })
 
 onMounted(async () => {
