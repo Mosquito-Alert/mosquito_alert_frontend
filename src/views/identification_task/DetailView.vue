@@ -366,6 +366,7 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
     observationUuid: identificationTask.value.observation.uuid,
     metaCreateIdentificationTaskReviewRequest: metaRequest as MetaCreateIdentificationTaskReviewRequest
   }
+  isSubmittingReview.value = true;
   identificationTasksApi.reviewCreate(request).then(() => {
     toast.add({ severity: 'success', summary: 'Success', detail: 'Review submitted successfully.', life: 5000 });
     fetchIdentificationTask();
