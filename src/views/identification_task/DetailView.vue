@@ -100,10 +100,14 @@
               <!-- <Button class="ml-auto" icon="pi pi-plus" label="Add" /> -->
             </RouterLink>
           </div>
-          <IdentificationTaskReviewActionMessage v-if="identificationTask?.review"
+          <IdentificationTaskReviewActionMessage
+            v-if="identificationTask?.review && identificationTask?.result?.source == IdentificationTaskResultSource.Expert"
             :review="identificationTask?.review" />
         </div>
         <div class="flex flex-col items-center gap-2">
+          <span v-if="sortedAnnotations.length === 0" class="text-lg text-gray-600 dark:text-gray-400">
+            No annotations given for this identification task.
+          </span>
           <AnnotationPanel v-for="annotation in sortedAnnotations" :key="annotation.id" :annotation="annotation"
             :collapsed="!(annotation.feedback?.public_note || annotation.feedback?.internal_note)" class="w-full" />
         </div>
@@ -112,7 +116,12 @@
     </div>
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
-        <h5>Photos</h5>
+        <div class="flex flex-col mb-4 gap-2">
+          <h5 class="my-0!">Photos</h5>
+          <IdentificationTaskReviewActionMessage
+            v-if="identificationTask?.review && identificationTask?.result?.source == IdentificationTaskResultSource.Ai"
+            :review="identificationTask?.review" />
+        </div>
         <Galleria :value="photosWithPrediction" :numVisible="numVisible" :circular="true" :showItemNavigators="true"
           :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true"
           :showThumbnailNavigators="photosWithPrediction.length > numVisible">
@@ -176,7 +185,7 @@ import { useToast } from "primevue/usetoast";
 import { identificationTasksApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
 import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
-import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction } from 'mosquito-alert';
+import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
 

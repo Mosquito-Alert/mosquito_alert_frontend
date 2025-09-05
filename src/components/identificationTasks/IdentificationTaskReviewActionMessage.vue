@@ -9,7 +9,7 @@
       The reviewer has <strong>
         {{ review.action == IdentificationTaskReviewAction.Agree ? 'agreed' : 'disagreed' }}
       </strong>
-      with the result from the annotators.
+      with the result.
     </span>
   </Message>
 </template>
