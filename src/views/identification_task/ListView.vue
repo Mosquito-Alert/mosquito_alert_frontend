@@ -58,6 +58,11 @@
               <label for="num_annotations">Annotations</label>
             </FloatLabel>
             <FloatLabel variant="on">
+              <IdentificationTaskReviewActionSelect id="review_action" v-model="selectedReviewAction"
+                class="min-w-30" />
+              <label for="review_action">Review</label>
+            </FloatLabel>
+            <FloatLabel variant="on">
               <Select id="is_flagged" v-model="isFlagged" :options="[true, false]" showClear />
               <label for="is_flagged">Flag</label>
             </FloatLabel>
@@ -101,13 +106,14 @@ import TaxonTreeSelect from '@/components/taxa/TaxonTreeSelect.vue';
 
 import { identificationTasksApi } from '@/services/apiService';
 
-import type { IdentificationTask, IdentificationTaskResultSource, Country, Taxon } from 'mosquito-alert';
+import type { IdentificationTask, IdentificationTaskResultSource, IdentificationtasksListReviewActionParameter, Country, Taxon } from 'mosquito-alert';
 import { IdentificationTaskStatus } from 'mosquito-alert';
 import { IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 import type { IdentificationTasksApiListRequest } from 'mosquito-alert';
 
 import { useAbility } from '@casl/vue';
 import type { AppAbility } from '@/services/ability';
+import IdentificationTaskReviewActionSelect from '@/components/identificationTasks/IdentificationTaskReviewActionSelect.vue';
 
 const ability = useAbility<AppAbility>();
 
@@ -155,6 +161,7 @@ const selectedCountryIds = computed<number[]>(() => {
   return selectedCountries.value?.map(c => c.id) ?? [];
 });
 const selectedNumAnnotation = ref<{ min: number | undefined; max: number | undefined }>();
+const selectedReviewAction = ref<IdentificationtasksListReviewActionParameter>();
 const numAnnotationOptions = ref<Array<{ value: { min: number | undefined; max: number | undefined }; label: string }>>([
   { value: { min: 0, max: 0 }, label: '0' },
   { value: { min: 1, max: 1 }, label: '1' },
@@ -172,6 +179,7 @@ function clearFilters() {
   selectedSources.value = [];
   selectedCountries.value = [];
   selectedNumAnnotation.value = undefined;
+  selectedReviewAction.value = undefined;
   isFlagged.value = undefined;
 }
 
@@ -252,6 +260,7 @@ watchEffect(async () => {
     observationCountryIds: selectedCountryIds.value || undefined,
     resultSource: selectedSources.value || undefined,
     resultTaxonIds: selectedTaxon.value ? [selectedTaxon.value.id] : undefined,
+    reviewAction: selectedReviewAction.value || undefined,
     page: pageSelected.value + 1,
     pageSize: numRows.value,
     orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
