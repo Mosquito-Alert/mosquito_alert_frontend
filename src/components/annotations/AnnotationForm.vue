@@ -244,14 +244,14 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
           : AnnotationClassificationConfidenceLabel.Probably
       },
       feedback: {
-        public_note: publicNote.value,
+        public_note: isExtended.value ? publicNote.value : null,
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
-      characteristics: {
+      characteristics: isExtended.value ? <AnnotationCharacteristicsRequest>{
         sex: selectedSex.value,
         blood_fed: values.bloodFed || false,
         is_gravid: values.isGravid || false
-      } as AnnotationCharacteristicsRequest,
+      } : undefined,
       is_flagged: props.isFlagged,
       is_decisive: isExecutive.value,
       observation_flags: {
