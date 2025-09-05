@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, watchEffect, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import type { DataViewPageEvent } from 'primevue/dataview'
 
@@ -243,12 +243,9 @@ const fetchData = () => {
   });
 }
 
-watch(listRequest, async () => {
-  fetchData();
-})
-
-watchEffect(async () => {
-  listRequest.value = {
+// Use computed for the list request to avoid duplicate triggers
+const computedListRequest = computed(() => {
+  return {
     createdAtAfter: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? selectedCreatedAtDateRange.value[0].toISOString() : undefined,
     createdAtBefore: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? new Date(new Date(selectedCreatedAtDateRange.value[1]).setDate(selectedCreatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
     updatedAtAfter: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? selectedUpdatedAtDateRange.value[0].toISOString() : undefined,
@@ -265,14 +262,24 @@ watchEffect(async () => {
     pageSize: numRows.value,
     orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
   } as IdentificationTasksApiListRequest
+})
+
+// Watch the computed request and update both listRequest and URL
+watch(computedListRequest, async (newRequest) => {
+  listRequest.value = newRequest;
 
   const query = Object.fromEntries(
-    Object.entries(listRequest.value)
-      .filter(([_, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
+    Object.entries(newRequest)
+      .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
       .map(([k, v]) => Array.isArray(v) ? [k, v.join(',')] : [k, v])
   )
 
   router.replace({ query })
+}, { deep: true })
+
+// Watch listRequest changes and fetch data
+watch(listRequest, async () => {
+  fetchData();
 })
 
 </script>

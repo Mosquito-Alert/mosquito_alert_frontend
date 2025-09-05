@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, watchEffect, onMounted } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import type { DataViewPageEvent } from 'primevue/dataview'
@@ -166,12 +166,9 @@ const fetchData = () => {
   });
 }
 
-watch(listRequest, async () => {
-  fetchData();
-})
-
-watchEffect(async () => {
-  listRequest.value = {
+// Use computed for the list request to avoid duplicate triggers
+const computedListRequest = computed(() => {
+  return {
     updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
     updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
     isDecisive: isExecutive.value ?? undefined,
@@ -183,14 +180,24 @@ watchEffect(async () => {
     pageSize: numRows.value,
     orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
   } as IdentificationTasksApiAnnotationsListMineRequest
+})
+
+// Watch the computed request and update both listRequest and URL
+watch(computedListRequest, async (newRequest) => {
+  listRequest.value = newRequest;
 
   const query = Object.fromEntries(
-    Object.entries(listRequest.value)
-      .filter(([_, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
+    Object.entries(newRequest)
+      .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
       .map(([k, v]) => Array.isArray(v) ? [k, v.join(',')] : [k, v])
   )
 
   router.replace({ query })
+}, { deep: true })
+
+// Watch listRequest changes and fetch data
+watch(listRequest, async () => {
+  fetchData();
 })
 
 </script>
