@@ -149,7 +149,7 @@
                   <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction"
                     :showLabel="false" />
                   <figcaption class="flex absolute top-2 right-2 rounded-md gap-1">
-                    <RadioButton v-if="isReviewing" v-model=editIdentificationTask!.public_photo.uuid
+                    <RadioButton v-if="isReviewing" v-model="editIdentificationTask!.public_photo.uuid"
                       :value="slotProps.item.uuid" :inputId="slotProps.item.uuid" name="radio-BestPhoto" />
                     <Tag
                       v-if="slotProps.item.uuid === (isReviewing ? editIdentificationTask?.public_photo.uuid : identificationTask?.public_photo.uuid)"
