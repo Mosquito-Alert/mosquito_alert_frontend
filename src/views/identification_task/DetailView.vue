@@ -105,10 +105,10 @@
             :review="identificationTask?.review" />
         </div>
         <div class="flex flex-col items-center gap-2">
-          <span v-if="sortedAnnotations.length === 0" class="text-lg text-gray-600 dark:text-gray-400">
+          <span v-if="annotations.length === 0" class="text-lg text-gray-600 dark:text-gray-400">
             No annotations given for this identification task.
           </span>
-          <AnnotationPanel v-for="annotation in sortedAnnotations" :key="annotation.id" :annotation="annotation"
+          <AnnotationPanel v-for="annotation in annotations" :key="annotation.id" :annotation="annotation"
             :collapsed="!(annotation.feedback?.public_note || annotation.feedback?.internal_note)" class="w-full" />
         </div>
       </div>
@@ -185,7 +185,7 @@ import { useToast } from "primevue/usetoast";
 import { identificationTasksApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
 import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
-import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource } from 'mosquito-alert';
+import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
@@ -246,12 +246,6 @@ watch(identificationTask, () => {
   fetchPhotoPredictions();
 })
 
-const sortedAnnotations = computed(() =>
-  [...annotations.value].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-  )
-)
-
 const userHasAnnotated = computed(() => {
   return annotations.value.some(annotation => annotation.user.uuid === userStore.user!.uuid);
 })
@@ -308,7 +302,7 @@ function fetchIdentificationTask() {
 
 function fetchAnnotations() {
   loading.value = true;
-  identificationTasksApi.annotationsList({ observationUuid: props.observationUuid }).then(
+  identificationTasksApi.annotationsList({ observationUuid: props.observationUuid, orderBy: [IdentificationtasksListOrderByParameter.CreatedAt,] }).then(
     (response) => {
       annotations.value = response.data.results || [];
       loading.value = false;
