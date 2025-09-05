@@ -4,14 +4,16 @@ import {
   type ForcedSubject,
   type MongoAbility,
 } from '@casl/ability'
-import type {
-  UserPermission,
-  AnnotationPermission,
-  IdentificationTaskPermission,
-  ReviewPermission,
-  Annotation,
-  Country,
-  IdentificationTask,
+import {
+  type UserPermission,
+  type AnnotationPermission,
+  type IdentificationTaskPermission,
+  type ReviewPermission,
+  type Annotation,
+  type Country,
+  type IdentificationTask,
+  CountryPermissionRole,
+  IdentificationTaskStatus,
 } from 'mosquito-alert'
 
 type Actions = 'add' | 'view' | 'change' | 'delete'
@@ -29,8 +31,13 @@ export type AppAbility = MongoAbility<[Actions, Subjects | ForcedSubject<Exclude
 export default function defineAbilityFor(userPermission: UserPermission | null) {
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(createMongoAbility)
 
-  function grantAnnotationPermissions(perms: AnnotationPermission, countryId?: number) {
-    if (perms.add) {
+  function grantAnnotationPermissions(
+    role: CountryPermissionRole,
+    perms: AnnotationPermission,
+    countryId?: number,
+  ) {
+    // TODO: remove this once the backend support a Reviwer adding annotations.
+    if (perms.add && role !== CountryPermissionRole.Reviewer) {
       can('add', 'Annotation')
       // can('add_annotation', 'IdentificationTask', buildCountryCondition(countryId))
       can('add', 'IdentificationTask', ['annotations'], buildCountryCondition(countryId))
@@ -62,7 +69,28 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   }
 
   function grantReviewPermissions(perms: ReviewPermission, countryId?: number) {
-    if (perms.add) can('add', 'Review', buildCountryCondition(countryId))
+    if (perms.add) {
+      const countryCondition = buildCountryCondition(countryId)
+      const remappedCountryCondition = countryCondition
+        ? Object.fromEntries(
+            Object.entries(countryCondition).map(([key, value]) => [
+              `identification_task.${key}`,
+              value,
+            ]),
+          )
+        : {}
+      can('add', 'Review', {
+        'identification_task.status': {
+          $in: [
+            IdentificationTaskStatus.Conflict,
+            IdentificationTaskStatus.Done,
+            IdentificationTaskStatus.Review,
+          ],
+        },
+        'identification_task.review': null,
+        ...remappedCountryCondition,
+      })
+    }
     if (perms.change) can('change', 'Review', buildCountryCondition(countryId))
     if (perms.view) can('view', 'Review', buildCountryCondition(countryId))
     if (perms.delete) can('delete', 'Review', buildCountryCondition(countryId))
@@ -85,17 +113,17 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
     can('view', 'Review')
   }
 
-  grantAnnotationPermissions(annotationPerms)
+  grantAnnotationPermissions(general.role, annotationPerms)
   grantIdentificationTaskPermissions(taskPerms)
   grantReviewPermissions(reviewPerms)
 
-  for (const { country, permissions } of countries) {
+  for (const { country, permissions, role } of countries) {
     const countryId = country.id
     const countryAnnotationPerms = permissions.annotation ?? {}
     const countryTaskPerms = permissions.identification_task ?? {}
     const countryReviewPerms = permissions.review ?? {}
 
-    grantAnnotationPermissions(countryAnnotationPerms, countryId)
+    grantAnnotationPermissions(role, countryAnnotationPerms, countryId)
     grantIdentificationTaskPermissions(countryTaskPerms, countryId)
     grantReviewPermissions(countryReviewPerms, countryId)
   }

@@ -2,8 +2,8 @@
   <div class="layout-wrapper flex flex-col min-h-screen" :class="containerClass">
     <app-topbar></app-topbar>
     <app-sidebar></app-sidebar>
-    <div class="layout-main-container flex flex-col flex-1 overflow-hidden">
-      <div class="layout-main flex-1 overflow-auto">
+    <div class="layout-main-container flex flex-col flex-1">
+      <div class="layout-main flex-1">
         <router-view></router-view>
       </div>
       <app-footer></app-footer>

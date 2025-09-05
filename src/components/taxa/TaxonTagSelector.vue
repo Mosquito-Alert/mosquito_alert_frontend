@@ -1,18 +1,19 @@
 <template>
   <div class="flex flex-wrap justify-center gap-2">
-    <ToggleButton v-for="taxon in sortedRelevantTaxa" :key="taxon.id" :modelValue="selectedTaxon === taxon"
-      :onLabel="taxon.name" :offLabel="taxon.name" :class="{ 'italic': taxon.italicize }" @update:modelValue="(value) => {
+    <ToggleButton v-for="taxon in sortedRelevantTaxa" :key="taxon.id" :modelValue="selectedTaxon?.id === taxon.id"
+      :disabled="disabled" :onLabel="taxon.name" :offLabel="taxon.name" :class="{ 'italic': taxon.italicize }"
+      @update:modelValue="(value) => {
         selectedTaxonOnTree = undefined; // Reset the tree selection when a taxon is selected
         if (value) selectedTaxon = taxon;
         else if (selectedTaxon === taxon) selectedTaxon = undefined;
       }">
       <template #icon>
-        <template v-if="selectedTaxon === taxon">
+        <template v-if="selectedTaxon?.id === taxon.id">
           <slot name="selectedIcon" />
         </template>
       </template>
     </ToggleButton>
-    <TaxonTreeSelect v-model="selectedTaxonOnTree" placeholder="Other taxon"
+    <TaxonTreeSelect v-model="selectedTaxonOnTree" placeholder="Other taxon" :disabled="disabled"
       @on-change="(value) => { selectedTaxon = value }">
       <template #value="{ value, placeholder }">
         <template v-if="value && value.length">
@@ -39,7 +40,7 @@
 
 import { onMounted, ref, watch, watchEffect, computed } from 'vue';
 
-import type { Taxon } from 'mosquito-alert';
+import type { SimpleTaxon, Taxon } from 'mosquito-alert';
 import { SimpleTaxonRank } from 'mosquito-alert';
 
 import TaxonTreeSelect from './TaxonTreeSelect.vue';
@@ -53,7 +54,8 @@ const selectedTaxonOnTree = ref<Taxon>();
 const selectedTaxon = ref<Taxon>();
 
 const props = defineProps<({
-  modelValue?: Taxon;
+  modelValue?: Taxon | SimpleTaxon | null;
+  disabled?: boolean
 })>();
 
 const emit = defineEmits<{
@@ -66,14 +68,13 @@ watch(selectedTaxon, (newValue) => {
 
 watchEffect(() => {
   const modelValue = props.modelValue
-  if (!modelValue) return
 
   const isInRelevantTaxa = relevantTaxa.value.some(
-    taxon => taxon.id === modelValue.id
+    taxon => taxon.id === modelValue?.id
   )
 
-  selectedTaxon.value = modelValue
-  selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : modelValue
+  selectedTaxon.value = modelValue ? modelValue as Taxon : undefined
+  selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : selectedTaxon.value
 })
 
 onMounted(async () => {

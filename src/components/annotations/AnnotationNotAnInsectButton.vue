@@ -18,6 +18,7 @@ const toast = useToast();
 const props = withDefaults(defineProps<{
   observation: Observation | AssignedObservation | SimplifiedObservationWithPhotos,
   loading?: boolean
+  onConfirm?: () => Promise<void> | void
 }>(), {
   loading: false
 });
@@ -44,20 +45,28 @@ const confirmNotInsect = (event: MouseEvent) => {
       label: 'Accept',
       severity: 'danger'
     },
-    accept: () => {
-      const annotationRequest = <AnnotationRequest>{
-        classification: null,
-      }
-      identificationTasksApi.annotationsCreate({
-        observationUuid: props.observation.uuid,
-        annotationRequest: annotationRequest,
-      }).then(() => {
-        toast.add({ severity: 'info', summary: 'Observation rejected', detail: 'Marked as not an insect', life: 3000 });
+    accept: async () => {
+      try {
+        if (props.onConfirm) {
+          await props.onConfirm();
+        } else {
+          const annotationRequest = <AnnotationRequest>{
+            classification: null,
+          }
+          try {
+            await identificationTasksApi.annotationsCreate({
+              observationUuid: props.observation.uuid,
+              annotationRequest: annotationRequest,
+            });
+            toast.add({ severity: 'info', summary: 'Observation rejected', detail: 'Marked as not an insect', life: 3000 });
+          } catch {
+            toast.add({ severity: 'danger', summary: 'Failed', detail: 'Annotation failed', life: 3000 });
+          }
+        }
         emit('onSubmitSuccess')
-      }).catch(() => {
-        toast.add({ severity: 'danger', summary: 'Failed', detail: 'Annotation failed', life: 3000 });
+      } catch {
         emit('onSubmitFailure')
-      })
+      }
     },
     reject: () => { }
   });
