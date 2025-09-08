@@ -245,7 +245,7 @@ const fetchData = () => {
 
 // Use computed for the list request to avoid duplicate triggers
 const computedListRequest = computed(() => {
-  return {
+  return <IdentificationTasksApiListRequest>{
     createdAtAfter: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? selectedCreatedAtDateRange.value[0].toISOString() : undefined,
     createdAtBefore: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? new Date(new Date(selectedCreatedAtDateRange.value[1]).setDate(selectedCreatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
     updatedAtAfter: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? selectedUpdatedAtDateRange.value[0].toISOString() : undefined,
@@ -261,7 +261,7 @@ const computedListRequest = computed(() => {
     page: pageSelected.value + 1,
     pageSize: numRows.value,
     orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
-  } as IdentificationTasksApiListRequest
+  };
 })
 
 // Watch the computed request and update both listRequest and URL
