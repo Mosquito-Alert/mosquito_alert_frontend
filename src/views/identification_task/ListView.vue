@@ -199,8 +199,6 @@ const onPageChange = (event: DataViewPageEvent) => {
 const identificationTasksTotalCount = ref<number>(0);
 const identificationTasksArray = ref<IdentificationTask[]>([]);
 
-const listRequest = ref<IdentificationTasksApiListRequest>();
-
 const numRows = ref<number>(25);
 
 onMounted(() => {
@@ -225,11 +223,31 @@ onMounted(() => {
 
   pageSelected.value = q.page ? Number(q.page) - 1 : 0
   numRows.value = q.pageSize ? Number(q.pageSize) : 25
+
+  fetchData();
 })
 
-const fetchData = () => {
+const listRequest = computed<IdentificationTasksApiListRequest>(() => ({
+  createdAtAfter: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? selectedCreatedAtDateRange.value[0].toISOString() : undefined,
+  createdAtBefore: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? new Date(new Date(selectedCreatedAtDateRange.value[1]).setDate(selectedCreatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
+  updatedAtAfter: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? selectedUpdatedAtDateRange.value[0].toISOString() : undefined,
+  updatedAtBefore: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? new Date(new Date(selectedUpdatedAtDateRange.value[1]).setDate(selectedUpdatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
+  status: selectedIdentificationTaskStatus.value || undefined,
+  isFlagged: isFlagged.value ?? undefined,
+  numAnnotationsMin: selectedNumAnnotation.value?.min,
+  numAnnotationsMax: selectedNumAnnotation.value?.max,
+  observationCountryIds: selectedCountryIds.value || undefined,
+  resultSource: selectedSources.value || undefined,
+  resultTaxonIds: selectedTaxon.value ? [selectedTaxon.value.id] : undefined,
+  reviewAction: selectedReviewAction.value || undefined,
+  page: pageSelected.value + 1,
+  pageSize: numRows.value,
+  orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
+}));
+
+const fetchData = async () => {
   loading.value = true;
-  identificationTasksApi.list(listRequest.value).then(
+  await identificationTasksApi.list(listRequest.value).then(
     (response) => {
       // Assign results to identificationTasksArray.value, or an empty array if results is undefined
       identificationTasksArray.value = response.data.results || [];
@@ -243,43 +261,15 @@ const fetchData = () => {
   });
 }
 
-// Use computed for the list request to avoid duplicate triggers
-const computedListRequest = computed(() => {
-  return <IdentificationTasksApiListRequest>{
-    createdAtAfter: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? selectedCreatedAtDateRange.value[0].toISOString() : undefined,
-    createdAtBefore: selectedCreatedAtDateRange.value && selectedCreatedAtDateRange.value.length > 1 ? new Date(new Date(selectedCreatedAtDateRange.value[1]).setDate(selectedCreatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
-    updatedAtAfter: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? selectedUpdatedAtDateRange.value[0].toISOString() : undefined,
-    updatedAtBefore: selectedUpdatedAtDateRange.value && selectedUpdatedAtDateRange.value.length > 1 ? new Date(new Date(selectedUpdatedAtDateRange.value[1]).setDate(selectedUpdatedAtDateRange.value[1].getDate() + 1)).toISOString() : undefined,
-    status: selectedIdentificationTaskStatus.value || undefined,
-    isFlagged: isFlagged.value ?? undefined,
-    numAnnotationsMin: selectedNumAnnotation.value?.min,
-    numAnnotationsMax: selectedNumAnnotation.value?.max,
-    observationCountryIds: selectedCountryIds.value || undefined,
-    resultSource: selectedSources.value || undefined,
-    resultTaxonIds: selectedTaxon.value ? [selectedTaxon.value.id] : undefined,
-    reviewAction: selectedReviewAction.value || undefined,
-    page: pageSelected.value + 1,
-    pageSize: numRows.value,
-    orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
-  };
-})
-
-// Watch the computed request and update both listRequest and URL
-watch(computedListRequest, async (newRequest) => {
-  listRequest.value = newRequest;
+watch(listRequest, async () => {
+  await fetchData();
 
   const query = Object.fromEntries(
-    Object.entries(newRequest)
+    Object.entries(listRequest.value)
       .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
       .map(([k, v]) => Array.isArray(v) ? [k, v.join(',')] : [k, v])
   )
-
   router.replace({ query })
 }, { deep: true })
-
-// Watch listRequest changes and fetch data
-watch(listRequest, async () => {
-  fetchData();
-})
 
 </script>

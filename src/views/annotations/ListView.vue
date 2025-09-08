@@ -118,8 +118,6 @@ const orderByArray = ref<Array<{ value: IdentificationtasksListOrderByParameter;
 const annotationsTotalCount = ref<number>(0);
 const annotationsArray = ref<Annotation[]>([]);
 
-const listRequest = ref<IdentificationTasksApiAnnotationsListMineRequest>();
-
 function clearFilters() {
   selectedDateRange.value = undefined;
   isExecutive.value = undefined;
@@ -148,11 +146,25 @@ onMounted(() => {
   numRows.value = q.pageSize ? Number(q.pageSize) : 25
 
   // selectedOrderBy.value = q.orderBy ? { value: (q.orderBy as string).split(',')[0] } : null
+  fetchData();
 })
 
-const fetchData = () => {
+const listRequest = computed<IdentificationTasksApiAnnotationsListMineRequest>(() => ({
+  updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
+  updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
+  isDecisive: isExecutive.value ?? undefined,
+  isFlagged: isFlagged.value ?? undefined,
+  isFavourite: isFavourite.value ?? undefined,
+  classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
+  type: selectedType.value ?? undefined,
+  page: pageSelected.value + 1,
+  pageSize: numRows.value,
+  orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
+}));
+
+const fetchData = async () => {
   loading.value = true;
-  identificationTasksApi.annotationsListMine(listRequest.value).then(
+  await identificationTasksApi.annotationsListMine(listRequest.value).then(
     (response) => {
       // Assign results to annotationsArray.value, or an empty array if results is undefined
       annotationsArray.value = response.data.results || [];
@@ -166,38 +178,18 @@ const fetchData = () => {
   });
 }
 
-// Use computed for the list request to avoid duplicate triggers
-const computedListRequest = computed(() => {
-  return <IdentificationTasksApiAnnotationsListMineRequest>{
-    updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
-    updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
-    isDecisive: isExecutive.value ?? undefined,
-    isFlagged: isFlagged.value ?? undefined,
-    isFavourite: isFavourite.value ?? undefined,
-    classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
-    type: selectedType.value ?? undefined,
-    page: pageSelected.value + 1,
-    pageSize: numRows.value,
-    orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
-  };
-})
 
 // Watch the computed request and update both listRequest and URL
-watch(computedListRequest, async (newRequest) => {
-  listRequest.value = newRequest;
+watch(listRequest, async () => {
+  await fetchData();
 
   const query = Object.fromEntries(
-    Object.entries(newRequest)
+    Object.entries(listRequest.value)
       .filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0))
       .map(([k, v]) => Array.isArray(v) ? [k, v.join(',')] : [k, v])
   )
 
   router.replace({ query })
 }, { deep: true })
-
-// Watch listRequest changes and fetch data
-watch(listRequest, async () => {
-  fetchData();
-})
 
 </script>
