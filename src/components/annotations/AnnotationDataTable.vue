@@ -4,10 +4,12 @@
       <template #body="slotProps">
         <Button asChild variant="link">
           <RouterLink
-            :to="{ name: 'identification_task', params: { observationUuid: slotProps.data.observation_uuid } }"
-            class="flex gap-2">
-            <span class="hover:underline">{{ slotProps.data.observation_uuid }}</span>
-            <i class="pi pi-link" />
+            :to="{ name: 'identification_task', params: { observationUuid: slotProps.data.observation_uuid } }" custom
+            v-slot="{ href }">
+            <a :href="href" target="_blank" class="flex items-center gap-2">
+              <span class="hover:underline">{{ slotProps.data.observation_uuid }}</span>
+              <i class="pi pi-external-link" style="font-size: 0.8rem" />
+            </a>
           </RouterLink>
         </Button>
       </template>

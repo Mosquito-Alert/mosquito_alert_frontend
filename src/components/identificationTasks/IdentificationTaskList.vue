@@ -1,6 +1,5 @@
 <template>
-  <DataTable :value="tasks" ref="dt" stripedRows :loading="loading" data-key="observation.uuid" row-hover
-    selectionMode="single" @rowClick="goToAnnotation">
+  <DataTable :value="tasks" ref="dt" stripedRows :loading="loading" data-key="observation.uuid">
     <!-- <template #header>
       <div style="text-align:left">
         <MultiSelect id="column_select" :modelValue="selectedColumns" :options="columns" optionLabel="header"
@@ -8,7 +7,17 @@
           placeholder="Columns" />
       </div>
     </template> -->
-    <Column field="observation.uuid" header="UUID" />
+    <Column field="observation.uuid" header="UUID">
+      <template #body="slotProps">
+        <RouterLink :to="{ name: 'identification_task', params: { observationUuid: slotProps.data.observation.uuid } }"
+          custom v-slot="{ href }">
+          <a :href="href" target="_blank" class="flex items-center gap-2">
+            <span class="hover:underline">{{ slotProps.data.observation.uuid }}</span>
+            <i class="pi pi-external-link" style="font-size: 0.8rem" />
+          </a>
+        </RouterLink>
+      </template>
+    </Column>
     <Column header="Status">
       <template #body="slotProps">
         <IdentificationTaskStatusTag :status="slotProps.data.status" />
@@ -107,10 +116,6 @@ const selectedColumns = ref(columns.value);
 const onSelectColumn = (value: Partial<ColumnProps>[]) => {
   selectedColumns.value = columns.value.filter(col => value.includes(col));
 };
-
-function goToAnnotation(event: DataTableRowClickEvent) {
-  router.push({ name: 'identification_task', params: { observationUuid: event.data.observation.uuid } });
-}
 
 
 defineExpose({
