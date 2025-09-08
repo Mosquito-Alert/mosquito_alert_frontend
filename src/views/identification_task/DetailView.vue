@@ -17,7 +17,11 @@
         <span>Identification task: </span>
         <span class="text-surface-900 dark:text-surface-0">{{ identificationTask?.observation.uuid }}</span>
       </div>
-      <div class="ml-auto">
+      <div class="flex ml-auto gap-2 items-center">
+        <Button
+          v-if="$can(identificationTask?.review == null ? 'add' : 'change', subject('Review', { 'identification_task': identificationTask }))"
+          icon="pi pi-pencil" size='small' severity="secondary" outlined @click="isReviewing = true"
+          :disabled="isReviewing" v-tooltip.top="'Edit review'" />
         <IdentificationTaskStatusTag v-if="identificationTask" :status="identificationTask?.status" />
       </div>
     </div>
@@ -164,7 +168,8 @@
     </div>
   </div>
 
-  <ReviewDialog v-if="$can('add', subject('Review', { 'identification_task': identificationTask }))"
+  <ReviewDialog
+    v-if="$can('add', subject('Review', { 'identification_task': identificationTask })) && identificationTask?.result"
     :identification-task="identificationTask" :visible="!isReviewing" :loading="isSubmittingReview || loading"
     @agree="submitReview(CreateAgreeReviewRequestAction.Agree)" @disagree="isReviewing = true" />
 

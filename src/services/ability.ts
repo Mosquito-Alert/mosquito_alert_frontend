@@ -69,29 +69,27 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   }
 
   function grantReviewPermissions(perms: ReviewPermission, countryId?: number) {
+    const countryCondition = buildCountryCondition(countryId)
+    const remappedCountryCondition = countryCondition
+      ? Object.fromEntries(
+          Object.entries(countryCondition).map(([key, value]) => [
+            `identification_task.${key}`,
+            value,
+          ]),
+        )
+      : {}
     if (perms.add) {
-      const countryCondition = buildCountryCondition(countryId)
-      const remappedCountryCondition = countryCondition
-        ? Object.fromEntries(
-            Object.entries(countryCondition).map(([key, value]) => [
-              `identification_task.${key}`,
-              value,
-            ]),
-          )
-        : {}
       can('add', 'Review', {
-        'identification_task.status': {
-          $in: [
-            IdentificationTaskStatus.Conflict,
-            IdentificationTaskStatus.Done,
-            IdentificationTaskStatus.Review,
-          ],
-        },
         'identification_task.review': null,
         ...remappedCountryCondition,
       })
     }
-    if (perms.change) can('change', 'Review', buildCountryCondition(countryId))
+    if (perms.change) {
+      can('change', 'Review', {
+        'identification_task.review': { $ne: null },
+        ...remappedCountryCondition,
+      })
+    }
     if (perms.view) can('view', 'Review', buildCountryCondition(countryId))
     if (perms.delete) can('delete', 'Review', buildCountryCondition(countryId))
   }

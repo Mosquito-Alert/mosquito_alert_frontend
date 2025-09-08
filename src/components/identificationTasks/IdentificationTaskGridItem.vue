@@ -23,7 +23,7 @@
     <figcaption v-if="task.result" class="absolute bottom-0 left-0 p-2">
       <IdentificationTaskResultTag class="bg-white/80!" :result="task.result" />
     </figcaption>
-    <figcaption v-else-if="$can('add', 'Review') && !task.review"
+    <figcaption v-else-if="$can('add', subject('Review', { 'identification_task': task }))"
       class="absolute bottom-0 left-0 p-2 flex gap-2 w-full bg-linear-to-t from-black to-transparent">
       <TaxonTreeSelect class="flex-1" placeholder="Select taxon"
         @on-change="(taxon) => taxon ? submitReview(taxon) : null" />
@@ -35,6 +35,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { subject } from '@casl/ability';
 import { useToast } from 'primevue/usetoast';
 
 import type { IdentificationTask, Taxon, IdentificationTasksApiReviewCreateRequest } from 'mosquito-alert';
