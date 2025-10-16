@@ -4,89 +4,91 @@
       <h4 class="m-0!">Identification tasks</h4>
       <AnnotationStartButton class="ml-auto" />
     </div>
+    <!-- Header panel + filter panel -->
+    <div class="flex flex-col py-4 gap-4">
+      <div class="flex flex-row">
+        <div class="flex gap-2">
+          <IconField>
+            <InputIcon class="pi pi-search" />
+            <InputText placeholder="Search by uuid or id"
+              @keydown.enter="searchValue = ($event.currentTarget as HTMLInputElement).value" />
+          </IconField>
+        </div>
+        <div class="flex items-center gap-2 ml-auto">
+          <Button :icon="showFilters ? 'pi pi-filter-fill' : 'pi pi-filter'" variant="outlined"
+            :severity="showFilters ? 'contrast' : 'secondary'" @click="showFilters = !showFilters"
+            v-tooltip.top="'Show/hide filter panel'" />
+          <Select v-model="selectedOrderBy" :options="orderByArray" optionLabel="label" variant="outlined"
+            dropdown-icon="pi pi-sort-alt" />
+          <Divider layout="vertical" class="my-0" />
+          <Button icon="pi pi-refresh" :loading="loading" severity="secondary" @click="fetchData" variant="outlined" />
+          <SelectButton v-model="layout" :options="layoutOptions" :allowEmpty="false">
+            <template #option="{ option }">
+              <i :class="[option === 'list' ? 'pi pi-list' : 'pi pi-table']" />
+            </template>
+          </SelectButton>
+        </div>
+      </div>
+      <Panel v-show="showFilters" header="Filters" class="mb-4" :pt="{
+        content: {
+          class: 'flex flex-wrap items-center gap-2'
+        },
+      }">
+        <FloatLabel variant="on">
+          <IdentificationTaskStatusMultiSelect id="status_filter" v-model="selectedIdentificationTaskStatus" />
+          <label for="status_filter">Status</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
+          <label for="taxaFilter">Taxa</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <IdentificationTaskSourceMultiSelect v-model="selectedSources" />
+          <label>Source</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <CountryMultipleSelect id="countryFilter" v-model="selectedCountries"
+            :allowedCountryIds="allowedCountryIds" />
+          <label for="countryFilter">Countries</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <Select id="num_annotations" v-model="selectedNumAnnotation" class="w-35" :options="numAnnotationOptions"
+            optionValue="value" optionLabel="label" dataKey="value" dropdown-icon="pi pi-plus-circle" showClear />
+          <label for="num_annotations">Annotations</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <IdentificationTaskReviewActionSelect id="review_action" v-model="selectedReviewAction" class="min-w-30" />
+          <label for="review_action">Review</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <Select id="is_flagged" v-model="isFlagged" :options="[true, false]" showClear />
+          <label for="is_flagged">Flag</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <DatePicker id="created_at_filter" v-model="selectedCreatedAtDateRange" showIcon iconDisplay="input"
+            :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
+          <label for="created_at_filter">Created at</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <DatePicker id="updated_at_filter" v-model="selectedUpdatedAtDateRange" showIcon iconDisplay="input"
+            :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
+          <label for="updated_at_filter">Updated at</label>
+        </FloatLabel>
+        <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
+      </Panel>
+    </div>
+
     <DataView :value="identificationTasksArray" dataKey='observation.uuid' v-model:rows="numRows"
       :total-records="identificationTasksTotalCount" :layout="layout" lazy paginator
       :rowsPerPageOptions="[5, 10, 25, 50]" @page="onPageChange"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
       currentPageReportTemplate="({totalRecords} items)">
-      <template #header>
-        <Toolbar class="mb-6 gap-2">
-          <template #start>
-            <div class="flex gap-2">
-              <ToggleButton v-model="showFilters" onLabel="Filters" offLabel="Filters" onIcon="pi pi-filter-fill"
-                offIcon="pi pi-filter" />
-              <Select v-model="selectedOrderBy" :options="orderByArray" optionLabel="label" variant="filled"
-                dropdown-icon="pi pi-sort-alt" />
-            </div>
-          </template>
-          <template #end>
-            <div class="flex gap-2">
-              <div class="flex gap-1">
-                <Button icon="pi pi-refresh" :loading="loading" @click="fetchData" />
-                <!-- <Button label="Export" icon="pi pi-upload" severity="secondary" @click="handleExport" /> -->
-              </div>
-              <SelectButton v-model="layout" :options="layoutOptions" :allowEmpty="false">
-                <template #option="{ option }">
-                  <i :class="[option === 'list' ? 'pi pi-list' : 'pi pi-table']" />
-                </template>
-              </SelectButton>
-            </div>
-          </template>
-        </Toolbar>
-        <Panel v-show="showFilters" header="Filters" class="mt-4">
-          <div class="flex gap-2">
-            <FloatLabel variant="on">
-              <IdentificationTaskStatusMultiSelect id="status_filter" v-model="selectedIdentificationTaskStatus" />
-              <label for="status_filter">Status</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
-              <label for="taxaFilter">Taxa</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <IdentificationTaskSourceMultiSelect v-model="selectedSources" />
-              <label>Source</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <CountryMultipleSelect id="countryFilter" v-model="selectedCountries"
-                :allowedCountryIds="allowedCountryIds" />
-              <label for="countryFilter">Countries</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <Select id="num_annotations" v-model="selectedNumAnnotation" class="w-35" :options="numAnnotationOptions"
-                optionValue="value" optionLabel="label" dataKey="value" dropdown-icon="pi pi-plus-circle" showClear />
-              <label for="num_annotations">Annotations</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <IdentificationTaskReviewActionSelect id="review_action" v-model="selectedReviewAction"
-                class="min-w-30" />
-              <label for="review_action">Review</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <Select id="is_flagged" v-model="isFlagged" :options="[true, false]" showClear />
-              <label for="is_flagged">Flag</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <DatePicker id="created_at_filter" v-model="selectedCreatedAtDateRange" showIcon iconDisplay="input"
-                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="created_at_filter">Created at</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <DatePicker id="updated_at_filter" v-model="selectedUpdatedAtDateRange" showIcon iconDisplay="input"
-                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="updated_at_filter">Updated at</label>
-            </FloatLabel>
-            <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
-          </div>
-        </Panel>
-      </template>
       <template #list="slotProps">
         <IdentificationTaskList ref='taskListRef' :tasks="slotProps.items" :loading="loading" />
       </template>
       <template #grid="slotProps">
         <IdentificationTaskGrid :tasks="slotProps.items" @on-change="fetchData" />
       </template>
-
     </DataView>
   </div>
 </template>
@@ -153,6 +155,7 @@ const loading = ref<boolean>(false);
 const showFilters = ref<boolean>(false);
 
 // Filters
+const searchValue = ref<string>();
 const selectedIdentificationTaskStatus = ref<IdentificationTaskStatus[]>([])
 const selectedTaxon = ref<Taxon | null>(null);
 const selectedSources = ref<IdentificationTaskResultSource[]>();
@@ -240,6 +243,7 @@ const listRequest = computed<IdentificationTasksApiListRequest>(() => ({
   resultSource: selectedSources.value || undefined,
   resultTaxonIds: selectedTaxon.value ? [selectedTaxon.value.id] : undefined,
   reviewAction: selectedReviewAction.value || undefined,
+  search: searchValue.value || undefined,
   page: pageSelected.value + 1,
   pageSize: numRows.value,
   orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
