@@ -155,7 +155,7 @@ onMounted(() => {
   fetchData();
 })
 
-const listRequest = computed(() => ({
+const listRequest = computed<IdentificationTasksApiAnnotationsListMineRequest>(() => ({
   updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
   updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
   isDecisive: isExecutive.value ?? undefined,
