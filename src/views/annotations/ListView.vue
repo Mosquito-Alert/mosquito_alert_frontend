@@ -4,59 +4,64 @@
       <h4 class="m-0!">Your annotations</h4>
       <AnnotationStartButton class="ml-auto" />
     </div>
+    <!-- Header panel + filter panel -->
+    <div class="flex flex-col py-4 gap-4">
+      <div class="flex flex-row">
+        <div class="flex gap-2">
+          <IconField>
+            <InputIcon class="pi pi-search" />
+            <InputText placeholder="Search by uuid"
+              @keydown.enter="searchValue = ($event.currentTarget as HTMLInputElement).value" />
+          </IconField>
+        </div>
+        <div class="flex items-center gap-2 ml-auto">
+          <Button :icon="showFilters ? 'pi pi-filter-fill' : 'pi pi-filter'" variant="outlined"
+            :severity="showFilters ? 'contrast' : 'secondary'" @click="showFilters = !showFilters"
+            v-tooltip.top="'Show/hide filter panel'" />
+          <Select v-model="selectedOrderBy" :options="orderByArray" optionLabel="label" variant="outlined"
+            dropdown-icon="pi pi-sort-alt" />
+          <Divider layout="vertical" class="my-0" />
+          <Button icon="pi pi-refresh" :loading="loading" severity="secondary" @click="fetchData" variant="outlined" />
+        </div>
+      </div>
+      <Panel v-show="showFilters" header="Filters" class="mb-4" :pt="{
+        content: {
+          class: 'flex flex-wrap items-center gap-2'
+        },
+      }">
+        <FloatLabel variant="on">
+          <AnnotationTypeSelect v-model="selectedType" />
+          <label for="type">Type</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
+          <label for="taxaFilter">Taxa</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <Select id="is_flagged" v-model="isFlagged" class="w-28" :options="[true, false]" showClear />
+          <label for="is_flagged">Flag</label>
+        </FloatLabel>
+        <!-- <FloatLabel variant="on">
+              <Select id="is_executive" v-model="isExecutive" class="w-28" :options="[true, false]" showClear />
+              <label for="is_executive">Executive</label>
+            </FloatLabel> -->
+        <FloatLabel variant="on">
+          <Select id="is_favourite" v-model="isFavourite" class="w-28" :options="[true, false]" showClear />
+          <label for="is_favourite">Favourite</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
+          <DatePicker id="date_filter" v-model="selectedDateRange" showIcon iconDisplay="input" :max-date="new Date()"
+            selectionMode="range" :manualInput="false" showButtonBar />
+          <label for="date_filter">Date</label>
+        </FloatLabel>
+        <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
+      </Panel>
+    </div>
+
     <DataView :value="annotationsArray" dataKey='id' v-model:rows="numRows" :total-records="annotationsTotalCount" lazy
       paginator :rowsPerPageOptions="[5, 10, 25, 50]" @page="onPageChange"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
       currentPageReportTemplate="({totalRecords} items)">
-      <template #header>
-        <Toolbar class="mb-6 gap-2">
-          <template #start>
-            <div class="flex gap-2">
-              <ToggleButton v-model="showFilters" onLabel="Filters" offLabel="Filters" onIcon="pi pi-filter-fill"
-                offIcon="pi pi-filter" />
-              <Select v-model="selectedOrderBy" :options="orderByArray" optionLabel="label" variant="filled"
-                dropdown-icon="pi pi-sort-alt" />
-            </div>
-          </template>
-          <template #end>
-            <div class="flex gap-2">
-              <div class="flex gap-1">
-                <Button icon="pi pi-refresh" :loading="loading" severity="secondary" @click="fetchData" />
-              </div>
-            </div>
-          </template>
-        </Toolbar>
-        <Panel v-show="showFilters" header="Filters" class="mt-4">
-          <div class="flex gap-2">
-            <FloatLabel variant="on">
-              <AnnotationTypeSelect v-model="selectedType" />
-              <label for="type">Type</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <TaxonTreeSelect id="taxaFilter" v-model="selectedTaxon" />
-              <label for="taxaFilter">Taxa</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <Select id="is_flagged" v-model="isFlagged" class="w-28" :options="[true, false]" showClear />
-              <label for="is_flagged">Flag</label>
-            </FloatLabel>
-            <!-- <FloatLabel variant="on">
-              <Select id="is_executive" v-model="isExecutive" class="w-28" :options="[true, false]" showClear />
-              <label for="is_executive">Executive</label>
-            </FloatLabel> -->
-            <FloatLabel variant="on">
-              <Select id="is_favourite" v-model="isFavourite" class="w-28" :options="[true, false]" showClear />
-              <label for="is_favourite">Favourite</label>
-            </FloatLabel>
-            <FloatLabel variant="on">
-              <DatePicker id="date_filter" v-model="selectedDateRange" showIcon iconDisplay="input"
-                :max-date="new Date()" selectionMode="range" :manualInput="false" showButtonBar />
-              <label for="date_filter">Date</label>
-            </FloatLabel>
-            <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
-          </div>
-        </Panel>
-      </template>
       <template #list="slotProps">
         <AnnotationDataTable ref='annotationsList' :annotations="slotProps.items" :loading="loading" />
       </template>
@@ -90,6 +95,7 @@ const loading = ref<boolean>(false);
 const showFilters = ref<boolean>(false);
 
 // Filters
+const searchValue = ref<string>();
 const selectedDateRange = ref<Date[]>();
 const isExecutive = ref<boolean>();
 const isFlagged = ref<boolean>();
@@ -149,7 +155,7 @@ onMounted(() => {
   fetchData();
 })
 
-const listRequest = computed<IdentificationTasksApiAnnotationsListMineRequest>(() => ({
+const listRequest = computed(() => ({
   updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
   updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
   isDecisive: isExecutive.value ?? undefined,
@@ -157,10 +163,11 @@ const listRequest = computed<IdentificationTasksApiAnnotationsListMineRequest>((
   isFavourite: isFavourite.value ?? undefined,
   classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
   type: selectedType.value ?? undefined,
+  search: searchValue.value || undefined,
   page: pageSelected.value + 1,
   pageSize: numRows.value,
   orderBy: selectedOrderBy.value ? [selectedOrderBy.value.value] : undefined
-}));
+}) satisfies IdentificationTasksApiAnnotationsListMineRequest);
 
 const fetchData = async () => {
   loading.value = true;
