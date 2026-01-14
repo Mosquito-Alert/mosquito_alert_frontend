@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/layout/AppLayout.vue'
 import { useUserStore } from '@/stores/userStore'
+import LegalView from '@/views/legal/LegalView.vue'
+import InfoView from '@/views/info/InfoView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,6 +12,9 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/auth/LoginView.vue'),
+      meta: {
+        requiresAuth: false,
+      },
     },
     {
       path: '/',
@@ -51,12 +56,36 @@ const router = createRouter({
         },
       ],
     },
+    // ------------------------
+    // Legal Pages
+    // ------------------------
+    {
+      path: '/:lang?/legal/:doc',
+      name: 'Legal',
+      component: LegalView,
+      props: (route) => ({ lang: route.params.lang, doc: route.params.doc }),
+      meta: {
+        requiresAuth: false,
+      },
+    },
+
+    // ------------------------
+    // Info Pages
+    // ------------------------
+    {
+      path: '/:lang?/info/:doc',
+      name: 'Info',
+      component: InfoView,
+      props: (route) => ({ lang: route.params.lang, doc: route.params.doc }),
+      meta: {
+        requiresAuth: false,
+      },
+    },
   ],
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ['login']
-  const authRequired = !publicPages.includes(to.name as string)
+  const authRequired = to.meta.requiresAuth !== false
   // Check if the user is authenticated
   const userStore = useUserStore()
   if (authRequired && !userStore.user) {

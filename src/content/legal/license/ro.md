@@ -1,0 +1,33 @@
+```
+Licență  
+
+
+
+
+
+```
+Mosquito Alert este un sistem citizen science care permite colaborarea diferiților actori în studiu, monitorizarea și controlul țânțarilor care sunt vectori ai bolilor precum dengue, Zika, chikungunya sau febra Nilului de Vest. Aplicația Mosquito Alert (fostă Tigatrapp) este o aplicație pentru telefoane mobile și tablete care permite oricui să participe la Mosquito Alert.
+
+Aplicația Mosquito Alert a fost dezvoltată de următoarele instituții: Centrul Blanes pentru Studii Avansate al Consiliului Național de Cercetare Spaniol (CEAB-CSIC), Universitatea Pompeu Fabra (UPF) și Institutul Catalan pentru Cercetare și Studii Avansate (ICREA).
+
+Codul sursă pentru aplicația Mosquito Alert este disponibil pe site-ul web al proiectului la www.mosquitoalert.com.
+
+Autori (în ordine alfabetică): Frederic Bartumeus, Berj Dekramanjian, Roger Eritja, Santi Escartin, Augustí Escobar, Joan Garriga, Misericórdia Gironés, Zviko Juznic-Zonta, Aitana Oltra, John RB Palmer, Ariadna Peña, Alex Richter-Boix, Isis Sanpera , Alex Tarragó, Marina Torres.
+
+În colaborare cu comunitatea AIM COST (https://www.aedescost.eu/) și Global Mosquito Alert (https://globalmosquitoalert.com/).
+
+Imagini de țânțari în Ghidul de țânțari al aplicației de către Roger Eritja, toate drepturile rezervate.
+
+Ilustrații de țânțari în Ghidul de țânțari și Tutorialul aplicației de către JL Ordoñez, CC BY 2.0,
+
+Pictograma de scurgere, modificată de Alex Richter, din pictograma de scurgere a bibliotecii Free Icons # 338924 (https://icon-library.net/icon/drain-icon-3.htm) Domeniu public.
+
+Mosquito Bite, modificat de Alex Richter-Boix din Mosquito Bite de Sveta_Aho, licență standard Adobe Stock
+
+Ciclul de viață, silueta telefonului mobil, desen de urmărire a fundalului, de Alex Richter-Boix, CC BY 2.0.
+
+Mosquito Alert este un software gratis: poate fi distribuită și/sau modificată sub condițiile LPG Licența Pubică Generală publicată de către Free Software Foundation (licență versiunea 3 sau mai înaltă).
+
+ 
+
+Acest program este distribuit în speranța că va fi util, dar FĂRĂ NICIO GARANȚIE; fără garanția implicată de VĂNZABILITATE sau de ADECVARE PENTRU UN SCOP PARTICULAR. Vezi LPG pentru mai multe detalii. Trebuia să primești o copie a acestuia împreună cu programul. Dacă nu, vezi la http://www.gnu.org/licenses
