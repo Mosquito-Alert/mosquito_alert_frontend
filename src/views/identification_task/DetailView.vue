@@ -100,7 +100,7 @@
             <h5 class="my-0!"><i class="pi pi-users" /> Annotations</h5>
             <!-- TODO: only if can annotate -->
             <RouterLink v-if="!userHasAnnotated && !identificationTask?.review" class='ml-auto'
-              :to="{ name: 'annotate_identification_task', params: { observationUuid: props.observationUuid } }">
+              :to="{ name: 'annotate_identification_task', params: { observationUuid: observationUuid } }">
               <!-- <Button class="ml-auto" icon="pi pi-plus" label="Add" /> -->
             </RouterLink>
           </div>
@@ -176,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { subject } from '@casl/ability';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -186,9 +186,12 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { useToast } from "primevue/usetoast";
+import { useRouteParams, useRouteQuery } from '@vueuse/router'
 
 import { identificationTasksApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
+import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
+
 import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
 import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 
@@ -206,16 +209,16 @@ import BestPhotoTag from '@/components/photos/BestPhotoTag.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 import ReviewDialog from '@/components/reviews/ReviewDialog.vue';
 import TaxonTagSelector from '@/components/taxa/TaxonTagSelector.vue';
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore();
+const identificationTaskStore = useIdentificationTaskStore()
 const toast = useToast();
+const router = useRouter();
 
-const props = withDefaults(defineProps<{
-  observationUuid: string,
-  annotating?: boolean,
-}>(), {
-  annotating: false
-})
+const observationUuid = useRouteParams<string>('observationUuid');
+const mode = useRouteQuery('mode')
+const isModeAutoPlayReview = computed(() => mode.value === 'review')
 
 const isReviewing = ref<boolean>(false);
 const isReviewNotInsect = ref<boolean>(false);
@@ -271,12 +274,6 @@ const photosWithPrediction = computed<(SimplePhoto & { prediction: PhotoPredicti
   return mappedPhotos;
 })
 
-const showCreateStepper = ref<boolean>(props.annotating);
-// Update showStepper when annotating changes
-watch(() => props.annotating, (newVal) => {
-  showCreateStepper.value = newVal
-})
-
 const responsiveOptions = ref([
   {
     breakpoint: '1300px',
@@ -288,13 +285,13 @@ const responsiveOptions = ref([
   }
 ]);
 
-onMounted(() => {
+watch(observationUuid, () => {
   fetchIdentificationTask();
-});
+}, { immediate: true })
 
 function fetchIdentificationTask() {
   loading.value = true;
-  identificationTasksApi.retrieve({ observationUuid: props.observationUuid }).then(
+  identificationTasksApi.retrieve({ observationUuid: observationUuid.value }).then(
     (response) => {
       identificationTask.value = response.data || undefined;
       loading.value = false;
@@ -307,7 +304,7 @@ function fetchIdentificationTask() {
 
 function fetchAnnotations() {
   loading.value = true;
-  identificationTasksApi.annotationsList({ observationUuid: props.observationUuid, orderBy: [IdentificationtasksListOrderByParameter.CreatedAt,] }).then(
+  identificationTasksApi.annotationsList({ observationUuid: observationUuid.value, orderBy: [IdentificationtasksListOrderByParameter.CreatedAt,] }).then(
     (response) => {
       annotations.value = response.data.results || [];
       loading.value = false;
@@ -320,7 +317,7 @@ function fetchAnnotations() {
 
 function fetchPhotoPredictions() {
   loading.value = true;
-  identificationTasksApi.predictionsList({ observationUuid: props.observationUuid }).then(
+  identificationTasksApi.predictionsList({ observationUuid: observationUuid.value }).then(
     (response) => {
       photoPredictions.value = response.data.results || [];
       loading.value = false;
@@ -368,8 +365,34 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
   isSubmittingReview.value = true;
   identificationTasksApi.reviewCreate(request).then(() => {
     toast.add({ severity: 'success', summary: 'Success', detail: 'Review submitted successfully.', life: 5000 });
-    fetchIdentificationTask();
     isReviewing.value = false;
+    if (isModeAutoPlayReview.value) {
+      identificationTaskStore.fetchNextIdentificationTasksToReview().then(() => {
+        const identificationTaskToReview = identificationTaskStore.identificationTaskToReview
+        if (identificationTaskToReview) {
+          router.push({
+            name: 'identification_task',
+            params: {
+              observationUuid: identificationTaskToReview.observation.uuid
+            },
+            query: {
+              mode: mode.value
+            }
+          });
+        } else {
+          toast.add(
+            { severity: 'info', summary: 'No more tasks available to review', detail: 'No more identification tasks available to review at the moment', life: 3000 }
+          )
+          // No more tasks to review, exit review mode
+          isReviewing.value = false;
+        }
+      }).catch((error) => {
+        console.error('Error fetching next task to review:', error);
+        toast.add({ severity: 'error', summary: 'Error', detail: 'There was an error fetching the next task to review.', life: 5000 });
+      });
+    } else {
+      fetchIdentificationTask();
+    }
   }).catch((error) => {
     console.error('Error submitting review:', error);
     toast.add({ severity: 'error', summary: 'Error', detail: 'There was an error submitting the review.', life: 5000 });

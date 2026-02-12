@@ -42,7 +42,6 @@ const router = createRouter({
                   path: '',
                   name: 'identification_task',
                   component: () => import('@/views/identification_task/DetailView.vue'),
-                  props: true,
                 },
                 {
                   path: 'annotations/new',
