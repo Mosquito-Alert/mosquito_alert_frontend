@@ -2,6 +2,7 @@
   <div class="card">
     <div class="flex flex-row">
       <h4 class="m-0!">Identification tasks</h4>
+      <ReviewStartButton class="ml-auto" />
       <AnnotationStartButton class="ml-auto" />
     </div>
     <!-- Header panel + filter panel -->
@@ -116,6 +117,7 @@ import type { IdentificationTasksApiListRequest } from 'mosquito-alert';
 import { useAbility } from '@casl/vue';
 import type { AppAbility } from '@/services/ability';
 import IdentificationTaskReviewActionSelect from '@/components/identificationTasks/IdentificationTaskReviewActionSelect.vue';
+import ReviewStartButton from '@/components/reviews/ReviewStartButton.vue';
 
 const ability = useAbility<AppAbility>();
 

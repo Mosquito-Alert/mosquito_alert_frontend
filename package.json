@@ -19,6 +19,7 @@
     "@primeuix/themes": "^1.0.3",
     "@primevue/forms": "^4.3.4",
     "@tailwindcss/vite": "^4.1.4",
+    "@vueuse/router": "^14.2.1",
     "@websitebeaver/vue-magnifier": "^1.1.0",
     "dayjs": "^1.11.13",
     "dompurify": "^3.3.1",
@@ -31,7 +32,7 @@
     "tailwindcss": "^4.1.4",
     "tailwindcss-primeui": "^0.6.1",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@primevue/auto-import-resolver": "^4.3.3",
