@@ -187,6 +187,8 @@ dayjs.extend(timezone);
 
 import { useToast } from "primevue/usetoast";
 import { useRouteParams, useRouteQuery } from '@vueuse/router'
+import { useRouter } from 'vue-router'
+
 
 import { identificationTasksApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
@@ -197,6 +199,7 @@ import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
+import { IdentificationTaskDetailViewMode } from '@/enums/IdentificationTaskDetailViewMode';
 import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
 import IdentificationTaskIsSafeTag from '@/components/identificationTasks/IdentificationTaskIsSafeTag.vue';
 import IdentificationTaskIsSafeSelect from '@/components/identificationTasks/IdentificationTaskIsSafeSelect.vue';
@@ -209,7 +212,6 @@ import BestPhotoTag from '@/components/photos/BestPhotoTag.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 import ReviewDialog from '@/components/reviews/ReviewDialog.vue';
 import TaxonTagSelector from '@/components/taxa/TaxonTagSelector.vue';
-import { useRouter } from 'vue-router'
 
 const userStore = useUserStore();
 const identificationTaskStore = useIdentificationTaskStore()
@@ -217,8 +219,7 @@ const toast = useToast();
 const router = useRouter();
 
 const observationUuid = useRouteParams<string>('observationUuid');
-const mode = useRouteQuery('mode')
-const isModeAutoPlayReview = computed(() => mode.value === 'review')
+const mode = useRouteQuery<IdentificationTaskDetailViewMode>('mode')
 
 const isReviewing = ref<boolean>(false);
 const isReviewNotInsect = ref<boolean>(false);
@@ -366,7 +367,7 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
   identificationTasksApi.reviewCreate(request).then(() => {
     toast.add({ severity: 'success', summary: 'Success', detail: 'Review submitted successfully.', life: 5000 });
     isReviewing.value = false;
-    if (isModeAutoPlayReview.value) {
+    if (mode.value === IdentificationTaskDetailViewMode.Review) {
       identificationTaskStore.fetchNextIdentificationTasksToReview().then(() => {
         const identificationTaskToReview = identificationTaskStore.identificationTaskToReview
         if (identificationTaskToReview) {
@@ -376,7 +377,7 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
               observationUuid: identificationTaskToReview.observation.uuid
             },
             query: {
-              mode: mode.value
+              mode: IdentificationTaskDetailViewMode.Review
             }
           });
         } else {

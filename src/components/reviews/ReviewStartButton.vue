@@ -8,7 +8,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router'
 
 import { useToast } from "primevue/usetoast";
-
+import { IdentificationTaskDetailViewMode } from '@/enums/IdentificationTaskDetailViewMode';
 import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
 
 const router = useRouter()
@@ -38,7 +38,7 @@ const onStartReviewClicked = async () => {
         observationUuid: identificationTaskToReview.observation.uuid
       },
       query: {
-        mode: 'review'
+        mode: IdentificationTaskDetailViewMode.Review
       }
     })
   } else {
