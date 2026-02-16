@@ -76,7 +76,12 @@
         </div>
       </li>
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">Public note</div>
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">
+          Public note
+          <Button v-if="editIdentificationTask" icon="pi pi-sparkles" label="Generate" severity="help"
+            @click="generatePublicNote()" rounded variant="outlined" :disabled="!editIdentificationTask!.result?.taxon"
+            size="small" />
+        </div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
           <template v-if="isReviewing">
             <Textarea fluid autoResize v-model="editIdentificationTask!.public_note" />
@@ -198,6 +203,7 @@ import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, Iden
 import { SpeciesClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
+import { getPublicNote } from '@/utils/AnnotationUtils';
 
 import { IdentificationTaskDetailViewMode } from '@/enums/IdentificationTaskDetailViewMode';
 import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
@@ -402,5 +408,16 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
   });
 
 }
+
+const generatePublicNote = () => {
+  if (editIdentificationTask.value!.result?.taxon) {
+    // TODO: support multiple languages
+    editIdentificationTask.value!.public_note = getPublicNote(
+      editIdentificationTask.value!.result!.taxon,
+      editIdentificationTask.value!.result!.is_high_confidence,
+      'en'
+    );
+  }
+};
 
 </script>

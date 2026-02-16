@@ -1,10 +1,10 @@
-import type { Taxon, TaxonTreeNode } from 'mosquito-alert'
+import type { Taxon, SimpleTaxon, TaxonTreeNode } from 'mosquito-alert'
 
 import { useTaxaStore } from '@/stores/taxaStore'
 
 const taxaStore = useTaxaStore()
 
-export function getTaxonAncestors(taxon: Taxon): TaxonTreeNode[] | null {
+export function getTaxonAncestors(taxon: Taxon | SimpleTaxon): TaxonTreeNode[] | null {
   const path: TaxonTreeNode[] = []
 
   function dfs(node: TaxonTreeNode): boolean {

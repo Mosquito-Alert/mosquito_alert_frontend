@@ -1,5 +1,5 @@
 import { MinimalUserLocale } from 'mosquito-alert'
-import type { Taxon, TaxonTreeNode } from 'mosquito-alert'
+import type { Taxon, TaxonTreeNode, SimpleTaxon } from 'mosquito-alert'
 import { getTaxonAncestors } from '@/utils/TaxonUtils'
 
 const messages: Record<
@@ -630,7 +630,7 @@ const messages: Record<
 }
 
 export function getPublicNote(
-  taxon: Taxon,
+  taxon: Taxon | SimpleTaxon,
   isHighConfidence: boolean,
   locale: MinimalUserLocale,
 ): string {
