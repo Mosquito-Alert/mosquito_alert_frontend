@@ -25,7 +25,7 @@
       </div>
     </template>
     <template #icons>
-      <TaxonClassificationTag :classification="annotation.classification" />
+      <TaxonClassificationTag :classification="annotation.classification" :sex="annotation.characteristics?.sex" />
     </template>
     <div class="flex mb-2">
       <div class="flex ml-auto gap-1">
