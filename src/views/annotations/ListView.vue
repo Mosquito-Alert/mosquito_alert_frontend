@@ -38,6 +38,14 @@
           <label for="taxaFilter">Taxa</label>
         </FloatLabel>
         <FloatLabel variant="on">
+          <Select id="sex" v-model="selectedSex" class="w-34" :options="[
+            IdentificationtasksAnnotationsListCharacteristicsSexParameter.Female,
+            IdentificationtasksAnnotationsListCharacteristicsSexParameter.Male,
+            IdentificationtasksAnnotationsListCharacteristicsSexParameter.Null
+          ]" showClear />
+          <label for="sex">Sex</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
           <Select id="is_flagged" v-model="isFlagged" class="w-28" :options="[true, false]" showClear />
           <label for="is_flagged">Flag</label>
         </FloatLabel>
@@ -75,7 +83,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import type { DataViewPageEvent } from 'primevue/dataview'
 
-import { IdentificationtasksListOrderByParameter, AnnotationType } from 'mosquito-alert';
+import { IdentificationtasksListOrderByParameter, AnnotationType, IdentificationtasksAnnotationsListCharacteristicsSexParameter } from 'mosquito-alert';
 import type { Annotation, IdentificationTasksApiAnnotationsListMineRequest, Taxon } from 'mosquito-alert';
 
 import AnnotationDataTable from '@/components/annotations/AnnotationDataTable.vue';
@@ -102,6 +110,7 @@ const isFlagged = ref<boolean>();
 const isFavourite = ref<boolean>();
 const selectedTaxon = ref<Taxon | null>(null);
 const selectedType = ref<AnnotationType>();
+const selectedSex = ref<IdentificationtasksAnnotationsListCharacteristicsSexParameter>();
 
 const numRows = ref<number>(25);
 const onPageChange = (event: DataViewPageEvent) => {
@@ -130,6 +139,7 @@ function clearFilters() {
   isFlagged.value = undefined;
   isFavourite.value = undefined;
   selectedTaxon.value = null;
+  selectedSex.value = undefined;
   selectedType.value = undefined;
 }
 
@@ -147,7 +157,7 @@ onMounted(() => {
   isExecutive.value = q.isDecisive ? Boolean(JSON.parse(q.isDecisive as string)) : undefined;
   isFlagged.value = q.isFlagged ? Boolean(JSON.parse(q.isFlagged as string)) : undefined;
   isFavourite.value = q.isFavourite ? Boolean(JSON.parse(q.isFavourite as string)) : undefined;
-
+  selectedSex.value = q.sex ? (q.sex as IdentificationtasksAnnotationsListCharacteristicsSexParameter) : undefined;
   pageSelected.value = q.page ? Number(q.page) - 1 : 0
   numRows.value = q.pageSize ? Number(q.pageSize) : 25
 
@@ -162,6 +172,7 @@ const listRequest = computed<IdentificationTasksApiAnnotationsListMineRequest>((
   isFlagged: isFlagged.value ?? undefined,
   isFavourite: isFavourite.value ?? undefined,
   classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
+  characteristicsSex: selectedSex.value ?? undefined,
   type: selectedType.value ?? undefined,
   search: searchValue.value || undefined,
   page: pageSelected.value + 1,

@@ -1,5 +1,5 @@
 <template>
-  <TaxonClassificationTag :classification="result">
+  <TaxonClassificationTag :classification="result" :sex="result.characteristics?.sex">
     <div
       class="flex absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 origin-[100%_0%] m-0 outline-2 outline-solid outline-white text-surface-900 bg-white justify-items-center items-center p-1 rounded-full">
       <i v-if='result.source === IdentificationTaskResultSource.Ai' class="pi pi-microchip-ai"

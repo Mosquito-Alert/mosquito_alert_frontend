@@ -33,7 +33,8 @@
 
       <Column header="Classification">
         <template #body="slotProps">
-          <TaxonClassificationTag :classification="slotProps.data.classification" />
+          <TaxonClassificationTag :classification="slotProps.data.classification"
+            :sex="slotProps.data.characteristics?.sex" />
         </template>
       </Column>
       <Column field="is_flagged" header="Is flagged" dataType="boolean" style="min-width: 6rem">

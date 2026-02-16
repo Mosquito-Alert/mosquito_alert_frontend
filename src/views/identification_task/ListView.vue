@@ -44,6 +44,14 @@
           <label for="taxaFilter">Taxa</label>
         </FloatLabel>
         <FloatLabel variant="on">
+          <Select id="sex" v-model="selectedSex" class="w-34" :options="[
+            IdentificationtasksListResultCharacteristicsSexParameter.Female,
+            IdentificationtasksListResultCharacteristicsSexParameter.Male,
+            IdentificationtasksListResultCharacteristicsSexParameter.Null
+          ]" showClear />
+          <label for="sex">Sex</label>
+        </FloatLabel>
+        <FloatLabel variant="on">
           <IdentificationTaskSourceMultiSelect v-model="selectedSources" />
           <label>Source</label>
         </FloatLabel>
@@ -110,7 +118,7 @@ import TaxonTreeSelect from '@/components/taxa/TaxonTreeSelect.vue';
 import { identificationTasksApi } from '@/services/apiService';
 
 import type { IdentificationTask, IdentificationTaskResultSource, IdentificationtasksListReviewActionParameter, Country, Taxon } from 'mosquito-alert';
-import { IdentificationTaskStatus } from 'mosquito-alert';
+import { IdentificationTaskStatus, IdentificationtasksListResultCharacteristicsSexParameter } from 'mosquito-alert';
 import { IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 import type { IdentificationTasksApiListRequest } from 'mosquito-alert';
 
@@ -160,6 +168,7 @@ const showFilters = ref<boolean>(false);
 const searchValue = ref<string>();
 const selectedIdentificationTaskStatus = ref<IdentificationTaskStatus[]>([])
 const selectedTaxon = ref<Taxon | null>(null);
+const selectedSex = ref<IdentificationtasksListResultCharacteristicsSexParameter>();
 const selectedSources = ref<IdentificationTaskResultSource[]>();
 const selectedCountries = ref<Country[]>();
 const selectedCountryIds = computed<number[]>(() => {
@@ -181,6 +190,7 @@ const selectedUpdatedAtDateRange = ref<Date[]>();
 function clearFilters() {
   selectedIdentificationTaskStatus.value = [];
   selectedTaxon.value = null;
+  selectedSex.value = undefined;
   selectedSources.value = [];
   selectedCountries.value = [];
   selectedNumAnnotation.value = undefined;
@@ -226,6 +236,8 @@ onMounted(() => {
 
   isFlagged.value = q.isFlagged ? Boolean(JSON.parse(q.isFlagged as string)) : undefined;
 
+  selectedSex.value = q.sex ? (q.sex as IdentificationtasksListResultCharacteristicsSexParameter) : undefined;
+
   pageSelected.value = q.page ? Number(q.page) - 1 : 0
   numRows.value = q.pageSize ? Number(q.pageSize) : 25
 
@@ -244,6 +256,7 @@ const listRequest = computed<IdentificationTasksApiListRequest>(() => ({
   observationCountryIds: selectedCountryIds.value || undefined,
   resultSource: selectedSources.value || undefined,
   resultTaxonIds: selectedTaxon.value ? [selectedTaxon.value.id] : undefined,
+  resultCharacteristicsSex: selectedSex.value ?? undefined,
   reviewAction: selectedReviewAction.value || undefined,
   search: searchValue.value || undefined,
   page: pageSelected.value + 1,

@@ -71,8 +71,46 @@
             </div>
           </template>
           <template v-else>
-            <IdentificationTaskResultTag v-if="identificationTask?.result" :result="identificationTask?.result" />
+            <IdentificationTaskResultTag v-if="identificationTask?.result" :result="identificationTask?.result"
+              :sex="identificationTask?.result.characteristics?.sex" />
           </template>
+        </div>
+      </li>
+      <li v-if="isReviewing" class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">Characteristics</div>
+        <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
+          <div class="flex flex-col gap-2 w-full">
+            <div class="flex items-center w-full">
+              <AnnotationSexRadioButton :model-value="editIdentificationTask!.result?.characteristics?.sex ?? null"
+                @update:model-value="val => {
+                  if (val === null) {
+                    editIdentificationTask!.result!.characteristics = null;
+                  } else {
+                    editIdentificationTask!.result!.characteristics = { sex: val };
+                  }
+                }" class="w-full" />
+              <div class="flex h-full transition-all duration-500 ease-in-out overflow-hidden"
+                :class="{ 'w-0': editIdentificationTask!.result?.characteristics?.sex !== SpeciesCharacteristicsSex.Female, 'w-full': editIdentificationTask!.result?.characteristics?.sex === SpeciesCharacteristicsSex.Female }">
+                <Divider layout="vertical" />
+                <div v-show="editIdentificationTask!.result?.characteristics?.sex === SpeciesCharacteristicsSex.Female"
+                  class="flex justify-center items-center w-full">
+                  <div class="flex flex-col gap-2 w-full">
+                    <div class="flex row items-center gap-2">
+                      <label>Is blood fed?</label>
+                      <ToggleSwitch
+                        :model-value="editIdentificationTask!.result!.characteristics?.is_blood_fed ?? false"
+                        @update:model-value="val => editIdentificationTask!.result!.characteristics!.is_blood_fed = val" />
+                    </div>
+                    <div class="flex row items-center gap-2">
+                      <label>Is gravid?</label>
+                      <ToggleSwitch :model-value="editIdentificationTask!.result!.characteristics?.is_gravid ?? false"
+                        @update:model-value="val => editIdentificationTask!.result!.characteristics!.is_gravid = val" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </li>
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
@@ -200,7 +238,7 @@ import { useUserStore } from '@/stores/userStore';
 import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
 
 import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
-import { SpeciesClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter } from 'mosquito-alert';
+import { SpeciesClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter, SpeciesCharacteristicsSex } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
 import { getPublicNote } from '@/utils/AnnotationUtils';
@@ -218,6 +256,7 @@ import BestPhotoTag from '@/components/photos/BestPhotoTag.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 import ReviewDialog from '@/components/reviews/ReviewDialog.vue';
 import TaxonTagSelector from '@/components/taxa/TaxonTagSelector.vue';
+import AnnotationSexRadioButton from '@/components/annotations/AnnotationSexRadioButton.vue';
 
 const userStore = useUserStore();
 const identificationTaskStore = useIdentificationTaskStore()
@@ -242,6 +281,8 @@ watch(isReviewing, (newValue) => {
 });
 
 watch(isReviewNotInsect, (newValue) => {
+  if (!editIdentificationTask.value) return;
+
   if (newValue) {
     editIdentificationTask.value!.result!.taxon = null
   } else {
@@ -358,6 +399,11 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
           confidence_label: editIdentificationTask.value!.result.is_high_confidence
             ? SpeciesClassificationConfidenceLabel.Definitely
             : SpeciesClassificationConfidenceLabel.Probably
+        } : null,
+        characteristics: editIdentificationTask.value!.result?.characteristics ? {
+          sex: editIdentificationTask.value!.result.characteristics.sex,
+          is_blood_fed: editIdentificationTask.value!.result.characteristics.is_blood_fed,
+          is_gravid: editIdentificationTask.value!.result.characteristics.is_gravid,
         } : null,
       };
       break;
