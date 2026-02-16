@@ -14,10 +14,10 @@
 
 <script setup lang="ts">
 
-import type { IdentificationTaskResult, AnnotationClassification } from 'mosquito-alert';
+import type { IdentificationTaskResult, SpeciesClassification } from 'mosquito-alert';
 
 defineProps<{
-  classification: IdentificationTaskResult | AnnotationClassification | null,
+  classification: IdentificationTaskResult | SpeciesClassification | null,
 }>()
 
 </script>

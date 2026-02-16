@@ -195,7 +195,7 @@ import { useUserStore } from '@/stores/userStore';
 import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
 
 import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
-import { AnnotationClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter } from 'mosquito-alert';
+import { SpeciesClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
 
@@ -347,11 +347,11 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
         public_photo_uuid: editIdentificationTask.value!.public_photo.uuid,
         is_safe: editIdentificationTask.value!.is_safe,
         public_note: editIdentificationTask.value!.public_note,
-        result: editIdentificationTask.value!.result?.taxon ? {
+        classification: editIdentificationTask.value!.result?.taxon ? {
           taxon_id: editIdentificationTask.value!.result.taxon!.id,
           confidence_label: editIdentificationTask.value!.result.is_high_confidence
-            ? AnnotationClassificationConfidenceLabel.Definitely
-            : AnnotationClassificationConfidenceLabel.Probably
+            ? SpeciesClassificationConfidenceLabel.Definitely
+            : SpeciesClassificationConfidenceLabel.Probably
         } : null,
       };
       break;

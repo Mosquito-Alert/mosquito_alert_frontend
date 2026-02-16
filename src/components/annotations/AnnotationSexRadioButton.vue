@@ -18,25 +18,25 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
-import { AnnotationCharacteristicsSex } from 'mosquito-alert';
+import { SpeciesCharacteristicsSex } from 'mosquito-alert';
 
 defineProps({
   modelValue: {
-    type: String as PropType<AnnotationCharacteristicsSex | null>,
+    type: String as PropType<SpeciesCharacteristicsSex | null>,
     required: false,
   },
 })
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: AnnotationCharacteristicsSex | null): void
+  (e: 'update:modelValue', value: SpeciesCharacteristicsSex | null): void
 }>()
 
-const updateValue = (value: AnnotationCharacteristicsSex | null) => {
+const updateValue = (value: SpeciesCharacteristicsSex | null) => {
   emit('update:modelValue', value)
 }
 
-const options: { value: AnnotationCharacteristicsSex | null; label: string; icon: string }[] = [
+const options: { value: SpeciesCharacteristicsSex | null; label: string; icon: string }[] = [
   { value: null, label: 'Unknown', icon: 'pi pi-question' },
-  { value: AnnotationCharacteristicsSex.Male, label: 'Male', icon: 'pi pi-mars' },
-  { value: AnnotationCharacteristicsSex.Female, label: 'Female', icon: 'pi pi-venus' },
+  { value: SpeciesCharacteristicsSex.Male, label: 'Male', icon: 'pi pi-mars' },
+  { value: SpeciesCharacteristicsSex.Female, label: 'Female', icon: 'pi pi-venus' },
 ]
 </script>

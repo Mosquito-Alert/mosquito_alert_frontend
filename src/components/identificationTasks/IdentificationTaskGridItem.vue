@@ -39,7 +39,7 @@ import { subject } from '@casl/ability';
 import { useToast } from 'primevue/usetoast';
 
 import type { IdentificationTask, Taxon, IdentificationTasksApiReviewCreateRequest } from 'mosquito-alert';
-import { AnnotationClassificationConfidenceLabel, CreateOverwriteReviewRequestAction } from 'mosquito-alert';
+import { SpeciesClassificationConfidenceLabel, CreateOverwriteReviewRequestAction } from 'mosquito-alert';
 
 import CountryTag from '@/components/countries/CountryTag.vue';
 import AnnotationNotAnInsectButton from '@/components/annotations/AnnotationNotAnInsectButton.vue';
@@ -73,9 +73,9 @@ const submitReview = (taxon: Taxon | null) => {
       public_photo_uuid: props.task.public_photo.uuid,
       is_safe: taxon != null,
       public_note: taxon ? getPublicNote(taxon, true, 'en') : null, // TODO: get locale from user.
-      result: taxon ? {
+      classification: taxon ? {
         taxon_id: taxon.id,
-        confidence_label: AnnotationClassificationConfidenceLabel.Definitely
+        confidence_label: SpeciesClassificationConfidenceLabel.Definitely
       } : null,
     }
   }

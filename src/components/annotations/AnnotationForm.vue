@@ -115,8 +115,8 @@ import { useToast } from 'primevue/usetoast';
 
 import { subject } from '@casl/ability';
 
-import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, AnnotationClassificationRequest, AnnotationFeedbackRequest, AnnotationCharacteristicsRequest } from 'mosquito-alert';
-import { AnnotationType, AnnotationClassificationConfidenceLabel, AnnotationCharacteristicsSex } from 'mosquito-alert';
+import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, SpeciesClassificationRequest, AnnotationFeedbackRequest, SpeciesCharacteristicsRequest } from 'mosquito-alert';
+import { AnnotationType, SpeciesClassificationConfidenceLabel, SpeciesCharacteristicsSex } from 'mosquito-alert';
 
 import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from './AnnotationSexRadioButton.vue';
@@ -132,7 +132,7 @@ const tagInputFieldRef = ref();
 const isHighConfidence = ref<boolean>(false);
 const isExecutive = ref<boolean>(false);
 const selectedTaxon = ref<Taxon>();
-const selectedSex = ref<AnnotationCharacteristicsSex | null | undefined>(undefined);
+const selectedSex = ref<SpeciesCharacteristicsSex | null | undefined>(undefined);
 const selectedTags = ref<string[]>([]);
 const publicNote = ref<string>();
 
@@ -171,7 +171,7 @@ watch(
   selectedSex,
   (newSex) => {
     if (!form.value) return
-    if (newSex !== AnnotationCharacteristicsSex.Female) {
+    if (newSex !== SpeciesCharacteristicsSex.Female) {
       form.value.setFieldValue('bloodFed', false)
       form.value.setFieldValue('isGravid', false)
     }
@@ -187,7 +187,7 @@ const isExtended = computed(() => {
 });
 
 const isFemale = computed(() => {
-  return selectedSex.value === AnnotationCharacteristicsSex.Female;
+  return selectedSex.value === SpeciesCharacteristicsSex.Female;
 })
 
 const isInternalNoteRequired = computed(() =>
@@ -237,17 +237,17 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
     isSubmitting.value = true;
     const annotationRequest = <AnnotationRequest>{
       best_photo_uuid: props.bestPhoto?.uuid,
-      classification: <AnnotationClassificationRequest>{
+      classification: <SpeciesClassificationRequest>{
         taxon_id: selectedTaxon.value!.id,
         confidence_label: values.isHighConfidence
-          ? AnnotationClassificationConfidenceLabel.Definitely
-          : AnnotationClassificationConfidenceLabel.Probably
+          ? SpeciesClassificationConfidenceLabel.Definitely
+          : SpeciesClassificationConfidenceLabel.Probably
       },
       feedback: {
         public_note: isExtended.value ? publicNote.value : null,
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
-      characteristics: isExtended.value ? <AnnotationCharacteristicsRequest>{
+      characteristics: isExtended.value ? <SpeciesCharacteristicsRequest>{
         sex: selectedSex.value,
         blood_fed: values.bloodFed || false,
         is_gravid: values.isGravid || false
