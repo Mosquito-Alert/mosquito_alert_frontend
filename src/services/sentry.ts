@@ -10,7 +10,7 @@ import { apiUrl } from './apiService'
 export function initSentry(app: App, router: Router, pinia: Pinia) {
   Sentry.init({
     app,
-    dsn: import.meta.env.SENTRY_DSN,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
     // Adds request headers and IP for users, for more info visit:
     // https://docs.sentry.io/platforms/javascript/guides/vue/configuration/options/#sendDefaultPii
     sendDefaultPii: true,

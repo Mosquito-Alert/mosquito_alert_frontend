@@ -61,7 +61,7 @@ jobs:
           cp .env.example .env.local
 
           # Override with environment-specific secrets from GitHub
-          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
+          echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.local
 
       - name: Build and push Docker image
