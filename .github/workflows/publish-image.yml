@@ -55,6 +55,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Generate .env file from secrets
+        run: |
+          # Copy non-sensitive defaults from .env.example
+          cp .env.example .env.local
+
+          # Override with environment-specific secrets from GitHub
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env.local
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:

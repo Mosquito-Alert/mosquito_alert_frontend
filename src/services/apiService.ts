@@ -9,12 +9,15 @@ import {
   TaxaApi,
   UsersApi,
 } from 'mosquito-alert'
+import { BASE_PATH } from 'mosquito-alert/base'
 import { attachAuthInterceptor } from 'mosquito-alert/interceptors'
 
 const apiConfig = new Configuration({
   ...(import.meta.env.VITE_API_BASE_URL ? { basePath: import.meta.env.VITE_API_BASE_URL } : {}),
   accessToken: () => localStorage.getItem('access_token') || '',
 })
+
+export const apiUrl = apiConfig.basePath || BASE_PATH
 
 const axiosInstance = axios.create({})
 attachAuthInterceptor(axiosInstance, {

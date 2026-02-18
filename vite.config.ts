@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
@@ -12,7 +13,14 @@ import { PrimeVueResolver } from '@primevue/auto-import-resolver'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development'
+
+  // load .env files based on current mode
+  const env = loadEnv(mode, process.cwd(), '')
+
   return {
+    build: {
+      sourcemap: true, // Source map generation must be turned on
+    },
     server: {
       ...(isDev && {
         proxy: {
@@ -32,6 +40,12 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       Components({
         resolvers: [PrimeVueResolver()],
+      }),
+      // Put the Sentry vite plugin after all other plugins
+      sentryVitePlugin({
+        authToken: env.SENTRY_AUTH_TOKEN,
+        org: 'mosquito-alert',
+        project: 'mosquito_alert_frontend',
       }),
     ],
     resolve: {

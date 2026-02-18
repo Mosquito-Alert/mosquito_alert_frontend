@@ -22,9 +22,12 @@ import { useUserStore } from './stores/userStore'
 import { useAuthStore } from './stores/authStore'
 import { usePermissionsStore } from './stores/permissionsStore'
 
+import { initSentry } from './services/sentry'
+
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 // Initialize the user on app start
 
 const MosquitoAlertPreset = definePreset(Aura, {
@@ -59,6 +62,8 @@ app.use(PrimeVue, {
 app.use(ToastService)
 app.use(ConfirmationService)
 app.directive('focustrap', FocusTrap)
+
+initSentry(app, router, pinia)
 
 async function initUser() {
   const userStore = useUserStore()
