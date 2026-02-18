@@ -57,8 +57,7 @@ jobs:
 
       - name: Generate .env file from secrets
         run: |
-          # Copy non-sensitive defaults from .env.example
-          cp .env.example .env.local
+          touch .env.local
 
           # Override with environment-specific secrets from GitHub
           echo "VITE_SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
