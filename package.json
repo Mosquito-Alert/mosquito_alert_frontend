@@ -18,6 +18,8 @@
     "@casl/vue": "^2.2.2",
     "@primeuix/themes": "^1.0.3",
     "@primevue/forms": "^4.3.4",
+    "@sentry/vite-plugin": "^4.9.1",
+    "@sentry/vue": "^10.39.0",
     "@tailwindcss/vite": "^4.1.4",
     "@vueuse/router": "^14.2.1",
     "@websitebeaver/vue-magnifier": "^1.1.0",
