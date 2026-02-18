@@ -2,8 +2,10 @@
   <div class="card">
     <div class="flex flex-row">
       <h4 class="m-0!">Identification tasks</h4>
-      <ReviewStartButton class="ml-auto" />
-      <AnnotationStartButton class="ml-auto" />
+      <div class="flex flex-row ml-auto gap-2">
+        <ReviewStartButton />
+        <AnnotationStartButton />
+      </div>
     </div>
     <!-- Header panel + filter panel -->
     <div class="flex flex-col py-4 gap-4">
