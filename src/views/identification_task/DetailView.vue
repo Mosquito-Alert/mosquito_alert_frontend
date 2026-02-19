@@ -19,9 +19,9 @@
       </div>
       <div class="flex ml-auto gap-2 items-center">
         <Button
-          v-if="$can(identificationTask?.review == null ? 'add' : 'change', subject('Review', { 'identification_task': identificationTask }))"
+          v-if="!isReviewing && $can(identificationTask?.review == null ? 'add' : 'change', subject('Review', { 'identification_task': identificationTask }))"
           icon="pi pi-pencil" size='small' severity="secondary" outlined @click="isReviewing = true"
-          :disabled="isReviewing" v-tooltip.top="'Edit review'" />
+          v-tooltip.top="'Edit review'" />
         <IdentificationTaskStatusTag v-if="identificationTask" :status="identificationTask?.status" />
       </div>
     </div>
