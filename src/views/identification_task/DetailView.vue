@@ -76,7 +76,8 @@
           </template>
         </div>
       </li>
-      <li v-if="isReviewing" class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
+      <li v-if="isReviewing && !isReviewNotInsect"
+        class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
         <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">Characteristics</div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
           <div class="flex flex-col gap-2 w-full">
@@ -300,6 +301,7 @@ watch(isReviewNotInsect, (newValue) => {
 
   if (newValue) {
     editIdentificationTask.value!.result.taxon = null
+    editIdentificationTask.value!.result.characteristics = null;
   } else {
     editIdentificationTask.value!.result.taxon = identificationTask?.value!.result?.taxon || null;
   }
