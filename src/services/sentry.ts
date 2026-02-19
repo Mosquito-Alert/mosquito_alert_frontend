@@ -23,6 +23,7 @@ export function initSentry(app: App, router: Router, pinia: Pinia) {
     tracesSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
     tracePropagationTargets: ['localhost', apiUrl],
+    environment: import.meta.env.MODE,
   })
 
   pinia.use(createSentryPiniaPlugin())
