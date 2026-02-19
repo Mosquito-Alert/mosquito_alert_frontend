@@ -46,11 +46,11 @@
           <template v-if="isReviewing">
             <div class="flex flex-col gap-2 w-full">
               <div class="flex gap-2">
-                <TaxonTagSelector :model-value="editIdentificationTask!.result?.taxon"
-                  @update:model-value="val => editIdentificationTask!.result!.taxon = <SimpleTaxon>val"
+                <TaxonTagSelector :model-value="editIdentificationTask!.result.taxon"
+                  @update:model-value="val => editIdentificationTask!.result.taxon = <SimpleTaxon>val"
                   :disabled="isReviewNotInsect">
                   <template #selectedIcon>
-                    <i v-if="editIdentificationTask!.result?.is_high_confidence"
+                    <i v-if="editIdentificationTask!.result.is_high_confidence"
                       class="pi pi-angle-double-up text-green-700" />
                   </template>
                 </TaxonTagSelector>
@@ -58,13 +58,13 @@
               <div class="flex flex-row">
                 <div class="flex flex-row items-center gap-2">
                   <span>High confidence?</span>
-                  <ToggleSwitch :model-value="editIdentificationTask!.result?.is_high_confidence"
-                    @update:model-value="val => editIdentificationTask!.result!.is_high_confidence = val"
+                  <ToggleSwitch :model-value="editIdentificationTask!.result.is_high_confidence"
+                    @update:model-value="val => editIdentificationTask!.result.is_high_confidence = val"
                     :disabled="isReviewNotInsect" />
                 </div>
                 <div class="flex flex-row items-center gap-2 ml-auto">
                   <span :class="isReviewNotInsect ? 'text-red-500' : ''">Not an insect</span>
-                  <ToggleSwitch :model-value="editIdentificationTask!.result?.taxon == null"
+                  <ToggleSwitch :model-value="editIdentificationTask!.result.taxon == null"
                     @update:model-value="val => isReviewNotInsect = val" />
                 </div>
               </div>
@@ -81,30 +81,29 @@
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
           <div class="flex flex-col gap-2 w-full">
             <div class="flex items-center w-full">
-              <AnnotationSexRadioButton :model-value="editIdentificationTask!.result?.characteristics?.sex ?? null"
+              <AnnotationSexRadioButton :model-value="editIdentificationTask!.result.characteristics?.sex ?? null"
                 @update:model-value="val => {
                   if (val === null) {
-                    editIdentificationTask!.result!.characteristics = null;
+                    editIdentificationTask!.result.characteristics = null;
                   } else {
-                    editIdentificationTask!.result!.characteristics = { sex: val };
+                    editIdentificationTask!.result.characteristics = { sex: val };
                   }
                 }" class="w-full" />
               <div class="flex h-full transition-all duration-500 ease-in-out overflow-hidden"
-                :class="{ 'w-0': editIdentificationTask!.result?.characteristics?.sex !== SpeciesCharacteristicsSex.Female, 'w-full': editIdentificationTask!.result?.characteristics?.sex === SpeciesCharacteristicsSex.Female }">
+                :class="{ 'w-0': editIdentificationTask!.result.characteristics?.sex !== SpeciesCharacteristicsSex.Female, 'w-full': editIdentificationTask!.result.characteristics?.sex === SpeciesCharacteristicsSex.Female }">
                 <Divider layout="vertical" />
-                <div v-show="editIdentificationTask!.result?.characteristics?.sex === SpeciesCharacteristicsSex.Female"
+                <div v-show="editIdentificationTask!.result.characteristics?.sex === SpeciesCharacteristicsSex.Female"
                   class="flex justify-center items-center w-full">
                   <div class="flex flex-col gap-2 w-full">
                     <div class="flex row items-center gap-2">
                       <label>Is blood fed?</label>
-                      <ToggleSwitch
-                        :model-value="editIdentificationTask!.result!.characteristics?.is_blood_fed ?? false"
-                        @update:model-value="val => editIdentificationTask!.result!.characteristics!.is_blood_fed = val" />
+                      <ToggleSwitch :model-value="editIdentificationTask!.result.characteristics?.is_blood_fed ?? false"
+                        @update:model-value="val => editIdentificationTask!.result.characteristics!.is_blood_fed = val" />
                     </div>
                     <div class="flex row items-center gap-2">
                       <label>Is gravid?</label>
-                      <ToggleSwitch :model-value="editIdentificationTask!.result!.characteristics?.is_gravid ?? false"
-                        @update:model-value="val => editIdentificationTask!.result!.characteristics!.is_gravid = val" />
+                      <ToggleSwitch :model-value="editIdentificationTask!.result.characteristics?.is_gravid ?? false"
+                        @update:model-value="val => editIdentificationTask!.result.characteristics!.is_gravid = val" />
                     </div>
                   </div>
                 </div>
@@ -117,7 +116,7 @@
         <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">
           Public note
           <Button v-if="editIdentificationTask" icon="pi pi-sparkles" label="Generate" severity="help"
-            @click="generatePublicNote()" rounded variant="outlined" :disabled="!editIdentificationTask!.result?.taxon"
+            @click="generatePublicNote()" rounded variant="outlined" :disabled="!editIdentificationTask!.result.taxon"
             size="small" />
         </div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
@@ -269,24 +268,40 @@ const mode = useRouteQuery<IdentificationTaskDetailViewMode>('mode')
 const isReviewing = ref<boolean>(false);
 const isReviewNotInsect = ref<boolean>(false);
 const isSubmittingReview = ref<boolean>(false);
-const editIdentificationTask = ref<IdentificationTask>();
+const editIdentificationTask = ref<IdentificationTask & { result: NonNullable<IdentificationTask['result']> }>();
 
 watch(isReviewing, (newValue) => {
   if (identificationTask.value && newValue) {
-    editIdentificationTask.value = JSON.parse(JSON.stringify(identificationTask.value));
+    // Clone the original object
+    const cloned = JSON.parse(JSON.stringify(identificationTask.value)) as IdentificationTask
+
+    // Ensure result is always set
+    editIdentificationTask.value = {
+      ...cloned,
+      result: cloned.result ?? {
+        source: IdentificationTaskResultSource.Expert,
+        taxon: null,
+        is_high_confidence: false,
+        confidence: 0,
+        confidence_label: 'probably',
+        uncertainty: 1,
+        agreement: 0,
+        characteristics: null,
+      },
+    }
   } else {
     editIdentificationTask.value = undefined;
   }
-  isReviewNotInsect.value = editIdentificationTask.value?.result?.taxon == null;
+  isReviewNotInsect.value = editIdentificationTask.value?.result.taxon == null;
 });
 
 watch(isReviewNotInsect, (newValue) => {
   if (!editIdentificationTask.value) return;
 
   if (newValue) {
-    editIdentificationTask.value!.result!.taxon = null
+    editIdentificationTask.value!.result.taxon = null
   } else {
-    editIdentificationTask.value!.result!.taxon = identificationTask?.value!.result?.taxon || null;
+    editIdentificationTask.value!.result.taxon = identificationTask?.value!.result?.taxon || null;
   }
   editIdentificationTask.value!.is_safe = !newValue
 });
@@ -394,13 +409,13 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
         public_photo_uuid: editIdentificationTask.value!.public_photo.uuid,
         is_safe: editIdentificationTask.value!.is_safe,
         public_note: editIdentificationTask.value!.public_note,
-        classification: editIdentificationTask.value!.result?.taxon ? {
+        classification: editIdentificationTask.value!.result.taxon ? {
           taxon_id: editIdentificationTask.value!.result.taxon!.id,
           confidence_label: editIdentificationTask.value!.result.is_high_confidence
             ? SpeciesClassificationConfidenceLabel.Definitely
             : SpeciesClassificationConfidenceLabel.Probably
         } : null,
-        characteristics: editIdentificationTask.value!.result?.characteristics ? {
+        characteristics: editIdentificationTask.value!.result.characteristics ? {
           sex: editIdentificationTask.value!.result.characteristics.sex,
           is_blood_fed: editIdentificationTask.value!.result.characteristics.is_blood_fed,
           is_gravid: editIdentificationTask.value!.result.characteristics.is_gravid,
@@ -456,11 +471,11 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
 }
 
 const generatePublicNote = () => {
-  if (editIdentificationTask.value!.result?.taxon) {
+  if (editIdentificationTask.value!.result.taxon) {
     // TODO: support multiple languages
     editIdentificationTask.value!.public_note = getPublicNote(
-      editIdentificationTask.value!.result!.taxon,
-      editIdentificationTask.value!.result!.is_high_confidence,
+      editIdentificationTask.value!.result.taxon,
+      editIdentificationTask.value!.result.is_high_confidence,
       'en'
     );
   }
