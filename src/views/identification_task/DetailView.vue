@@ -379,13 +379,13 @@ function fetchPhotoPredictions() {
 async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverwriteReviewRequestAction) {
   if (!identificationTask.value) return;
 
-  let metaRequest: CreateAgreeReviewRequest | CreateOverwriteReviewRequest;
+  let metaRequest: MetaCreateIdentificationTaskReviewRequest;
   switch (action) {
     case CreateAgreeReviewRequestAction.Agree:
       // Handle agree action
       metaRequest = {
         action: CreateAgreeReviewRequestAction.Agree,
-      };
+      } satisfies CreateAgreeReviewRequest;
       break;
     case CreateOverwriteReviewRequestAction.Overwrite:
       // Handle overwrite action
@@ -405,7 +405,7 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
           is_blood_fed: editIdentificationTask.value!.result.characteristics.is_blood_fed,
           is_gravid: editIdentificationTask.value!.result.characteristics.is_gravid,
         } : null,
-      };
+      } satisfies CreateOverwriteReviewRequest;
       break;
     default:
       throw new Error(`Unknown action: ${action}`);
@@ -413,7 +413,7 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
 
   const request: IdentificationTasksApiReviewCreateRequest = {
     observationUuid: identificationTask.value.observation.uuid,
-    metaCreateIdentificationTaskReviewRequest: metaRequest as MetaCreateIdentificationTaskReviewRequest
+    metaCreateIdentificationTaskReviewRequest: metaRequest
   }
   isSubmittingReview.value = true;
   identificationTasksApi.reviewCreate(request).then(() => {
