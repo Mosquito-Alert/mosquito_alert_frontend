@@ -25,7 +25,16 @@ const location = ref<{ latitude: number, longitude: number }>();
 
 watch(() => props.photo.url, async (newUrl) => {
   if (newUrl) {
-    location.value = await exifr.gps(newUrl);
+    const gps = await exifr.gps(newUrl);
+    if (
+      gps &&
+      Number.isFinite(gps.latitude) &&
+      Number.isFinite(gps.longitude)
+    ) {
+      location.value = gps
+    } else {
+      location.value = undefined
+    }
   }
 }, { immediate: true });
 </script>
