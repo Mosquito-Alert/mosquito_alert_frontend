@@ -5,11 +5,11 @@
         rate_review
       </span>
     </template>
-    <span>
-      The reviewer has <strong>
-        {{ review.action == IdentificationTaskReviewAction.Agree ? 'agreed' : 'disagreed' }}
-      </strong>
-      with the result.
+    <span v-if="review.action == IdentificationTaskReviewAction.Agree">
+      The reviewer has <strong>agreed</strong> with the result.
+    </span>
+    <span v-else>
+      The reviewer has <strong>forced</strong> the final result.
     </span>
   </Message>
 </template>
