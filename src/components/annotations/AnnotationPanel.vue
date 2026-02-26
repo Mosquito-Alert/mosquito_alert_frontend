@@ -6,15 +6,8 @@
         <span class="font-bold">{{ annotation?.user.full_name || annotation?.user.username }}</span>
         <AnnotationTypeTag v-if="annotation.type === AnnotationType.Long" :type="annotation.type" />
         <Tag v-if="annotation?.is_flagged" icon="pi pi-flag" severity="danger" value="Flagged" rounded />
-        <Tag v-if="annotation?.is_decisive" severity="contrast" value="Executive" rounded
-          v-tooltip.top="'This annotation determines the final identification task result.'">
-          <template #icon>
-            <!-- <i class="fa fa-gavel" /> -->
-            <span class="material-symbols-outlined p-tag-icon">
-              gavel
-            </span>
-          </template>
-        </Tag>
+        <AnnotationDecisionLevelTag v-if="annotation.decision_level !== AnnotationDecisionLevel.Normal"
+          :decision_level="annotation.decision_level" />
       </div>
     </template>
     <template #footer>
@@ -52,10 +45,11 @@
 <script setup lang="ts">
 
 import type { Annotation } from 'mosquito-alert';
-import { AnnotationType } from 'mosquito-alert';
+import { AnnotationDecisionLevel, AnnotationType } from 'mosquito-alert';
 import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
 import UserAvatar from '../users/UserAvatar.vue';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
+import AnnotationDecisionLevelTag from './AnnotationDecisionLevelTag.vue';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
 

@@ -13,7 +13,6 @@ import {
   type Country,
   type IdentificationTask,
   CountryPermissionRole,
-  IdentificationTaskStatus,
 } from 'mosquito-alert'
 
 type Actions = 'add' | 'view' | 'change' | 'delete'
@@ -49,12 +48,12 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
     }
     if (perms.delete) can('delete', 'Annotation', buildCountryCondition(countryId))
 
-    if (perms.mark_as_decisive) {
-      can('change', 'Annotation', ['is_decisive'], buildCountryCondition(countryId))
-      can('change', 'IdentificationTask', ['is_decisive'], buildCountryCondition(countryId))
+    if (perms.mark_as_executive) {
+      can('change', 'Annotation', ['is_executive'], buildCountryCondition(countryId))
+      can('change', 'IdentificationTask', ['is_executive'], buildCountryCondition(countryId))
     } else {
-      cannot('change', 'Annotation', ['is_decisive'], buildCountryCondition(countryId))
-      cannot('change', 'IdentificationTask', ['is_decisive'], buildCountryCondition(countryId))
+      cannot('change', 'Annotation', ['is_executive'], buildCountryCondition(countryId))
+      cannot('change', 'IdentificationTask', ['is_executive'], buildCountryCondition(countryId))
     }
   }
 

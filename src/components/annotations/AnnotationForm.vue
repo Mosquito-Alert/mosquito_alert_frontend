@@ -14,7 +14,7 @@
           <Message v-if="$field?.invalid" severity="error" size="small" variant="simple">{{ $field.error?.message }}
           </Message>
         </FormField>
-        <FormField v-if="$can('change', annotationSubject, 'is_decisive')" v-slot="$field" name="isExecutive"
+        <FormField v-if="$can('change', annotationSubject, 'is_executive')" v-slot="$field" name="isExecutive"
           :initial-value="false" class="flex ml-auto items-center gap-2">
           <label>Is executive?</label>
           <ToggleSwitch v-model="isExecutive" :disabled="isFlagged" />
@@ -253,7 +253,7 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
         is_gravid: values.isGravid || false
       } : undefined,
       is_flagged: props.isFlagged,
-      is_decisive: isExecutive.value,
+      is_executive: isExecutive.value,
       observation_flags: {
         is_favourite: props.isFavourite,
         is_visible: props.isVisible

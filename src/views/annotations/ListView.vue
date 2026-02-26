@@ -49,10 +49,14 @@
           <Select id="is_flagged" v-model="isFlagged" class="w-28" :options="[true, false]" showClear />
           <label for="is_flagged">Flag</label>
         </FloatLabel>
-        <!-- <FloatLabel variant="on">
-              <Select id="is_executive" v-model="isExecutive" class="w-28" :options="[true, false]" showClear />
-              <label for="is_executive">Executive</label>
-            </FloatLabel> -->
+        <FloatLabel variant="on">
+          <Select id="decision_level" v-model="decisionLevel" class="w-40" :options="[
+            AnnotationDecisionLevel.Normal,
+            AnnotationDecisionLevel.Executive,
+            AnnotationDecisionLevel.Final
+          ]" showClear />
+          <label for="decision_level">Decision level</label>
+        </FloatLabel>
         <FloatLabel variant="on">
           <Select id="is_favourite" v-model="isFavourite" class="w-28" :options="[true, false]" showClear />
           <label for="is_favourite">Favourite</label>
@@ -83,7 +87,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import type { DataViewPageEvent } from 'primevue/dataview'
 
-import { IdentificationtasksListOrderByParameter, AnnotationType, IdentificationtasksAnnotationsListCharacteristicsSexParameter } from 'mosquito-alert';
+import { IdentificationtasksListOrderByParameter, AnnotationType, AnnotationDecisionLevel, IdentificationtasksAnnotationsListCharacteristicsSexParameter } from 'mosquito-alert';
 import type { Annotation, IdentificationTasksApiAnnotationsListMineRequest, Taxon } from 'mosquito-alert';
 
 import AnnotationDataTable from '@/components/annotations/AnnotationDataTable.vue';
@@ -105,7 +109,7 @@ const showFilters = ref<boolean>(false);
 // Filters
 const searchValue = ref<string>();
 const selectedDateRange = ref<Date[]>();
-const isExecutive = ref<boolean>();
+const decisionLevel = ref<AnnotationDecisionLevel>();
 const isFlagged = ref<boolean>();
 const isFavourite = ref<boolean>();
 const selectedTaxon = ref<Taxon | null>(null);
@@ -135,7 +139,7 @@ const annotationsArray = ref<Annotation[]>([]);
 
 function clearFilters() {
   selectedDateRange.value = undefined;
-  isExecutive.value = undefined;
+  decisionLevel.value = undefined;
   isFlagged.value = undefined;
   isFavourite.value = undefined;
   selectedTaxon.value = null;
@@ -154,7 +158,7 @@ onMounted(() => {
     ] as Date[];
   }
 
-  isExecutive.value = q.isDecisive ? Boolean(JSON.parse(q.isDecisive as string)) : undefined;
+  decisionLevel.value = q.decisionLevel ? (q.decisionLevel as AnnotationDecisionLevel) : undefined;
   isFlagged.value = q.isFlagged ? Boolean(JSON.parse(q.isFlagged as string)) : undefined;
   isFavourite.value = q.isFavourite ? Boolean(JSON.parse(q.isFavourite as string)) : undefined;
   selectedSex.value = q.sex ? (q.sex as IdentificationtasksAnnotationsListCharacteristicsSexParameter) : undefined;
@@ -168,7 +172,7 @@ onMounted(() => {
 const listRequest = computed<IdentificationTasksApiAnnotationsListMineRequest>(() => ({
   updatedAtAfter: selectedDateRange.value && selectedDateRange.value.length > 1 ? selectedDateRange.value[0].toISOString() : undefined,
   updatedAtBefore: selectedDateRange.value && selectedDateRange.value.length > 1 ? new Date(new Date(selectedDateRange.value[1]).setDate(selectedDateRange.value[1].getDate() + 1)).toISOString() : undefined,
-  isDecisive: isExecutive.value ?? undefined,
+  decisionLevel: decisionLevel.value ? [decisionLevel.value,] : undefined,
   isFlagged: isFlagged.value ?? undefined,
   isFavourite: isFavourite.value ?? undefined,
   classificationTaxonIds: selectedTaxon.value?.id ? [selectedTaxon.value.id] : undefined,
