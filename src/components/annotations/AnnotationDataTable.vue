@@ -43,12 +43,11 @@
             :class="{ 'pi-check-circle text-green-500': slotProps.data.is_flagged, 'pi-times-circle text-red-400': !slotProps.data.is_flagged }" />
         </template>
       </Column>
-      <!-- <Column field="is_decisive" header="Is executive" dataType="boolean" style="min-width: 6rem">
-      <template #body="slotProps">
-        <i class="pi"
-          :class="{ 'pi-check-circle text-green-500': slotProps.data.is_decisive, 'pi-times-circle text-red-400': !slotProps.data.is_decisive }" />
-      </template>
-    </Column> -->
+      <Column header="Decision level">
+        <template #body="slotProps">
+          <AnnotationDecisionLevelTag :decision_level="slotProps.data.decision_level" />
+        </template>
+      </Column>
       <Column field="is_favourite" header="Is Favourite" dataType="boolean" style="min-width: 6rem">
         <template #body="slotProps">
           <i class="pi"
@@ -74,6 +73,7 @@ import { ref } from 'vue';
 import type { Annotation } from 'mosquito-alert';
 import { formatLocalDateTime } from '@/utils/DateUtils';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
+import AnnotationDecisionLevelTag from './AnnotationDecisionLevelTag.vue';
 import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
 
 defineProps<{
