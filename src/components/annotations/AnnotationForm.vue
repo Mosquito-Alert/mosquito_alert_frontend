@@ -247,7 +247,7 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
         public_note: isExtended.value ? publicNote.value : null,
         internal_note: values.internalNote
       } as AnnotationFeedbackRequest,
-      characteristics: isExtended.value ? <SpeciesCharacteristicsRequest>{
+      characteristics: isExtended.value && selectedSex.value ? <SpeciesCharacteristicsRequest>{
         sex: selectedSex.value,
         blood_fed: values.bloodFed || false,
         is_gravid: values.isGravid || false
