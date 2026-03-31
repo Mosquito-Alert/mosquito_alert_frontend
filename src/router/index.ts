@@ -53,6 +53,24 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: 'messages',
+          children: [
+            {
+              path: '',
+              name: 'list_messages',
+              component: () => import('@/views/messages/ListView.vue'),
+            },
+            {
+              path: ':messageId',
+              name: 'message_detail',
+              component: () => import('@/views/messages/DetailView.vue'),
+              props: (route) => ({
+                messageId: Number(route.params.messageId),
+              }),
+            },
+          ],
+        },
       ],
     },
     // ------------------------

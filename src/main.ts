@@ -8,6 +8,7 @@ import { definePreset } from '@primeuix/themes'
 import ConfirmationService from 'primevue/confirmationservice'
 import ToastService from 'primevue/toastservice'
 import FocusTrap from 'primevue/focustrap'
+import DialogService from 'primevue/dialogservice'
 
 import App from './App.vue'
 import router from './router'
@@ -61,6 +62,7 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(ConfirmationService)
+app.use(DialogService)
 app.directive('focustrap', FocusTrap)
 
 initSentry(app, router, pinia)

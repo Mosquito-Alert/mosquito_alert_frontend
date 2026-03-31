@@ -7,7 +7,7 @@ export function getInitials(fullName: string): string {
     .join('')
 }
 
-export function getLanguageName(localeCode: string): string | undefined {
+export function getLanguageName(localeCode: string): string {
   // Create a DisplayNames instance for languages, using English as the display language
   const displayNames = new Intl.DisplayNames(['en'], { type: 'language' })
 
@@ -15,5 +15,5 @@ export function getLanguageName(localeCode: string): string | undefined {
   // but Intl.DisplayNames expects just the language part like 'fr', so extract that
   const languageCode = localeCode.split('-')[0]
 
-  return displayNames.of(languageCode)
+  return displayNames.of(languageCode) || localeCode
 }

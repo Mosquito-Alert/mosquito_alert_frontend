@@ -134,7 +134,11 @@
   <div class="grid grid-cols-12 gap-8">
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
-        <h5>Observation</h5>
+        <div class="flex flex-row items-center">
+          <h5>Observation</h5>
+          <Button v-if="$can('add', 'Message')" severity="secondary" class="ml-auto" icon="pi pi-send" rounded
+            @click="openMessageCreateDialog()" v-tooltip.top="'Send message to user'" />
+        </div>
         <ObservationInfoData v-if="identificationTask?.observation" :observation="identificationTask?.observation" />
       </div>
       <div class="card">
@@ -233,7 +237,7 @@ import { useRouteParams, useRouteQuery } from '@vueuse/router'
 import { useRouter } from 'vue-router'
 
 
-import { identificationTasksApi } from '@/services/apiService';
+import { identificationTasksApi, userApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
 import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
 
@@ -251,12 +255,16 @@ import IdentificationTaskResultTag from '@/components/identificationTasks/Identi
 import IdentificationTaskReviewTag from '@/components/identificationTasks/IdentificationTaskReviewTag.vue';
 import IdentificationTaskReviewActionMessage from '@/components/identificationTasks/IdentificationTaskReviewActionMessage.vue';
 import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
+import MessagesCreateForm from '@/components/messages/MessagesCreateForm.vue'
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
 import BestPhotoTag from '@/components/photos/BestPhotoTag.vue';
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
 import ReviewDialog from '@/components/reviews/ReviewDialog.vue';
 import TaxonTagSelector from '@/components/taxa/TaxonTagSelector.vue';
 import AnnotationSexRadioButton from '@/components/annotations/AnnotationSexRadioButton.vue';
+import { useDialog } from 'primevue/usedialog';
+
+const dialog = useDialog();
 
 const userStore = useUserStore();
 const identificationTaskStore = useIdentificationTaskStore()
@@ -482,5 +490,20 @@ const generatePublicNote = () => {
     );
   }
 };
+
+function openMessageCreateDialog() {
+  userApi.retrieve({ uuid: identificationTask.value!.observation.user_uuid }).then((response) => {
+    dialog.open(MessagesCreateForm, {
+      data: {
+        initialRecipients: [response.data],
+        disableRecipientSelect: true,
+      },
+      props: {
+        header: 'Send message to the user',
+      }
+    }
+    )
+  })
+}
 
 </script>

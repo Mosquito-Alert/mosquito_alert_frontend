@@ -4,6 +4,7 @@
 <template>
   <Toast />
   <ConfirmPopup />
+  <DynamicDialog />
   <router-view />
 </template>
 

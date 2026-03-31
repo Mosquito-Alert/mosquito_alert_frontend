@@ -23,6 +23,9 @@ const model = ref<MenuItem[]>([
       ...(ability.rulesFor('view', 'IdentificationTask').length > 0
         ? [{ label: 'Identification tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } }]
         : []),
+      ...(ability.rulesFor('view', 'Message').length > 0
+        ? [{ label: 'Messages', icon: 'pi pi-fw pi-inbox', to: { name: 'list_messages' } }]
+        : []),
     ]
   },
 ]);

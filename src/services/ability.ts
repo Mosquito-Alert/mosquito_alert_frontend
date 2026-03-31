@@ -9,9 +9,11 @@ import {
   type AnnotationPermission,
   type IdentificationTaskPermission,
   type ReviewPermission,
+  type MessagePermission,
   type Annotation,
   type Country,
   type IdentificationTask,
+  type Message,
   CountryPermissionRole,
 } from 'mosquito-alert'
 
@@ -20,11 +22,12 @@ type Subjects =
   | Annotation
   | Country
   | IdentificationTask
+  | Message
   | 'Annotation'
   | 'Review'
   | 'Country'
   | 'IdentificationTask'
-
+  | 'Message'
 export type AppAbility = MongoAbility<[Actions, Subjects | ForcedSubject<Exclude<Subjects, 'all'>>]>
 
 export default function defineAbilityFor(userPermission: UserPermission | null) {
@@ -93,6 +96,13 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
     if (perms.delete) can('delete', 'Review', buildCountryCondition(countryId))
   }
 
+  function grantMessagePermissions(perms: MessagePermission) {
+    if (perms.add) can('add', 'Message')
+    if (perms.change) can('change', 'Message')
+    if (perms.view) can('view', 'Message')
+    if (perms.delete) can('delete', 'Message')
+  }
+
   function buildCountryCondition(countryId?: number) {
     return countryId ? { 'observation.location.country.id': countryId } : undefined
   }
@@ -103,6 +113,7 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   const annotationPerms = general.permissions.annotation ?? {}
   const taskPerms = general.permissions.identification_task ?? {}
   const reviewPerms = general.permissions.review ?? {}
+  const messagePerms = general.permissions.message ?? {}
 
   if (general?.is_staff) {
     can('view', 'Annotation')
@@ -113,6 +124,7 @@ export default function defineAbilityFor(userPermission: UserPermission | null) 
   grantAnnotationPermissions(general.role, annotationPerms)
   grantIdentificationTaskPermissions(taskPerms)
   grantReviewPermissions(reviewPerms)
+  grantMessagePermissions(messagePerms)
 
   for (const { country, permissions, role } of countries) {
     const countryId = country.id
