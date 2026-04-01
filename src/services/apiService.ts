@@ -5,6 +5,7 @@ import {
   Configuration,
   CountriesApi,
   IdentificationTasksApi,
+  MessagesApi,
   PermissionsApi,
   TaxaApi,
   UsersApi,
@@ -33,6 +34,7 @@ export const identificationTasksApi = new IdentificationTasksApi(
   undefined,
   axiosInstance,
 )
+export const messagesApi = new MessagesApi(apiConfig, undefined, axiosInstance)
 export const permissionsApi = new PermissionsApi(apiConfig, undefined, axiosInstance)
 export const taxaApi = new TaxaApi(apiConfig, undefined, axiosInstance)
 export const userApi = new UsersApi(apiConfig, undefined, axiosInstance)
