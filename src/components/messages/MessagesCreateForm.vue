@@ -86,6 +86,8 @@ const TOPIC_LANGUAGES = ['bg', 'bn', 'ca', 'de', 'el', 'en', 'es', 'eu', 'fr', '
 
 const toast = useToast();
 
+const emit = defineEmits(['onMessageSent']);
+
 // Store messages per language
 const userRecipients = ref<User[] | null>(null);
 const topicRecipient = ref<MessageTopic | null>(null);
@@ -254,10 +256,14 @@ async function handleSend() {
         }
       });
     }
-    toast.add({ severity: 'success', summary: 'Message sent', detail: 'Your message has been sent successfully.' });
+    toast.add({ severity: 'success', summary: 'Message sent', detail: 'Your message has been sent successfully.', life: 3000 });
+    // Emit event to parent to refresh message list
+    emit('onMessageSent');
+    // Close dialog
+    dialogRef?.value?.close();
   } catch (error) {
     console.error('Error sending message:', error);
-    toast.add({ severity: 'error', summary: 'Message not sent', detail: 'There was an error sending your message.' });
+    toast.add({ severity: 'error', summary: 'Message not sent', detail: 'There was an error sending your message.', life: 3000 });
   }
 }
 

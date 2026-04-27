@@ -34,7 +34,7 @@
   </div>
 
   <Dialog v-model:visible="showSendMessageDialog" modal header="Send message">
-    <MessagesCreateForm />
+    <MessagesCreateForm @onMessageSent="showSendMessageDialog = false; fetchData()" />
   </Dialog>
 </template>
 <script setup lang="ts">
