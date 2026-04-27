@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="flex flex-row">
-      <h4 class="m-0!">Your annotations</h4>
+      <h4 class="m-0!">My annotations</h4>
       <AnnotationStartButton class="ml-auto" />
     </div>
     <!-- Header panel + filter panel -->

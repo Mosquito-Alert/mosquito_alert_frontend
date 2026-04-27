@@ -71,7 +71,7 @@ const onFormSubmit = ({ valid, values }: { valid: boolean, values: Record<string
       if (nextPath) {
         router.push(nextPath as string);
       } else {
-        router.push({ name: 'list_annotations' });
+        router.push({ name: 'list_identification_tasks' });
       }
     }).catch(() => {
       isInvalid.value = true;

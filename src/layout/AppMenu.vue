@@ -17,17 +17,22 @@ const model = ref<MenuItem[]>([
   {
     label: 'Annotation tool',
     items: [
-      ...(ability.rulesFor('view', 'Annotation').length > 0
-        ? [{ label: 'Annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } }]
-        : []),
       ...(ability.rulesFor('view', 'IdentificationTask').length > 0
         ? [{ label: 'Identification tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } }]
         : []),
+      ...(ability.rulesFor('view', 'Annotation').length > 0
+        ? [{ label: 'My annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } }]
+        : []),
+    ]
+  },
+  ...(ability.rulesFor('view', 'Message').length > 0 ? [{
+    label: 'Messaging',
+    items: [
       ...(ability.rulesFor('view', 'Message').length > 0
         ? [{ label: 'Messages', icon: 'pi pi-fw pi-inbox', to: { name: 'list_messages' } }]
         : []),
     ]
-  },
+  }] : []),
 ]);
 </script>
 
