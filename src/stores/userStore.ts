@@ -3,6 +3,7 @@ import type { RawAxiosRequestConfig } from 'axios'
 
 import { userApi } from '@/services/apiService'
 import { usePermissionsStore } from './permissionsStore'
+import { useWorkspaceStore } from './workspaceStore'
 import type { User } from 'mosquito-alert'
 
 export const useUserStore = defineStore('user', {
@@ -25,12 +26,22 @@ export const useUserStore = defineStore('user', {
       } catch (error) {
         console.log('Failed to fetch permissions:', error)
       }
+      try {
+        const workspaceStore = useWorkspaceStore()
+        await workspaceStore.fetchWorkspaces()
+        await workspaceStore.fetchWorkspaceCollaborationGroups()
+      } catch (error) {
+        console.log('Failed to fetch workspaces or collaboration groups:', error)
+      }
     },
     clearUser() {
       this.user = null
 
       const permissionsStore = usePermissionsStore()
       permissionsStore.clearPermissions()
+
+      const workspaceStore = useWorkspaceStore()
+      workspaceStore.clear()
     },
   },
 })

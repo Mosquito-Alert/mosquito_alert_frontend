@@ -18,10 +18,8 @@
         <span class="text-surface-900 dark:text-surface-0">{{ identificationTask?.observation.uuid }}</span>
       </div>
       <div class="flex ml-auto gap-2 items-center">
-        <Button
-          v-if="!isReviewing && $can(identificationTask?.review == null ? 'add' : 'change', subject('Review', { 'identification_task': identificationTask }))"
-          icon="pi pi-pencil" size='small' severity="secondary" outlined @click="isReviewing = true"
-          v-tooltip.top="'Edit review'" />
+        <Button v-if="!isReviewing && capabilities?.review" icon="pi pi-pencil" size='small' severity="secondary"
+          outlined @click="isReviewing = true" v-tooltip.top="'Edit review'" />
         <IdentificationTaskStatusTag v-if="identificationTask" :status="identificationTask?.status" />
       </div>
     </div>
@@ -215,16 +213,14 @@
     </div>
   </div>
 
-  <ReviewDialog
-    v-if="$can('add', subject('Review', { 'identification_task': identificationTask })) && identificationTask?.result"
-    :identification-task="identificationTask" :visible="!isReviewing" :loading="isSubmittingReview || loading"
+  <ReviewDialog v-if="capabilities?.review && identificationTask?.result" :identification-task="identificationTask"
+    :visible="!isReviewing" :loading="isSubmittingReview || loading"
     @agree="submitReview(CreateAgreeReviewRequestAction.Agree)" @disagree="isReviewing = true" />
 
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { subject } from '@casl/ability';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -241,7 +237,7 @@ import { identificationTasksApi, userApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
 import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
 
-import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon } from 'mosquito-alert';
+import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon, IdentificationTaskCapabilities } from 'mosquito-alert';
 import { SpeciesClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter, SpeciesCharacteristicsSex } from 'mosquito-alert';
 
 import { formatLocalDateTime } from '@/utils/DateUtils';
@@ -318,11 +314,13 @@ watch(isReviewNotInsect, (newValue) => {
 
 const numVisible = ref(7);
 const loading = ref<boolean>(false);
+const capabilities = ref<IdentificationTaskCapabilities>();
 const identificationTask = ref<IdentificationTask>();
 const annotations = ref<Annotation[]>([]);
 const photoPredictions = ref<PhotoPrediction[]>([]);
 
 watch(identificationTask, () => {
+  fetchCapabilities();
   fetchAnnotations();
   fetchPhotoPredictions();
 })
@@ -367,6 +365,21 @@ function fetchIdentificationTask() {
   identificationTasksApi.retrieve({ observationUuid: observationUuid.value }).then(
     (response) => {
       identificationTask.value = response.data || undefined;
+      loading.value = false;
+    }
+  ).catch((error) => {
+    console.error(error);
+    loading.value = false;  // Ensure loading is set to false even if there is an error
+  });
+}
+
+function fetchCapabilities() {
+  if (!identificationTask.value) return;
+
+  loading.value = true;
+  identificationTasksApi.capabilitiesRetrieve({ observationUuid: identificationTask.value.observation.uuid }).then(
+    (response) => {
+      capabilities.value = response.data;
       loading.value = false;
     }
   ).catch((error) => {

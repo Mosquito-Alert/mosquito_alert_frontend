@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col flex-1 h-[calc(100dvh-8rem)]">
-    <AnnotationCreator v-if="assignment" class="flex-1 h-px w-full" :assignment="assignment" :loading="loading"
-      @on-start-annotation="annotationStarted = true" @on-cancel-annotation="annotationStarted = false"
-      @on-submit-annotation="onSubmitAnnotation" />
+    <AnnotationCreator v-if="assignment" class="flex-1 h-px w-full" :assignment="assignment"
+      :capabilities="identificationTaskCapabilities" :loading="loading" @on-start-annotation="annotationStarted = true"
+      @on-cancel-annotation="annotationStarted = false" @on-submit-annotation="onSubmitAnnotation" />
   </div>
 </template>
 
@@ -12,10 +12,11 @@ import { useRouter, useRoute } from 'vue-router';
 
 import { useToast } from "primevue/usetoast";
 
-import type { Assignment } from 'mosquito-alert';
+import type { Assignment, IdentificationTaskCapabilities } from 'mosquito-alert';
 
 import AnnotationCreator from '@/components/annotations/AnnotationCreator.vue';
 import { useAssignmentStore } from '@/stores/assignmentStore';
+import { identificationTasksApi } from '@/services/apiService';
 
 const router = useRouter();
 const route = useRoute();
@@ -24,6 +25,7 @@ const toast = useToast();
 
 const assignmentStore = useAssignmentStore();
 const assignment = ref<Assignment>();
+const identificationTaskCapabilities = ref<IdentificationTaskCapabilities | undefined>(undefined);
 const annotationStarted = ref(false);
 
 const observationIsFavorited = ref(false);
@@ -45,8 +47,17 @@ onMounted(async () => {
   }
 })
 
-watch(assignment, (newAssignment) => {
+watch(assignment, async (newAssignment) => {
   observationIsFavorited.value = false;
+  if (newAssignment?.observation.uuid) {
+    try {
+      const response = await identificationTasksApi.capabilitiesRetrieve({ observationUuid: newAssignment.observation.uuid });
+      identificationTaskCapabilities.value = response.data;
+    } catch (error) {
+      console.error('Failed to fetch favorite status:', error);
+      identificationTaskCapabilities.value = undefined;
+    }
+  }
   if (newAssignment?.observation.uuid && newAssignment.observation.uuid !== route.params.observationUuid) {
     router.push({
       name: 'annotate_identification_task',
