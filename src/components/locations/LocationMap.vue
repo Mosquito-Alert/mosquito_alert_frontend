@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed } from 'vue';
 
 import { LMap, LTileLayer, LMarker } from "@vue-leaflet/vue-leaflet";
 
@@ -32,6 +32,9 @@ const props = defineProps<{
   location: Location | SimplifiedLocation
 }>();
 
-const latlon = ref<PointTuple>([props.location.point.latitude, props.location.point.longitude]);
+const latlon = computed<PointTuple>(() => [
+  props.location.point.latitude,
+  props.location.point.longitude
+]);
 
 </script>
