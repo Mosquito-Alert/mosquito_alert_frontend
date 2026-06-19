@@ -168,7 +168,7 @@ const cancelAnnotation = () => {
 
 const onSubmitAnnotation = (shouldContinue: boolean) => {
   emit('onSubmitAnnotation', shouldContinue)
-  if (!shouldContinue) {
+  if (shouldContinue) {
     isStarted.value = false
   }
 }
