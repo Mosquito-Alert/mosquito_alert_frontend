@@ -58,8 +58,7 @@
           <label>Source</label>
         </FloatLabel>
         <FloatLabel variant="on">
-          <CountryMultipleSelect id="countryFilter" v-model="selectedCountries"
-            :allowedCountryIds="allowedCountryIds" />
+          <CountryMultipleSelect id="countryFilter" v-model="selectedCountries" />
           <label for="countryFilter">Countries</label>
         </FloatLabel>
         <FloatLabel variant="on">
@@ -124,34 +123,8 @@ import { IdentificationTaskStatus, IdentificationtasksListResultCharacteristicsS
 import { IdentificationtasksListOrderByParameter } from 'mosquito-alert';
 import type { IdentificationTasksApiListRequest } from 'mosquito-alert';
 
-import { useAbility } from '@casl/vue';
-import type { AppAbility } from '@/services/ability';
 import IdentificationTaskReviewActionSelect from '@/components/identificationTasks/IdentificationTaskReviewActionSelect.vue';
 import ReviewStartButton from '@/components/reviews/ReviewStartButton.vue';
-
-const ability = useAbility<AppAbility>();
-
-// Get allowed country IDs from CASL
-const allowedCountryIds = computed<number[] | undefined>(() => {
-  const rules = ability.rulesFor('view', 'IdentificationTask');
-
-  // If any rule has no conditions at all => full access
-  if (rules.some(rule => !rule.conditions)) {
-    return undefined;
-  }
-
-  // Extract only rules that specifically filter by observation.location.country.id
-  const ids = rules
-    .map(rule => rule.conditions?.['observation.location.country.id'])
-    .filter((id): id is number => typeof id === 'number');
-
-  // If rules exist but none specify country.id, treat as unrestricted
-  if (rules.length && ids.length === 0) {
-    return undefined;
-  }
-
-  return [...new Set(ids)];
-});
 
 const route = useRoute()
 const router = useRouter()

@@ -9,6 +9,7 @@ import {
   PermissionsApi,
   TaxaApi,
   UsersApi,
+  WorkspacesApi,
 } from 'mosquito-alert'
 import { BASE_PATH } from 'mosquito-alert/base'
 import { attachAuthInterceptor } from 'mosquito-alert/interceptors'
@@ -38,3 +39,4 @@ export const messagesApi = new MessagesApi(apiConfig, undefined, axiosInstance)
 export const permissionsApi = new PermissionsApi(apiConfig, undefined, axiosInstance)
 export const taxaApi = new TaxaApi(apiConfig, undefined, axiosInstance)
 export const userApi = new UsersApi(apiConfig, undefined, axiosInstance)
+export const workspaceApi = new WorkspacesApi(apiConfig, undefined, axiosInstance)

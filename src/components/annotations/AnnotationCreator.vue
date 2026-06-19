@@ -82,7 +82,8 @@
           </div>
           <AnnotationForm v-if="activePhoto" :observation="assignment.observation" :best-photo="activePhoto"
             :annotation-type="assignment.annotation_type" :isVisible="isVisible" :isFlagged="isFlagged"
-            :isFavourite="isFavourite" @submit="onSubmitAnnotation" />
+            :isFavourite="isFavourite" :can-set-is-executive="capabilities?.annotate_executive"
+            @submit="onSubmitAnnotation" />
         </div>
       </div>
     </div>
@@ -102,7 +103,7 @@ import VueMagnifier from '@websitebeaver/vue-magnifier';
 import '@websitebeaver/vue-magnifier/styles.css'
 
 import { AnnotationType } from 'mosquito-alert';
-import type { Assignment } from 'mosquito-alert';
+import type { Assignment, IdentificationTaskCapabilities } from 'mosquito-alert';
 
 import AnnotationForm from './AnnotationForm.vue';
 import AnnotationTypeTag from './AnnotationTypeTag.vue';
@@ -133,6 +134,7 @@ defineOptions({ inheritAttrs: false })
 
 const props = withDefaults(defineProps<{
   assignment: Assignment,
+  capabilities?: IdentificationTaskCapabilities,
   loading?: boolean
 }>(), {
   loading: false
