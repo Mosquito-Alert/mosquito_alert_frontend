@@ -82,7 +82,7 @@ import { getLanguageName } from '@/utils/Utils';
 import UserAutocomplete from '../users/UserAutocomplete.vue';
 import MessageTopicAutocomplete from './MessageTopicAutocomplete.vue';
 
-const TOPIC_LANGUAGES = ['bg', 'bn', 'ca', 'de', 'el', 'en', 'es', 'eu', 'fr', 'gl', 'hr', 'hu', 'it', 'lb', 'mk', 'nl', 'pt', 'ro', 'sl', 'sq', 'sr', 'sv', 'tr', 'zh-CN'] as const satisfies ReadonlyArray<keyof LocalizedTopicMessageTitleRequest>;
+const TOPIC_LANGUAGES = ['bg', 'bn', 'ca', 'de', 'el', 'en', 'es', 'eu', 'fr', 'gl', 'hr', 'hu', 'it', 'lb', 'mk', 'nl', 'pt', 'ro', 'sl', 'sq', 'sr', 'sv', 'tr', 'zh-cn'] as const satisfies ReadonlyArray<keyof LocalizedTopicMessageTitleRequest>;
 
 const toast = useToast();
 
