@@ -213,8 +213,8 @@
     </div>
   </div>
 
-  <ReviewDialog v-if="capabilities?.review && identificationTask?.result" :identification-task="identificationTask"
-    :visible="!isReviewing" :loading="isSubmittingReview || loading"
+  <ReviewDialog v-if="capabilities?.review && identificationTask?.result && !identificationTask.review"
+    :identification-task="identificationTask" :visible="!isReviewing" :loading="isSubmittingReview || loading"
     @agree="submitReview(CreateAgreeReviewRequestAction.Agree)" @disagree="isReviewing = true" />
 
 </template>
