@@ -29,7 +29,7 @@
             </span>
             :
           </span>
-          <div class="flex flex-1 overflow-y">
+          <div class="flex flex-1 flex-wrap gap-2 overflow-auto max-h-48">
             <Skeleton v-if="loadingRecipients" />
             <MessageRecipientChip v-else-if="recipientsTotalCount < 100" v-for="recipient in recipients"
               :key="recipient.user.uuid" :user="recipient.user" :has_read="recipient.has_read" />
