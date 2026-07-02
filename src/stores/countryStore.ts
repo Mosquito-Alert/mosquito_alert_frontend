@@ -14,7 +14,7 @@ export const useCountryStore = defineStore('country', {
         let hasNextPage = true
 
         while (hasNextPage) {
-          const response = await countryApi.list({ page: page })
+          const response = await countryApi.list({ page: page, pageSize: 100 })
           allCountries.push(...(response.data.results ?? []))
           hasNextPage = response.data.next !== null
           page += 1
