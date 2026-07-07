@@ -113,7 +113,7 @@ import { ref, watch, computed } from 'vue';
 import { Form } from '@primevue/forms';
 import { useToast } from 'primevue/usetoast';
 
-import type { AssignedObservation, Photo, SimplePhoto, Taxon, AnnotationRequest, SpeciesClassificationRequest, AnnotationFeedbackRequest, SpeciesCharacteristicsRequest } from 'mosquito-alert';
+import type { SimplifiedObservationWithPhotos, Photo, SimplePhoto, Taxon, AnnotationRequest, SpeciesClassificationRequest, AnnotationFeedbackRequest, SpeciesCharacteristicsRequest } from 'mosquito-alert';
 import { AnnotationType, SpeciesClassificationConfidenceLabel, SpeciesCharacteristicsSex } from 'mosquito-alert';
 
 import TaxonTagSelector from '../taxa/TaxonTagSelector.vue';
@@ -139,7 +139,7 @@ const continueAfterSubmit = ref<boolean>(false);
 const isSubmitting = ref<boolean>(false);
 
 const props = withDefaults(defineProps<{
-  observation: AssignedObservation,
+  observation: SimplifiedObservationWithPhotos,
   bestPhoto?: SimplePhoto | Photo,
   annotationType: AnnotationType,
   isVisible?: boolean,

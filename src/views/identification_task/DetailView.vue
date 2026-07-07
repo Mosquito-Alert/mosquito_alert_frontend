@@ -233,7 +233,7 @@ import { useRouteParams, useRouteQuery } from '@vueuse/router'
 import { useRouter } from 'vue-router'
 
 
-import { identificationTasksApi, userApi } from '@/services/apiService';
+import { identificationTasksApi } from '@/services/apiService';
 import { useUserStore } from '@/stores/userStore';
 import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
 
@@ -364,11 +364,12 @@ function fetchIdentificationTask() {
   loading.value = true;
   identificationTasksApi.retrieve({ observationUuid: observationUuid.value }).then(
     (response) => {
-      identificationTask.value = response.data || undefined;
-      loading.value = false;
+      identificationTask.value = response.data ?? undefined;
     }
   ).catch((error) => {
     console.error(error);
+    identificationTask.value = undefined;
+  }).finally(() => {
     loading.value = false;  // Ensure loading is set to false even if there is an error
   });
 }
@@ -499,24 +500,22 @@ const generatePublicNote = () => {
     editIdentificationTask.value!.public_note = getPublicNote(
       editIdentificationTask.value!.result.taxon,
       editIdentificationTask.value!.result.is_high_confidence,
-      'en'
+      identificationTask.value!.observation.user.locale ?? 'en'
     );
   }
 };
 
 function openMessageCreateDialog() {
-  userApi.retrieve({ uuid: identificationTask.value!.observation.user_uuid }).then((response) => {
-    dialog.open(MessagesCreateForm, {
-      data: {
-        initialRecipients: [response.data],
-        disableRecipientSelect: true,
-      },
-      props: {
-        header: 'Send message to the user',
-      }
+  dialog.open(MessagesCreateForm, {
+    data: {
+      initialRecipients: [identificationTask.value!.observation.user],
+      disableRecipientSelect: true,
+    },
+    props: {
+      header: 'Send message to the user',
     }
-    )
-  })
+  }
+  );
 }
 
 </script>

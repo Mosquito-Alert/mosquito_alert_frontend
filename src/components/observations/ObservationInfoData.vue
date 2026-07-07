@@ -59,13 +59,13 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { LControlLayers } from "@vue-leaflet/vue-leaflet";
-import type { Observation, AssignedObservation, SimplifiedObservationWithPhotos } from 'mosquito-alert';
+import type { Observation, SimplifiedObservationWithPhotos } from 'mosquito-alert';
 
 import LocationMap from '../locations/LocationMap.vue';
 import PhotoGpsLeafletLayer from '../photos/PhotoGpsLeafletLayer.vue';
 
 defineProps<{
-  observation: Observation | AssignedObservation | SimplifiedObservationWithPhotos
+  observation: Observation | SimplifiedObservationWithPhotos
 }>();
 
 </script>
