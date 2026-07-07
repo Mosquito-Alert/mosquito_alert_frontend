@@ -171,9 +171,9 @@
             v-if="identificationTask?.review && identificationTask?.result?.source == IdentificationTaskResultSource.Ai"
             :review="identificationTask?.review" />
         </div>
-        <Galleria :value="photosWithPrediction" :numVisible="numVisible" :circular="true" :showItemNavigators="true"
-          :responsiveOptions="responsiveOptions" :showItemNavigatorsOnHover="true"
-          :showThumbnailNavigators="photosWithPrediction.length > numVisible">
+        <Galleria :value="photosWithPrediction" :numVisible="numVisible" :circular="true"
+          :showItemNavigators="photosWithPrediction.length > 1" :responsiveOptions="responsiveOptions"
+          :showItemNavigatorsOnHover="true" :showThumbnailNavigators="photosWithPrediction.length > numVisible">
           <template #item="slotProps">
             <Image :src="slotProps.item.url" class="justify-center w-full h-full" preview>
               <template #image>

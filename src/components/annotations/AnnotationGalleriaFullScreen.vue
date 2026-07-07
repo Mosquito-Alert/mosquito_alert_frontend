@@ -1,7 +1,7 @@
 <template>
   <Galleria v-model:visible="isVisible" :value="photos" containerStyle="height: 90%" circular fullScreen
-    showItemNavigators :showThumbnails="false" :showIndicators="true" :changeItemOnIndicatorHover="true"
-    showIndicatorsOnItem :pt="{
+    :showItemNavigators="photos.length > 1" :showThumbnails="false" :showIndicators="true"
+    :changeItemOnIndicatorHover="true" showIndicatorsOnItem :pt="{
       content: 'h-full',
       itemsContainer: 'h-full items-center justify-center',
       caption: 'flex top-2! right-2! left-auto! bottom-auto! bg-transparent!',

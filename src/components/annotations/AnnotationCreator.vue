@@ -8,7 +8,8 @@
           'h-full': true,
           'border-0!': true,
           'rounded-r-none!': isStarted
-        }" circular :showThumbnails="!isStarted" :showItemNavigators="!isStarted" :pt="{
+        }" circular :showThumbnails="!isStarted"
+        :showItemNavigators="!isStarted && assignment.observation.photos.length > 1" :pt="{
           content: 'bg-black/80! h-full',
           itemsContainer: 'h-full w-full items-center justify-center',
           items: 'flex-1 w-full items-center justify-center',
