@@ -1,7 +1,7 @@
 <template>
   <figure class="relative">
     <router-link :to="{ name: 'identification_task', params: { observationUuid: task.observation.uuid } }"
-      class="relative">
+      target="_blank" class="relative">
       <div v-if="isSubmittingReview" class="absolute inset-0 flex items-center justify-center z-10 bg-black/60">
         <ProgressSpinner />
       </div>
