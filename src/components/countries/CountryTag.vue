@@ -6,11 +6,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Country } from 'mosquito-alert';
+import type { Country } from 'mosquito-alert'
 
 defineProps<{
   country: Country
-}>();
-
-
+}>()
 </script>

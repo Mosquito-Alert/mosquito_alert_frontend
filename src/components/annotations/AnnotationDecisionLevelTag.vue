@@ -9,51 +9,53 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { AnnotationDecisionLevel } from 'mosquito-alert';
+import { computed } from 'vue'
+import { AnnotationDecisionLevel } from 'mosquito-alert'
 
-const props = withDefaults(defineProps<{
-  decision_level: AnnotationDecisionLevel,
-  showTooltip?: boolean
-}>(), {
-  showTooltip: true
-});
+const props = withDefaults(
+  defineProps<{
+    decision_level: AnnotationDecisionLevel
+    showTooltip?: boolean
+  }>(),
+  {
+    showTooltip: true,
+  },
+)
 
 const icon = computed(() => {
   switch (props.decision_level) {
     case AnnotationDecisionLevel.Executive:
-      return "step_over";
+      return 'step_over'
     case AnnotationDecisionLevel.Final:
-      return "gavel";
+      return 'gavel'
     default:
-      return null;
+      return null
   }
-});
+})
 
 const value = computed(() => {
-  return props.decision_level;
-});
+  return props.decision_level
+})
 
 const tooltip = computed(() => {
   switch (props.decision_level) {
     case AnnotationDecisionLevel.Executive:
-      return "Executive annotation";
+      return 'Executive annotation'
     case AnnotationDecisionLevel.Final:
-      return "This annotation determines the final result of the identification task";
+      return 'This annotation determines the final result of the identification task'
     default:
-      return null;
+      return null
   }
-});
+})
 
 const severity = computed(() => {
   switch (props.decision_level) {
     case AnnotationDecisionLevel.Executive:
-      return "contrast";
+      return 'contrast'
     case AnnotationDecisionLevel.Final:
-      return "contrast";
+      return 'contrast'
     default:
-      return "secondary";
+      return 'secondary'
   }
-});
-
+})
 </script>

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-import { useAbility } from '@casl/vue';
+import { useAbility } from '@casl/vue'
 
-import type { AppAbility } from '@/services/ability';
-import AppMenuItem from './AppMenuItem.vue';
+import type { AppAbility } from '@/services/ability'
+import AppMenuItem from './AppMenuItem.vue'
 import type { MenuItem } from './AppMenuItem.vue'
 
-const ability = useAbility<AppAbility>();
+const ability = useAbility<AppAbility>()
 
 const model = ref<MenuItem[]>([
   // {
@@ -18,22 +18,38 @@ const model = ref<MenuItem[]>([
     label: 'Annotation tool',
     items: [
       ...(ability.rulesFor('view', 'IdentificationTask').length > 0
-        ? [{ label: 'Identification tasks', icon: 'pi pi-fw pi-list', to: { name: 'list_identification_tasks' } }]
+        ? [
+            {
+              label: 'Identification tasks',
+              icon: 'pi pi-fw pi-list',
+              to: { name: 'list_identification_tasks' },
+            },
+          ]
         : []),
       ...(ability.rulesFor('view', 'Annotation').length > 0
-        ? [{ label: 'My annotations', icon: 'pi pi-fw pi-file-check', to: { name: 'list_annotations' } }]
+        ? [
+            {
+              label: 'My annotations',
+              icon: 'pi pi-fw pi-file-check',
+              to: { name: 'list_annotations' },
+            },
+          ]
         : []),
-    ]
+    ],
   },
-  ...(ability.rulesFor('view', 'Message').length > 0 ? [{
-    label: 'Messaging',
-    items: [
-      ...(ability.rulesFor('view', 'Message').length > 0
-        ? [{ label: 'Messages', icon: 'pi pi-fw pi-inbox', to: { name: 'list_messages' } }]
-        : []),
-    ]
-  }] : []),
-]);
+  ...(ability.rulesFor('view', 'Message').length > 0
+    ? [
+        {
+          label: 'Messaging',
+          items: [
+            ...(ability.rulesFor('view', 'Message').length > 0
+              ? [{ label: 'Messages', icon: 'pi pi-fw pi-inbox', to: { name: 'list_messages' } }]
+              : []),
+          ],
+        },
+      ]
+    : []),
+])
 </script>
 
 <template>

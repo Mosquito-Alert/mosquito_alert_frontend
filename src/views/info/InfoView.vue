@@ -12,10 +12,14 @@ const props = withDefaults(
     lang?: string
     doc: string
   }>(),
-  { lang: 'en' }
+  { lang: 'en' },
 )
 
 const ALLOWED_DOCS = ['score'] as const
 
-const { html } = useMarkdownLoader(props, { folder: 'info', allowedDocs: ALLOWED_DOCS, fallbackLang: 'en' })
+const { html } = useMarkdownLoader(props, {
+  folder: 'info',
+  allowedDocs: ALLOWED_DOCS,
+  fallbackLang: 'en',
+})
 </script>

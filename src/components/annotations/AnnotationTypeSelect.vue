@@ -1,5 +1,11 @@
 <template>
-  <Select :model-value="modelValue" :options="options" optionValue="value" showClear @update:modelValue="onUpdate">
+  <Select
+    :model-value="modelValue"
+    :options="options"
+    optionValue="value"
+    showClear
+    @update:modelValue="onUpdate"
+  >
     <template #value="slotProps">
       <AnnotationTypeTag v-if="slotProps.value" :type="slotProps.value" />
       <span v-else-if="slotProps.placeholder">
@@ -13,28 +19,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { AnnotationType } from 'mosquito-alert';
+import { computed } from 'vue'
+import { AnnotationType } from 'mosquito-alert'
 
-import AnnotationTypeTag from './AnnotationTypeTag.vue';
+import AnnotationTypeTag from './AnnotationTypeTag.vue'
 
 defineProps<{
-  modelValue?: AnnotationType;
-}>();
+  modelValue?: AnnotationType
+}>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: AnnotationType | undefined): void;
-}>();
+  (e: 'update:modelValue', value: AnnotationType | undefined): void
+}>()
 
 const onUpdate = (value: AnnotationType | undefined) => {
-  emit('update:modelValue', value ?? undefined);
-};
+  emit('update:modelValue', value ?? undefined)
+}
 
 const options = computed<{ value: AnnotationType }[]>(() => {
   return Object.values(AnnotationType)
-    .filter(type => type !== AnnotationType.UnknownDefaultOpenApi)
-    .map(type => ({
-      value: type
-    }));
+    .filter((type) => type !== AnnotationType.UnknownDefaultOpenApi)
+    .map((type) => ({
+      value: type,
+    }))
 })
 </script>

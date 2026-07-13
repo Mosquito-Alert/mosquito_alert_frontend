@@ -5,12 +5,11 @@
 </template>
 
 <script setup lang="ts">
-import { LFeatureGroup } from "@vue-leaflet/vue-leaflet";
-import type { SimplePhoto } from 'mosquito-alert';
-import PhotoGpsLeafletFeature from './PhotoGpsLeafletFeature.vue';
+import { LFeatureGroup } from '@vue-leaflet/vue-leaflet'
+import type { SimplePhoto } from 'mosquito-alert'
+import PhotoGpsLeafletFeature from './PhotoGpsLeafletFeature.vue'
 
 defineProps<{
   photos: SimplePhoto[]
-}>();
-
+}>()
 </script>

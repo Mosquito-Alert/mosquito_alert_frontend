@@ -16,14 +16,18 @@
               <InputGroupAddon>
                 <i class="pi pi-language" />
               </InputGroupAddon>
-              <Select :options="availableLanguages" v-model="selectedLanguage"
-                :optionLabel="(value) => getLanguageName(value)" />
+              <Select
+                :options="availableLanguages"
+                v-model="selectedLanguage"
+                :optionLabel="(value) => getLanguageName(value)"
+              />
             </InputGroup>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <span>To
+          <span
+            >To
             <span v-if="!loadingRecipients" class="text-muted-color">
               ({{ recipientsTotalReadCount }} reads of {{ recipientsTotalCount }})
             </span>
@@ -31,23 +35,34 @@
           </span>
           <div class="flex flex-1 flex-wrap gap-2 overflow-auto max-h-48">
             <Skeleton v-if="loadingRecipients" />
-            <MessageRecipientChip v-else-if="recipientsTotalCount < 100" v-for="recipient in recipients"
-              :key="recipient.user.uuid" :user="recipient.user" :has_read="recipient.has_read" />
-            <VirtualScroller v-else :items="recipients" :itemSize="50"
-              class="border border-surface-200 dark:border-surface-700 rounded w-full" style="height: 200px">
+            <MessageRecipientChip
+              v-else-if="recipientsTotalCount < 100"
+              v-for="recipient in recipients"
+              :key="recipient.user.uuid"
+              :user="recipient.user"
+              :has_read="recipient.has_read"
+            />
+            <VirtualScroller
+              v-else
+              :items="recipients"
+              :itemSize="50"
+              class="border border-surface-200 dark:border-surface-700 rounded w-full"
+              style="height: 200px"
+            >
               <template v-slot:item="{ item }">
                 <MessageRecipientChip :user="item.user" :has_read="item.has_read" />
               </template>
             </VirtualScroller>
           </div>
-          <div class=" flex ml-auto">
+          <div class="flex ml-auto">
             <div class="flex ml-auto">
-              <span v-if="message" class="text-muted-color">{{ formatLocalDateTime(message.created_at) }}</span>
+              <span v-if="message" class="text-muted-color">{{
+                formatLocalDateTime(message.created_at)
+              }}</span>
               <Skeleton v-else />
             </div>
           </div>
         </div>
-
       </div>
     </div>
     <Divider />
@@ -62,69 +77,72 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { messagesApi } from '@/services/apiService';
-import type { Message, MessageRecipient, LocalizedMessageTitle } from 'mosquito-alert';
-import { getLanguageName } from '@/utils/Utils';
-import UserAvatar from '@/components/users/UserAvatar.vue';
-import { formatLocalDateTime } from '@/utils/DateUtils';
-import MessageRecipientChip from '@/components/messages/MessageRecipientChip.vue';
+import { computed, onMounted, ref } from 'vue'
+import { messagesApi } from '@/services/apiService'
+import type { Message, MessageRecipient, LocalizedMessageTitle } from 'mosquito-alert'
+import { getLanguageName } from '@/utils/Utils'
+import UserAvatar from '@/components/users/UserAvatar.vue'
+import { formatLocalDateTime } from '@/utils/DateUtils'
+import MessageRecipientChip from '@/components/messages/MessageRecipientChip.vue'
 
 const props = defineProps<{
-  messageId: number,
+  messageId: number
 }>()
 
-const message = ref<Message | null>(null);
+const message = ref<Message | null>(null)
 
-const recipients = ref<MessageRecipient[]>([]);
+const recipients = ref<MessageRecipient[]>([])
 
-const recipientsTotalCount = computed(() => recipients.value.length);
-const recipientsTotalReadCount = computed(() => recipients.value.filter(r => r.has_read).length);
+const recipientsTotalCount = computed(() => recipients.value.length)
+const recipientsTotalReadCount = computed(() => recipients.value.filter((r) => r.has_read).length)
 
-const loadingRecipients = ref<boolean>(true);
-const selectedLanguage = ref<keyof LocalizedMessageTitle>('en');
-const availableLanguages = ref<(keyof LocalizedMessageTitle)[]>([]);
+const loadingRecipients = ref<boolean>(true)
+const selectedLanguage = ref<keyof LocalizedMessageTitle>('en')
+const availableLanguages = ref<(keyof LocalizedMessageTitle)[]>([])
 
 function getTitle(message: Message, language: keyof LocalizedMessageTitle) {
-  return message.content?.title?.[language] || 'No title';
+  return message.content?.title?.[language] || 'No title'
 }
 
 function getBody(message: Message, language: keyof LocalizedMessageTitle) {
-  return message.content?.body?.[language] || 'No content';
+  return message.content?.body?.[language] || 'No content'
 }
 
 onMounted(async () => {
   try {
-    const response = await messagesApi.retrieve({ id: props.messageId });
-    const titles = response.data.content?.title;
+    const response = await messagesApi.retrieve({ id: props.messageId })
+    const titles = response.data.content?.title
     selectedLanguage.value = titles
-      ? (Object.keys(titles).find(
-        key => titles[key as keyof typeof titles]
-      ) as keyof LocalizedMessageTitle) ?? 'en'
-      : 'en';
+      ? ((Object.keys(titles).find(
+          (key) => titles[key as keyof typeof titles],
+        ) as keyof LocalizedMessageTitle) ?? 'en')
+      : 'en'
     availableLanguages.value = titles
-      ? (Object.keys(titles) as (keyof LocalizedMessageTitle)[])
-        .filter((key) => titles[key])
-      : [];
-    message.value = response.data;
+      ? (Object.keys(titles) as (keyof LocalizedMessageTitle)[]).filter((key) => titles[key])
+      : []
+    message.value = response.data
 
-    const recipientsResponse = await messagesApi.recipientsList({ id: props.messageId });
-    recipients.value = recipientsResponse.data;
+    const recipientsResponse = await messagesApi.recipientsList({ id: props.messageId })
+    recipients.value = recipientsResponse.data
   } catch (error) {
-    console.error('Error fetching message details:', error);
+    console.error('Error fetching message details:', error)
   }
-  await fetchRecipients();
-});
+  await fetchRecipients()
+})
 
 async function fetchRecipients() {
-  loadingRecipients.value = true;
+  loadingRecipients.value = true
 
-  messagesApi.recipientsList({ id: props.messageId }).then((response) => {
-    recipients.value = response.data;
-  }).catch((error) => {
-    console.error('Error fetching message recipients:', error);
-  }).finally(() => {
-    loadingRecipients.value = false;
-  });
+  messagesApi
+    .recipientsList({ id: props.messageId })
+    .then((response) => {
+      recipients.value = response.data
+    })
+    .catch((error) => {
+      console.error('Error fetching message recipients:', error)
+    })
+    .finally(() => {
+      loadingRecipients.value = false
+    })
 }
 </script>

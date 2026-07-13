@@ -1,24 +1,25 @@
 <template>
   <div class="items-center justify-center grid lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-    <div v-for="(item, key) in tasks" :key="key" class="relative w-full h-full overflow-hidden group">
+    <div
+      v-for="(item, key) in tasks"
+      :key="key"
+      class="relative w-full h-full overflow-hidden group"
+    >
       <IdentificationTaskGridItem :task="item" @on-review-success="$emit('onChange')" />
     </div>
   </div>
 </template>
 
-
 <script setup lang="ts">
+import type { IdentificationTask } from 'mosquito-alert'
 
-import type { IdentificationTask } from 'mosquito-alert';
-
-import IdentificationTaskGridItem from './IdentificationTaskGridItem.vue';
+import IdentificationTaskGridItem from './IdentificationTaskGridItem.vue'
 
 defineProps<{
   tasks: IdentificationTask[]
 }>()
 
 defineEmits<{
-  (e: 'onChange'): void,
+  (e: 'onChange'): void
 }>()
-
 </script>
