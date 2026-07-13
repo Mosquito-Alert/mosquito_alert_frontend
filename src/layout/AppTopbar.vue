@@ -32,8 +32,15 @@
             <span>Profile</span>
             <Menu ref="profileMenu" id="overlay_menu" :model="profileMenuItems" :popup="true" />
           </button> -->
-          <Button class="p-2!" icon="pi pi-user" :label="username" rounded variant="outlined" severity="secondary"
-            @click="profileMenuToggle">
+          <Button
+            class="p-2!"
+            icon="pi pi-user"
+            :label="username"
+            rounded
+            variant="outlined"
+            severity="secondary"
+            @click="profileMenuToggle"
+          >
             <template #icon>
               <UserAvatar :user="userStore.user" />
             </template>
@@ -46,25 +53,24 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useLayout } from './composables/layout'
+import UserAvatar from '@/components/users/UserAvatar.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useUserStore } from '@/stores/userStore'
 
-import { useLayout } from './composables/layout';
-import UserAvatar from '@/components/users/UserAvatar.vue';
-import { useAuthStore } from '@/stores/authStore';
-import { useUserStore } from '@/stores/userStore';
+const { toggleMenu } = useLayout()
 
-const { toggleMenu } = useLayout();
+const router = useRouter()
 
-const router = useRouter();
+const authStore = useAuthStore()
+const userStore = useUserStore()
 
-const authStore = useAuthStore();
-const userStore = useUserStore();
+const username = ref(userStore.user?.username || 'Guest')
 
-const username = ref(userStore.user?.username || 'Guest');
-
-const profileMenu = ref();
+const profileMenu = ref()
 const profileMenuItems = ref([
   {
     label: 'Profile',
@@ -73,18 +79,16 @@ const profileMenuItems = ref([
         label: 'Logout',
         icon: 'pi pi-sign-out',
         command: () => {
-          authStore.logout();
+          authStore.logout()
           // Redirect to login page after logout
-          router.push({ name: 'login' });
-        }
+          router.push({ name: 'login' })
+        },
       },
-    ]
-  }
-]);
+    ],
+  },
+])
 
 const profileMenuToggle = (event: MouseEvent) => {
-  profileMenu.value.toggle(event);
-};
-
-
+  profileMenu.value.toggle(event)
+}
 </script>

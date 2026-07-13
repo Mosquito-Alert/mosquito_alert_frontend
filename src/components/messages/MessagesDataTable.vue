@@ -1,21 +1,32 @@
 <template>
   <div class="flex-1 h-full overflow-hidden flex border border-surface rounded-2xl">
-    <DataTable :value="messages" dataKey='id' :loading="loading" v-model:rows="numRows"
-      :total-records="messagesTotalCount" lazy paginator :rowsPerPageOptions="[5, 10, 25, 50]"
+    <DataTable
+      :value="messages"
+      dataKey="id"
+      :loading="loading"
+      v-model:rows="numRows"
+      :total-records="messagesTotalCount"
+      lazy
+      paginator
+      :rowsPerPageOptions="[5, 10, 25, 50]"
       @page="$emit('page', $event)"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
-      currentPageReportTemplate="({totalRecords} items)" tableStyle="min-width: 50rem" selectionMode="single"
-      @rowSelect="handleRowSelect" :pt="{
+      currentPageReportTemplate="({totalRecords} items)"
+      tableStyle="min-width: 50rem"
+      selectionMode="single"
+      @rowSelect="handleRowSelect"
+      :pt="{
         root: {
-          class: 'w-full flex-1 overflow-x-auto'
+          class: 'w-full flex-1 overflow-x-auto',
         },
         thead: {
-          class: 'hidden'
+          class: 'hidden',
         },
         header: {
-          class: 'sticky top-0 z-10'
-        }
-      }">
+          class: 'sticky top-0 z-10',
+        },
+      }"
+    >
       <Column field="title" style="min-width: 14rem; max-width: 40rem">
         <template #body="{ data }">
           <div class="truncate">
@@ -36,16 +47,17 @@
       </Column>
       <Column field="created_at">
         <template #body="{ data }">
-          <div class="text-sm leading-5 text-muted-color">{{ formatLocalDateTime(data.created_at) }}</div>
+          <div class="text-sm leading-5 text-muted-color">
+            {{ formatLocalDateTime(data.created_at) }}
+          </div>
         </template>
       </Column>
     </DataTable>
   </div>
-
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue'
 import type { DataTablePageEvent, DataTableRowSelectEvent } from 'primevue'
 import { htmlToText } from 'html-to-text'
 import { useRouter } from 'vue-router'
@@ -55,13 +67,13 @@ import { formatLocalDateTime } from '@/utils/DateUtils'
 import UserAvatar from '@/components/users/UserAvatar.vue'
 
 defineProps<{
-  messages?: Message[],
-  loading: boolean,
+  messages?: Message[]
+  loading: boolean
   messagesTotalCount: number
 }>()
 
 defineEmits<{
-  (e: 'page', event: DataTablePageEvent): void,
+  (e: 'page', event: DataTablePageEvent): void
 }>()
 
 const router = useRouter()
@@ -88,8 +100,8 @@ function getBody(message: Message) {
 }
 
 function handleRowSelect(event: DataTableRowSelectEvent<Message>) {
-  const messageId = event.data.id;
+  const messageId = event.data.id
   // Navigate to the detail view for the selected message
-  router.push({ name: 'message_detail', params: { messageId } });
+  router.push({ name: 'message_detail', params: { messageId } })
 }
 </script>

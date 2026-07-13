@@ -2,11 +2,11 @@
   <Tag :value="getValue(reviewActionParam)" :severity="getStatusSeverity(reviewActionParam)" />
 </template>
 <script setup lang="ts">
-import { IdentificationtasksListReviewActionParameter } from 'mosquito-alert';
+import { IdentificationtasksListReviewActionParameter } from 'mosquito-alert'
 
 defineProps<{
-  reviewActionParam: IdentificationtasksListReviewActionParameter,
-}>();
+  reviewActionParam: IdentificationtasksListReviewActionParameter
+}>()
 
 const getValue = (reviewAction: IdentificationtasksListReviewActionParameter) => {
   switch (reviewAction) {
@@ -33,5 +33,4 @@ const getStatusSeverity = (reviewAction: IdentificationtasksListReviewActionPara
       return 'default' // optional fallback
   }
 }
-
 </script>

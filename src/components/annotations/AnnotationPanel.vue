@@ -5,9 +5,17 @@
         <UserAvatar :user="annotation?.user" />
         <span class="font-bold">{{ annotation?.user.full_name || annotation?.user.username }}</span>
         <AnnotationTypeTag v-if="annotation.type === AnnotationType.Long" :type="annotation.type" />
-        <Tag v-if="annotation?.is_flagged" icon="pi pi-flag" severity="danger" value="Flagged" rounded />
-        <AnnotationDecisionLevelTag v-if="annotation.decision_level !== AnnotationDecisionLevel.Normal"
-          :decision_level="annotation.decision_level" />
+        <Tag
+          v-if="annotation?.is_flagged"
+          icon="pi pi-flag"
+          severity="danger"
+          value="Flagged"
+          rounded
+        />
+        <AnnotationDecisionLevelTag
+          v-if="annotation.decision_level !== AnnotationDecisionLevel.Normal"
+          :decision_level="annotation.decision_level"
+        />
       </div>
     </template>
     <template #footer>
@@ -18,7 +26,10 @@
       </div>
     </template>
     <template #icons>
-      <TaxonClassificationTag :classification="annotation.classification" :sex="annotation.characteristics?.sex" />
+      <TaxonClassificationTag
+        :classification="annotation.classification"
+        :sex="annotation.characteristics?.sex"
+      />
     </template>
     <div class="flex mb-2">
       <div class="flex ml-auto gap-1">
@@ -27,37 +38,42 @@
     </div>
     <ul class="list-none p-0 m-0">
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Public note</div>
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">
+          Public note
+        </div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-8/12 md:order-none order-1">
           {{ annotation?.feedback?.public_note }}
         </div>
       </li>
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">Internal note
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-2/12 font-medium">
+          Internal note
         </div>
-        <div class="text-surface-900 dark:text-surface-0 w-full md:w-8/12 md:order-none order-1">{{
-          annotation?.feedback?.internal_note }}</div>
+        <div class="text-surface-900 dark:text-surface-0 w-full md:w-8/12 md:order-none order-1">
+          {{ annotation?.feedback?.internal_note }}
+        </div>
       </li>
     </ul>
   </Panel>
 </template>
 
 <script setup lang="ts">
+import type { Annotation } from 'mosquito-alert'
+import { AnnotationDecisionLevel, AnnotationType } from 'mosquito-alert'
+import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue'
+import UserAvatar from '../users/UserAvatar.vue'
+import AnnotationTypeTag from './AnnotationTypeTag.vue'
+import AnnotationDecisionLevelTag from './AnnotationDecisionLevelTag.vue'
 
-import type { Annotation } from 'mosquito-alert';
-import { AnnotationDecisionLevel, AnnotationType } from 'mosquito-alert';
-import TaxonClassificationTag from '../taxa/TaxonClassificationTag.vue';
-import UserAvatar from '../users/UserAvatar.vue';
-import AnnotationTypeTag from './AnnotationTypeTag.vue';
-import AnnotationDecisionLevelTag from './AnnotationDecisionLevelTag.vue';
+import { formatLocalDateTime } from '@/utils/DateUtils'
 
-import { formatLocalDateTime } from '@/utils/DateUtils';
-
-withDefaults(defineProps<{
-  annotation: Annotation,
-  collapsed?: boolean
-}>(), {
-  collapsed: true
-});
-
+withDefaults(
+  defineProps<{
+    annotation: Annotation
+    collapsed?: boolean
+  }>(),
+  {
+    collapsed: true,
+  },
+)
 </script>

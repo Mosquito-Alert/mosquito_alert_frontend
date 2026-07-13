@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import type { MinimalUser, SimpleUser, User } from 'mosquito-alert';
+import type { MinimalUser, SimpleUser, User } from 'mosquito-alert'
 
 defineProps<{
   user: MinimalUser | SimpleUser | User

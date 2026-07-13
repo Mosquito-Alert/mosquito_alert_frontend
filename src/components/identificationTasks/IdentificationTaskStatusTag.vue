@@ -3,11 +3,11 @@
 </template>
 
 <script setup lang="ts">
-import { IdentificationTaskStatus } from 'mosquito-alert';
+import { IdentificationTaskStatus } from 'mosquito-alert'
 
 defineProps<{
-  status: IdentificationTaskStatus;
-}>();
+  status: IdentificationTaskStatus
+}>()
 
 const getStatusSeverity = (status: IdentificationTaskStatus) => {
   switch (status) {
@@ -25,5 +25,4 @@ const getStatusSeverity = (status: IdentificationTaskStatus) => {
       return 'default' // optional fallback
   }
 }
-
 </script>

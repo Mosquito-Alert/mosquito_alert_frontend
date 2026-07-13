@@ -1,13 +1,31 @@
 <template>
-  <Message v-if="isReviewing" class="mb-2 sticky! top-20 z-1101" severity="warn" icon="pi pi-pencil" size="large" :pt="{
-    text: 'flex flex-row w-full items-center',
-  }">
+  <Message
+    v-if="isReviewing"
+    class="mb-2 sticky! top-20 z-1101"
+    severity="warn"
+    icon="pi pi-pencil"
+    size="large"
+    :pt="{
+      text: 'flex flex-row w-full items-center',
+    }"
+  >
     <span>Review mode</span>
     <div class="flex ml-auto gap-2">
-      <Button severity="secondary" label="Cancel" icon="pi pi-times" outlined :loading="isSubmittingReview || loading"
-        @click="isReviewing = false" />
-      <Button severity="primary" label="Submit changes" icon="pi pi-check" :loading="isSubmittingReview || loading"
-        @click="submitReview(CreateOverwriteReviewRequestAction.Overwrite)" />
+      <Button
+        severity="secondary"
+        label="Cancel"
+        icon="pi pi-times"
+        outlined
+        :loading="isSubmittingReview || loading"
+        @click="isReviewing = false"
+      />
+      <Button
+        severity="primary"
+        label="Submit changes"
+        icon="pi pi-check"
+        :loading="isSubmittingReview || loading"
+        @click="submitReview(CreateOverwriteReviewRequestAction.Overwrite)"
+      />
     </div>
   </Message>
 
@@ -15,94 +33,168 @@
     <div class="flex items-center">
       <div class="font-medium text-3xl text-surface-500 dark:text-surface-300 mb-4">
         <span>Identification task: </span>
-        <span class="text-surface-900 dark:text-surface-0">{{ identificationTask?.observation.uuid }}</span>
+        <span class="text-surface-900 dark:text-surface-0">{{
+          identificationTask?.observation.uuid
+        }}</span>
       </div>
       <div class="flex ml-auto gap-2 items-center">
-        <Button v-if="!isReviewing && capabilities?.review" icon="pi pi-pencil" size='small' severity="secondary"
-          outlined @click="isReviewing = true" v-tooltip.top="'Edit review'" />
-        <IdentificationTaskStatusTag v-if="identificationTask" :status="identificationTask?.status" />
+        <Button
+          v-if="!isReviewing && capabilities?.review"
+          icon="pi pi-pencil"
+          size="small"
+          severity="secondary"
+          outlined
+          @click="isReviewing = true"
+          v-tooltip.top="'Edit review'"
+        />
+        <IdentificationTaskStatusTag
+          v-if="identificationTask"
+          :status="identificationTask?.status"
+        />
       </div>
     </div>
 
     <div class="flex items-center mb-4 gap-2">
       <IdentificationTaskReviewTag v-if="identificationTask" :review="identificationTask.review" />
 
-      <IdentificationTaskIsSafeSelect v-if="isReviewing" v-model="editIdentificationTask!.is_safe"
-        :disabled="isReviewNotInsect" />
+      <IdentificationTaskIsSafeSelect
+        v-if="isReviewing"
+        v-model="editIdentificationTask!.is_safe"
+        :disabled="isReviewNotInsect"
+      />
       <IdentificationTaskIsSafeTag v-else :is-safe="identificationTask?.is_safe || false" />
 
-      <Tag v-if='identificationTask?.is_flagged' icon="pi pi-flag" value='Flagged' severity="danger" />
+      <Tag
+        v-if="identificationTask?.is_flagged"
+        icon="pi pi-flag"
+        value="Flagged"
+        severity="danger"
+      />
       <div class="ml-auto text-surface-400 dark:text-surface-400 flex flex-col">
         <span>Last update: {{ formatLocalDateTime(identificationTask?.updated_at!) }}</span>
       </div>
     </div>
     <ul v-if="identificationTask?.result || isReviewing" class="list-none p-0 m-0">
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">Classification
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">
+          Classification
         </div>
-        <div class="flex text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
+        <div
+          class="flex text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1"
+        >
           <template v-if="isReviewing">
             <div class="flex flex-col gap-2 w-full">
               <div class="flex gap-2">
-                <TaxonTagSelector :model-value="editIdentificationTask!.result.taxon"
-                  @update:model-value="val => editIdentificationTask!.result.taxon = <SimpleTaxon>val"
-                  :disabled="isReviewNotInsect">
+                <TaxonTagSelector
+                  :model-value="editIdentificationTask!.result.taxon"
+                  @update:model-value="
+                    (val) => (editIdentificationTask!.result.taxon = <SimpleTaxon>val)
+                  "
+                  :disabled="isReviewNotInsect"
+                >
                   <template #selectedIcon>
-                    <i v-if="editIdentificationTask!.result.is_high_confidence"
-                      class="pi pi-angle-double-up text-green-700" />
+                    <i
+                      v-if="editIdentificationTask!.result.is_high_confidence"
+                      class="pi pi-angle-double-up text-green-700"
+                    />
                   </template>
                 </TaxonTagSelector>
               </div>
               <div class="flex flex-row">
                 <div class="flex flex-row items-center gap-2">
                   <span>High confidence?</span>
-                  <ToggleSwitch :model-value="editIdentificationTask!.result.is_high_confidence"
-                    @update:model-value="val => editIdentificationTask!.result.is_high_confidence = val"
-                    :disabled="isReviewNotInsect" />
+                  <ToggleSwitch
+                    :model-value="editIdentificationTask!.result.is_high_confidence"
+                    @update:model-value="
+                      (val) => (editIdentificationTask!.result.is_high_confidence = val)
+                    "
+                    :disabled="isReviewNotInsect"
+                  />
                 </div>
                 <div class="flex flex-row items-center gap-2 ml-auto">
                   <span :class="isReviewNotInsect ? 'text-red-500' : ''">Not an insect</span>
-                  <ToggleSwitch :model-value="editIdentificationTask!.result.taxon == null"
-                    @update:model-value="val => isReviewNotInsect = val" />
+                  <ToggleSwitch
+                    :model-value="editIdentificationTask!.result.taxon == null"
+                    @update:model-value="(val) => (isReviewNotInsect = val)"
+                  />
                 </div>
               </div>
             </div>
           </template>
           <template v-else>
-            <IdentificationTaskResultTag v-if="identificationTask?.result" :result="identificationTask?.result"
-              :sex="identificationTask?.result.characteristics?.sex" />
+            <IdentificationTaskResultTag
+              v-if="identificationTask?.result"
+              :result="identificationTask?.result"
+              :sex="identificationTask?.result.characteristics?.sex"
+            />
           </template>
         </div>
       </li>
-      <li v-if="isReviewing && !isReviewNotInsect"
-        class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
-        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">Characteristics</div>
+      <li
+        v-if="isReviewing && !isReviewNotInsect"
+        class="flex items-center py-4 px-2 border-t border-surface flex-wrap"
+      >
+        <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">
+          Characteristics
+        </div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
           <div class="flex flex-col gap-2 w-full">
             <div class="flex items-center w-full">
-              <AnnotationSexRadioButton :model-value="editIdentificationTask!.result.characteristics?.sex ?? null"
-                @update:model-value="val => {
-                  if (val === null) {
-                    editIdentificationTask!.result.characteristics = null;
-                  } else {
-                    editIdentificationTask!.result.characteristics = { sex: val };
+              <AnnotationSexRadioButton
+                :model-value="editIdentificationTask!.result.characteristics?.sex ?? null"
+                @update:model-value="
+                  (val) => {
+                    if (val === null) {
+                      editIdentificationTask!.result.characteristics = null
+                    } else {
+                      editIdentificationTask!.result.characteristics = { sex: val }
+                    }
                   }
-                }" class="w-full" />
-              <div class="flex h-full transition-all duration-500 ease-in-out overflow-hidden"
-                :class="{ 'w-0': editIdentificationTask!.result.characteristics?.sex !== SpeciesCharacteristicsSex.Female, 'w-full': editIdentificationTask!.result.characteristics?.sex === SpeciesCharacteristicsSex.Female }">
+                "
+                class="w-full"
+              />
+              <div
+                class="flex h-full transition-all duration-500 ease-in-out overflow-hidden"
+                :class="{
+                  'w-0':
+                    editIdentificationTask!.result.characteristics?.sex !==
+                    SpeciesCharacteristicsSex.Female,
+                  'w-full':
+                    editIdentificationTask!.result.characteristics?.sex ===
+                    SpeciesCharacteristicsSex.Female,
+                }"
+              >
                 <Divider layout="vertical" />
-                <div v-show="editIdentificationTask!.result.characteristics?.sex === SpeciesCharacteristicsSex.Female"
-                  class="flex justify-center items-center w-full">
+                <div
+                  v-show="
+                    editIdentificationTask!.result.characteristics?.sex ===
+                    SpeciesCharacteristicsSex.Female
+                  "
+                  class="flex justify-center items-center w-full"
+                >
                   <div class="flex flex-col gap-2 w-full">
                     <div class="flex row items-center gap-2">
                       <label>Is blood fed?</label>
-                      <ToggleSwitch :model-value="editIdentificationTask!.result.characteristics?.is_blood_fed ?? false"
-                        @update:model-value="val => editIdentificationTask!.result.characteristics!.is_blood_fed = val" />
+                      <ToggleSwitch
+                        :model-value="
+                          editIdentificationTask!.result.characteristics?.is_blood_fed ?? false
+                        "
+                        @update:model-value="
+                          (val) =>
+                            (editIdentificationTask!.result.characteristics!.is_blood_fed = val)
+                        "
+                      />
                     </div>
                     <div class="flex row items-center gap-2">
                       <label>Is gravid?</label>
-                      <ToggleSwitch :model-value="editIdentificationTask!.result.characteristics?.is_gravid ?? false"
-                        @update:model-value="val => editIdentificationTask!.result.characteristics!.is_gravid = val" />
+                      <ToggleSwitch
+                        :model-value="
+                          editIdentificationTask!.result.characteristics?.is_gravid ?? false
+                        "
+                        @update:model-value="
+                          (val) => (editIdentificationTask!.result.characteristics!.is_gravid = val)
+                        "
+                      />
                     </div>
                   </div>
                 </div>
@@ -114,9 +206,17 @@
       <li class="flex items-center py-4 px-2 border-t border-surface flex-wrap">
         <div class="text-surface-500 dark:text-surface-300 w-6/12 md:w-1/12 font-medium">
           Public note
-          <Button v-if="editIdentificationTask" icon="pi pi-sparkles" label="Generate" severity="help"
-            @click="generatePublicNote()" rounded variant="outlined" :disabled="!editIdentificationTask!.result.taxon"
-            size="small" />
+          <Button
+            v-if="editIdentificationTask"
+            icon="pi pi-sparkles"
+            label="Generate"
+            severity="help"
+            @click="generatePublicNote()"
+            rounded
+            variant="outlined"
+            :disabled="!editIdentificationTask!.result.taxon"
+            size="small"
+          />
         </div>
         <div class="text-surface-900 dark:text-surface-0 w-full md:w-11/12 md:order-none order-1">
           <template v-if="isReviewing">
@@ -134,55 +234,98 @@
       <div class="card">
         <div class="flex flex-row items-center">
           <h5>Observation</h5>
-          <Button v-if="$can('add', 'Message')" severity="secondary" class="ml-auto" icon="pi pi-send" rounded
-            @click="openMessageCreateDialog()" v-tooltip.top="'Send message to user'" />
+          <Button
+            v-if="$can('add', 'Message')"
+            severity="secondary"
+            class="ml-auto"
+            icon="pi pi-send"
+            rounded
+            @click="openMessageCreateDialog()"
+            v-tooltip.top="'Send message to user'"
+          />
         </div>
-        <ObservationInfoData v-if="identificationTask?.observation" :observation="identificationTask?.observation" />
+        <ObservationInfoData
+          v-if="identificationTask?.observation"
+          :observation="identificationTask?.observation"
+        />
       </div>
       <div class="card">
         <div class="flex flex-col mb-4 gap-2">
           <div class="flex items-start gap-2">
             <h5 class="my-0!"><i class="pi pi-users" /> Annotations</h5>
             <!-- TODO: only if can annotate -->
-            <RouterLink v-if="!userHasAnnotated && !identificationTask?.review" class='ml-auto'
-              :to="{ name: 'annotate_identification_task', params: { observationUuid: observationUuid } }">
+            <RouterLink
+              v-if="!userHasAnnotated && !identificationTask?.review"
+              class="ml-auto"
+              :to="{
+                name: 'annotate_identification_task',
+                params: { observationUuid: observationUuid },
+              }"
+            >
               <!-- <Button class="ml-auto" icon="pi pi-plus" label="Add" /> -->
             </RouterLink>
           </div>
           <IdentificationTaskReviewActionMessage
-            v-if="identificationTask?.review && identificationTask?.result?.source == IdentificationTaskResultSource.Expert"
-            :review="identificationTask?.review" />
+            v-if="
+              identificationTask?.review &&
+              identificationTask?.result?.source == IdentificationTaskResultSource.Expert
+            "
+            :review="identificationTask?.review"
+          />
         </div>
         <div class="flex flex-col items-center gap-2">
           <span v-if="annotations.length === 0" class="text-lg text-gray-600 dark:text-gray-400">
             No annotations given for this identification task.
           </span>
-          <AnnotationPanel v-for="annotation in annotations" :key="annotation.id" :annotation="annotation"
-            :collapsed="!(annotation.feedback?.public_note || annotation.feedback?.internal_note)" class="w-full" />
+          <AnnotationPanel
+            v-for="annotation in annotations"
+            :key="annotation.id"
+            :annotation="annotation"
+            :collapsed="!(annotation.feedback?.public_note || annotation.feedback?.internal_note)"
+            class="w-full"
+          />
         </div>
       </div>
-
     </div>
     <div class="col-span-12 xl:col-span-6">
       <div class="card">
         <div class="flex flex-col mb-4 gap-2">
           <h5 class="my-0!">Photos</h5>
           <IdentificationTaskReviewActionMessage
-            v-if="identificationTask?.review && identificationTask?.result?.source == IdentificationTaskResultSource.Ai"
-            :review="identificationTask?.review" />
+            v-if="
+              identificationTask?.review &&
+              identificationTask?.result?.source == IdentificationTaskResultSource.Ai
+            "
+            :review="identificationTask?.review"
+          />
         </div>
-        <Galleria :value="photosWithPrediction" :numVisible="numVisible" :circular="true"
-          :showItemNavigators="photosWithPrediction.length > 1" :responsiveOptions="responsiveOptions"
-          :showItemNavigatorsOnHover="true" :showThumbnailNavigators="photosWithPrediction.length > numVisible">
+        <Galleria
+          :value="photosWithPrediction"
+          :numVisible="numVisible"
+          :circular="true"
+          :showItemNavigators="photosWithPrediction.length > 1"
+          :responsiveOptions="responsiveOptions"
+          :showItemNavigatorsOnHover="true"
+          :showThumbnailNavigators="photosWithPrediction.length > numVisible"
+        >
           <template #item="slotProps">
             <Image :src="slotProps.item.url" class="justify-center w-full h-full" preview>
               <template #image>
                 <figure class="relative">
                   <img :src="slotProps.item.url" class="w-full h-full" />
-                  <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction" />
+                  <PhotoPredictionBbox
+                    v-if="slotProps.item.prediction"
+                    :prediction="slotProps.item.prediction"
+                  />
                   <figcaption
-                    v-if="slotProps.item.uuid === (isReviewing ? editIdentificationTask?.public_photo.uuid : identificationTask?.public_photo.uuid)"
-                    class="absolute top-2 right-2 rounded-md">
+                    v-if="
+                      slotProps.item.uuid ===
+                      (isReviewing
+                        ? editIdentificationTask?.public_photo.uuid
+                        : identificationTask?.public_photo.uuid)
+                    "
+                    class="absolute top-2 right-2 rounded-md"
+                  >
                     <BestPhotoTag />
                   </figcaption>
                 </figure>
@@ -195,14 +338,30 @@
               <template #image>
                 <figure class="relative">
                   <img :src="slotProps.item.url" class="h-32 object-cover" />
-                  <PhotoPredictionBbox v-if="slotProps.item.prediction" :prediction="slotProps.item.prediction"
-                    :showLabel="false" />
+                  <PhotoPredictionBbox
+                    v-if="slotProps.item.prediction"
+                    :prediction="slotProps.item.prediction"
+                    :showLabel="false"
+                  />
                   <figcaption class="flex absolute top-2 right-2 rounded-md gap-1">
-                    <RadioButton v-if="isReviewing" v-model="editIdentificationTask!.public_photo.uuid"
-                      :value="slotProps.item.uuid" :inputId="slotProps.item.uuid" name="radio-BestPhoto" />
+                    <RadioButton
+                      v-if="isReviewing"
+                      v-model="editIdentificationTask!.public_photo.uuid"
+                      :value="slotProps.item.uuid"
+                      :inputId="slotProps.item.uuid"
+                      name="radio-BestPhoto"
+                    />
                     <Tag
-                      v-if="slotProps.item.uuid === (isReviewing ? editIdentificationTask?.public_photo.uuid : identificationTask?.public_photo.uuid)"
-                      icon="pi pi-sparkles" severity="success" rounded />
+                      v-if="
+                        slotProps.item.uuid ===
+                        (isReviewing
+                          ? editIdentificationTask?.public_photo.uuid
+                          : identificationTask?.public_photo.uuid)
+                      "
+                      icon="pi pi-sparkles"
+                      severity="success"
+                      rounded
+                    />
                   </figcaption>
                 </figure>
               </template>
@@ -213,67 +372,90 @@
     </div>
   </div>
 
-  <ReviewDialog v-if="capabilities?.review && identificationTask?.result && !identificationTask.review"
-    :identification-task="identificationTask" :visible="!isReviewing" :loading="isSubmittingReview || loading"
-    @agree="submitReview(CreateAgreeReviewRequestAction.Agree)" @disagree="isReviewing = true" />
-
+  <ReviewDialog
+    v-if="capabilities?.review && identificationTask?.result && !identificationTask.review"
+    :identification-task="identificationTask"
+    :visible="!isReviewing"
+    :loading="isSubmittingReview || loading"
+    @agree="submitReview(CreateAgreeReviewRequestAction.Agree)"
+    @disagree="isReviewing = true"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import { ref, watch, computed } from 'vue'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
-import { useToast } from "primevue/usetoast";
+import { useToast } from 'primevue/usetoast'
 import { useRouteParams, useRouteQuery } from '@vueuse/router'
 import { useRouter } from 'vue-router'
 
+import { identificationTasksApi } from '@/services/apiService'
+import { useUserStore } from '@/stores/userStore'
+import { useIdentificationTaskStore } from '@/stores/identificationTaskStore'
 
-import { identificationTasksApi } from '@/services/apiService';
-import { useUserStore } from '@/stores/userStore';
-import { useIdentificationTaskStore } from '@/stores/identificationTaskStore';
+import type {
+  IdentificationTask,
+  SimplePhoto,
+  Annotation,
+  PhotoPrediction,
+  IdentificationTasksApiReviewCreateRequest,
+  CreateAgreeReviewRequest,
+  CreateOverwriteReviewRequest,
+  MetaCreateIdentificationTaskReviewRequest,
+  SimpleTaxon,
+  IdentificationTaskCapabilities,
+} from 'mosquito-alert'
+import {
+  SpeciesClassificationConfidenceLabel,
+  CreateAgreeReviewRequestAction,
+  CreateOverwriteReviewRequestAction,
+  IdentificationTaskResultSource,
+  IdentificationtasksListOrderByParameter,
+  SpeciesCharacteristicsSex,
+} from 'mosquito-alert'
 
-import type { IdentificationTask, SimplePhoto, Annotation, PhotoPrediction, IdentificationTasksApiReviewCreateRequest, CreateAgreeReviewRequest, CreateOverwriteReviewRequest, MetaCreateIdentificationTaskReviewRequest, SimpleTaxon, IdentificationTaskCapabilities } from 'mosquito-alert';
-import { SpeciesClassificationConfidenceLabel, CreateAgreeReviewRequestAction, CreateOverwriteReviewRequestAction, IdentificationTaskResultSource, IdentificationtasksListOrderByParameter, SpeciesCharacteristicsSex } from 'mosquito-alert';
+import { formatLocalDateTime } from '@/utils/DateUtils'
+import { getPublicNote } from '@/utils/AnnotationUtils'
 
-import { formatLocalDateTime } from '@/utils/DateUtils';
-import { getPublicNote } from '@/utils/AnnotationUtils';
-
-import { IdentificationTaskDetailViewMode } from '@/enums/IdentificationTaskDetailViewMode';
-import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue';
-import IdentificationTaskIsSafeTag from '@/components/identificationTasks/IdentificationTaskIsSafeTag.vue';
-import IdentificationTaskIsSafeSelect from '@/components/identificationTasks/IdentificationTaskIsSafeSelect.vue';
-import IdentificationTaskResultTag from '@/components/identificationTasks/IdentificationTaskResultTag.vue';
-import IdentificationTaskReviewTag from '@/components/identificationTasks/IdentificationTaskReviewTag.vue';
-import IdentificationTaskReviewActionMessage from '@/components/identificationTasks/IdentificationTaskReviewActionMessage.vue';
-import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue';
+import { IdentificationTaskDetailViewMode } from '@/enums/IdentificationTaskDetailViewMode'
+import AnnotationPanel from '@/components/annotations/AnnotationPanel.vue'
+import IdentificationTaskIsSafeTag from '@/components/identificationTasks/IdentificationTaskIsSafeTag.vue'
+import IdentificationTaskIsSafeSelect from '@/components/identificationTasks/IdentificationTaskIsSafeSelect.vue'
+import IdentificationTaskResultTag from '@/components/identificationTasks/IdentificationTaskResultTag.vue'
+import IdentificationTaskReviewTag from '@/components/identificationTasks/IdentificationTaskReviewTag.vue'
+import IdentificationTaskReviewActionMessage from '@/components/identificationTasks/IdentificationTaskReviewActionMessage.vue'
+import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue'
 import MessagesCreateForm from '@/components/messages/MessagesCreateForm.vue'
-import ObservationInfoData from '@/components/observations/ObservationInfoData.vue';
-import BestPhotoTag from '@/components/photos/BestPhotoTag.vue';
-import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue';
-import ReviewDialog from '@/components/reviews/ReviewDialog.vue';
-import TaxonTagSelector from '@/components/taxa/TaxonTagSelector.vue';
-import AnnotationSexRadioButton from '@/components/annotations/AnnotationSexRadioButton.vue';
-import { useDialog } from 'primevue/usedialog';
+import ObservationInfoData from '@/components/observations/ObservationInfoData.vue'
+import BestPhotoTag from '@/components/photos/BestPhotoTag.vue'
+import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue'
+import ReviewDialog from '@/components/reviews/ReviewDialog.vue'
+import TaxonTagSelector from '@/components/taxa/TaxonTagSelector.vue'
+import AnnotationSexRadioButton from '@/components/annotations/AnnotationSexRadioButton.vue'
+import { useDialog } from 'primevue/usedialog'
 
-const dialog = useDialog();
+const dialog = useDialog()
 
-const userStore = useUserStore();
+const userStore = useUserStore()
 const identificationTaskStore = useIdentificationTaskStore()
-const toast = useToast();
-const router = useRouter();
+const toast = useToast()
+const router = useRouter()
 
-const observationUuid = useRouteParams<string>('observationUuid');
+const observationUuid = useRouteParams<string>('observationUuid')
 const mode = useRouteQuery<IdentificationTaskDetailViewMode>('mode')
 
-const isReviewing = ref<boolean>(false);
-const isReviewNotInsect = ref<boolean>(false);
-const isSubmittingReview = ref<boolean>(false);
-const editIdentificationTask = ref<IdentificationTask & { result: NonNullable<IdentificationTask['result']> }>();
+const isReviewing = ref<boolean>(false)
+const isReviewNotInsect = ref<boolean>(false)
+const isSubmittingReview = ref<boolean>(false)
+const editIdentificationTask = ref<
+  IdentificationTask & { result: NonNullable<IdentificationTask['result']> }
+>()
 
 watch(isReviewing, (newValue) => {
   if (identificationTask.value && newValue) {
@@ -295,137 +477,153 @@ watch(isReviewing, (newValue) => {
       },
     }
   } else {
-    editIdentificationTask.value = undefined;
+    editIdentificationTask.value = undefined
   }
-  isReviewNotInsect.value = editIdentificationTask.value?.result.taxon == null;
-});
+  isReviewNotInsect.value = editIdentificationTask.value?.result.taxon == null
+})
 
 watch(isReviewNotInsect, (newValue) => {
-  if (!editIdentificationTask.value) return;
+  if (!editIdentificationTask.value) return
 
   if (newValue) {
     editIdentificationTask.value!.result.taxon = null
-    editIdentificationTask.value!.result.characteristics = null;
+    editIdentificationTask.value!.result.characteristics = null
   } else {
-    editIdentificationTask.value!.result.taxon = identificationTask?.value!.result?.taxon || null;
+    editIdentificationTask.value!.result.taxon = identificationTask?.value!.result?.taxon || null
   }
   editIdentificationTask.value!.is_safe = !newValue
-});
+})
 
-const numVisible = ref(7);
-const loading = ref<boolean>(false);
-const capabilities = ref<IdentificationTaskCapabilities>();
-const identificationTask = ref<IdentificationTask>();
-const annotations = ref<Annotation[]>([]);
-const photoPredictions = ref<PhotoPrediction[]>([]);
+const numVisible = ref(7)
+const loading = ref<boolean>(false)
+const capabilities = ref<IdentificationTaskCapabilities>()
+const identificationTask = ref<IdentificationTask>()
+const annotations = ref<Annotation[]>([])
+const photoPredictions = ref<PhotoPrediction[]>([])
 
 watch(identificationTask, () => {
-  fetchCapabilities();
-  fetchAnnotations();
-  fetchPhotoPredictions();
+  fetchCapabilities()
+  fetchAnnotations()
+  fetchPhotoPredictions()
 })
 
 const userHasAnnotated = computed(() => {
-  return annotations.value.some(annotation => annotation.user.uuid === userStore.user!.uuid);
+  return annotations.value.some((annotation) => annotation.user.uuid === userStore.user!.uuid)
 })
 
-const photosWithPrediction = computed<(SimplePhoto & { prediction: PhotoPrediction | null })[]>(() => {
-  const photos = identificationTask.value?.observation.photos ?? [];
-  const bestPhotoUuid = identificationTask.value?.public_photo?.uuid;
-  const mappedPhotos = photos.map(photo => {
-    const prediction = photoPredictions.value.find(p => p.photo.uuid === photo.uuid) || null;
-    return {
-      ...photo,
-      prediction,
-    };
-  });
-  // Move the public photo to the first position
-  mappedPhotos.sort((a, b) => (a.uuid === bestPhotoUuid ? -1 : b.uuid === bestPhotoUuid ? 1 : 0));
+const photosWithPrediction = computed<(SimplePhoto & { prediction: PhotoPrediction | null })[]>(
+  () => {
+    const photos = identificationTask.value?.observation.photos ?? []
+    const bestPhotoUuid = identificationTask.value?.public_photo?.uuid
+    const mappedPhotos = photos.map((photo) => {
+      const prediction = photoPredictions.value.find((p) => p.photo.uuid === photo.uuid) || null
+      return {
+        ...photo,
+        prediction,
+      }
+    })
+    // Move the public photo to the first position
+    mappedPhotos.sort((a, b) => (a.uuid === bestPhotoUuid ? -1 : b.uuid === bestPhotoUuid ? 1 : 0))
 
-  return mappedPhotos;
-})
+    return mappedPhotos
+  },
+)
 
 const responsiveOptions = ref([
   {
     breakpoint: '1300px',
-    numVisible: 4
+    numVisible: 4,
   },
   {
     breakpoint: '575px',
-    numVisible: 1
-  }
-]);
+    numVisible: 1,
+  },
+])
 
-watch(observationUuid, () => {
-  fetchIdentificationTask();
-}, { immediate: true })
+watch(
+  observationUuid,
+  () => {
+    fetchIdentificationTask()
+  },
+  { immediate: true },
+)
 
 function fetchIdentificationTask() {
-  loading.value = true;
-  identificationTasksApi.retrieve({ observationUuid: observationUuid.value }).then(
-    (response) => {
-      identificationTask.value = response.data ?? undefined;
-    }
-  ).catch((error) => {
-    console.error(error);
-    identificationTask.value = undefined;
-  }).finally(() => {
-    loading.value = false;  // Ensure loading is set to false even if there is an error
-  });
+  loading.value = true
+  identificationTasksApi
+    .retrieve({ observationUuid: observationUuid.value })
+    .then((response) => {
+      identificationTask.value = response.data ?? undefined
+    })
+    .catch((error) => {
+      console.error(error)
+      identificationTask.value = undefined
+    })
+    .finally(() => {
+      loading.value = false // Ensure loading is set to false even if there is an error
+    })
 }
 
 function fetchCapabilities() {
-  if (!identificationTask.value) return;
+  if (!identificationTask.value) return
 
-  loading.value = true;
-  identificationTasksApi.capabilitiesRetrieve({ observationUuid: identificationTask.value.observation.uuid }).then(
-    (response) => {
-      capabilities.value = response.data;
-      loading.value = false;
-    }
-  ).catch((error) => {
-    console.error(error);
-    loading.value = false;  // Ensure loading is set to false even if there is an error
-  });
+  loading.value = true
+  identificationTasksApi
+    .capabilitiesRetrieve({ observationUuid: identificationTask.value.observation.uuid })
+    .then((response) => {
+      capabilities.value = response.data
+      loading.value = false
+    })
+    .catch((error) => {
+      console.error(error)
+      loading.value = false // Ensure loading is set to false even if there is an error
+    })
 }
 
 function fetchAnnotations() {
-  loading.value = true;
-  identificationTasksApi.annotationsList({ observationUuid: observationUuid.value, orderBy: [IdentificationtasksListOrderByParameter.CreatedAt,] }).then(
-    (response) => {
-      annotations.value = response.data.results || [];
-      loading.value = false;
-    }
-  ).catch((error) => {
-    console.error(error);
-    loading.value = false;  // Ensure loading is set to false even if there is an error
-  });
+  loading.value = true
+  identificationTasksApi
+    .annotationsList({
+      observationUuid: observationUuid.value,
+      orderBy: [IdentificationtasksListOrderByParameter.CreatedAt],
+    })
+    .then((response) => {
+      annotations.value = response.data.results || []
+      loading.value = false
+    })
+    .catch((error) => {
+      console.error(error)
+      loading.value = false // Ensure loading is set to false even if there is an error
+    })
 }
 
 function fetchPhotoPredictions() {
-  loading.value = true;
-  identificationTasksApi.predictionsList({ observationUuid: observationUuid.value }).then(
-    (response) => {
-      photoPredictions.value = response.data.results || [];
-      loading.value = false;
-    }
-  ).catch((error) => {
-    console.error(error);
-    loading.value = false;  // Ensure loading is set to false even if there is an error
-  });
+  loading.value = true
+  identificationTasksApi
+    .predictionsList({ observationUuid: observationUuid.value })
+    .then((response) => {
+      photoPredictions.value = response.data.results || []
+      loading.value = false
+    })
+    .catch((error) => {
+      console.error(error)
+      loading.value = false // Ensure loading is set to false even if there is an error
+    })
 }
 
-async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverwriteReviewRequestAction) {
-  if (!identificationTask.value) return;
+async function submitReview(
+  action: CreateAgreeReviewRequestAction | CreateOverwriteReviewRequestAction,
+) {
+  if (!identificationTask.value) return
 
-  let metaRequest: MetaCreateIdentificationTaskReviewRequest;
+  let metaRequest: MetaCreateIdentificationTaskReviewRequest
   switch (action) {
     case CreateAgreeReviewRequestAction.Agree:
       // Handle agree action
       metaRequest = {
         action: CreateAgreeReviewRequestAction.Agree,
-      } satisfies CreateAgreeReviewRequest;
-      break;
+      } satisfies CreateAgreeReviewRequest
+      break
     case CreateOverwriteReviewRequestAction.Overwrite:
       // Handle overwrite action
       metaRequest = {
@@ -433,65 +631,93 @@ async function submitReview(action: CreateAgreeReviewRequestAction | CreateOverw
         public_photo_uuid: editIdentificationTask.value!.public_photo.uuid,
         is_safe: editIdentificationTask.value!.is_safe,
         public_note: editIdentificationTask.value!.public_note,
-        classification: editIdentificationTask.value!.result.taxon ? {
-          taxon_id: editIdentificationTask.value!.result.taxon!.id,
-          confidence_label: editIdentificationTask.value!.result.is_high_confidence
-            ? SpeciesClassificationConfidenceLabel.Definitely
-            : SpeciesClassificationConfidenceLabel.Probably
-        } : null,
-        characteristics: editIdentificationTask.value!.result.characteristics ? {
-          sex: editIdentificationTask.value!.result.characteristics.sex,
-          is_blood_fed: editIdentificationTask.value!.result.characteristics.is_blood_fed,
-          is_gravid: editIdentificationTask.value!.result.characteristics.is_gravid,
-        } : null,
-      } satisfies CreateOverwriteReviewRequest;
-      break;
+        classification: editIdentificationTask.value!.result.taxon
+          ? {
+              taxon_id: editIdentificationTask.value!.result.taxon!.id,
+              confidence_label: editIdentificationTask.value!.result.is_high_confidence
+                ? SpeciesClassificationConfidenceLabel.Definitely
+                : SpeciesClassificationConfidenceLabel.Probably,
+            }
+          : null,
+        characteristics: editIdentificationTask.value!.result.characteristics
+          ? {
+              sex: editIdentificationTask.value!.result.characteristics.sex,
+              is_blood_fed: editIdentificationTask.value!.result.characteristics.is_blood_fed,
+              is_gravid: editIdentificationTask.value!.result.characteristics.is_gravid,
+            }
+          : null,
+      } satisfies CreateOverwriteReviewRequest
+      break
     default:
-      throw new Error(`Unknown action: ${action}`);
+      throw new Error(`Unknown action: ${action}`)
   }
 
   const request: IdentificationTasksApiReviewCreateRequest = {
     observationUuid: identificationTask.value.observation.uuid,
-    metaCreateIdentificationTaskReviewRequest: metaRequest
+    metaCreateIdentificationTaskReviewRequest: metaRequest,
   }
-  isSubmittingReview.value = true;
-  identificationTasksApi.reviewCreate(request).then(() => {
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Review submitted successfully.', life: 5000 });
-    isReviewing.value = false;
-    if (mode.value === IdentificationTaskDetailViewMode.Review) {
-      identificationTaskStore.fetchNextIdentificationTasksToReview().then(() => {
-        const identificationTaskToReview = identificationTaskStore.identificationTaskToReview
-        if (identificationTaskToReview) {
-          router.push({
-            name: 'identification_task',
-            params: {
-              observationUuid: identificationTaskToReview.observation.uuid
-            },
-            query: {
-              mode: IdentificationTaskDetailViewMode.Review
+  isSubmittingReview.value = true
+  identificationTasksApi
+    .reviewCreate(request)
+    .then(() => {
+      toast.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Review submitted successfully.',
+        life: 5000,
+      })
+      isReviewing.value = false
+      if (mode.value === IdentificationTaskDetailViewMode.Review) {
+        identificationTaskStore
+          .fetchNextIdentificationTasksToReview()
+          .then(() => {
+            const identificationTaskToReview = identificationTaskStore.identificationTaskToReview
+            if (identificationTaskToReview) {
+              router.push({
+                name: 'identification_task',
+                params: {
+                  observationUuid: identificationTaskToReview.observation.uuid,
+                },
+                query: {
+                  mode: IdentificationTaskDetailViewMode.Review,
+                },
+              })
+            } else {
+              toast.add({
+                severity: 'info',
+                summary: 'No more tasks available to review',
+                detail: 'No more identification tasks available to review at the moment',
+                life: 3000,
+              })
+              // No more tasks to review, exit review mode
+              isReviewing.value = false
             }
-          });
-        } else {
-          toast.add(
-            { severity: 'info', summary: 'No more tasks available to review', detail: 'No more identification tasks available to review at the moment', life: 3000 }
-          )
-          // No more tasks to review, exit review mode
-          isReviewing.value = false;
-        }
-      }).catch((error) => {
-        console.error('Error fetching next task to review:', error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'There was an error fetching the next task to review.', life: 5000 });
-      });
-    } else {
-      fetchIdentificationTask();
-    }
-  }).catch((error) => {
-    console.error('Error submitting review:', error);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'There was an error submitting the review.', life: 5000 });
-  }).finally(() => {
-    isSubmittingReview.value = false;
-  });
-
+          })
+          .catch((error) => {
+            console.error('Error fetching next task to review:', error)
+            toast.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'There was an error fetching the next task to review.',
+              life: 5000,
+            })
+          })
+      } else {
+        fetchIdentificationTask()
+      }
+    })
+    .catch((error) => {
+      console.error('Error submitting review:', error)
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'There was an error submitting the review.',
+        life: 5000,
+      })
+    })
+    .finally(() => {
+      isSubmittingReview.value = false
+    })
 }
 
 const generatePublicNote = () => {
@@ -500,10 +726,10 @@ const generatePublicNote = () => {
     editIdentificationTask.value!.public_note = getPublicNote(
       editIdentificationTask.value!.result.taxon,
       editIdentificationTask.value!.result.is_high_confidence,
-      identificationTask.value!.observation.user.locale ?? 'en'
-    );
+      identificationTask.value!.observation.user.locale ?? 'en',
+    )
   }
-};
+}
 
 function openMessageCreateDialog() {
   dialog.open(MessagesCreateForm, {
@@ -513,9 +739,7 @@ function openMessageCreateDialog() {
     },
     props: {
       header: 'Send message to the user',
-    }
-  }
-  );
+    },
+  })
 }
-
 </script>

@@ -1,20 +1,37 @@
 <template>
   <div class="flex flex-wrap justify-center gap-2">
-    <ToggleButton v-for="taxon in sortedRelevantTaxa" :key="taxon.id" :modelValue="selectedTaxon?.id === taxon.id"
-      :disabled="disabled" :onLabel="taxon.name" :offLabel="taxon.name" :class="{ 'italic': taxon.italicize }"
-      @update:modelValue="(value) => {
-        selectedTaxonOnTree = undefined; // Reset the tree selection when a taxon is selected
-        if (value) selectedTaxon = taxon;
-        else if (selectedTaxon === taxon) selectedTaxon = undefined;
-      }">
+    <ToggleButton
+      v-for="taxon in sortedRelevantTaxa"
+      :key="taxon.id"
+      :modelValue="selectedTaxon?.id === taxon.id"
+      :disabled="disabled"
+      :onLabel="taxon.name"
+      :offLabel="taxon.name"
+      :class="{ italic: taxon.italicize }"
+      @update:modelValue="
+        (value) => {
+          selectedTaxonOnTree = undefined // Reset the tree selection when a taxon is selected
+          if (value) selectedTaxon = taxon
+          else if (selectedTaxon === taxon) selectedTaxon = undefined
+        }
+      "
+    >
       <template #icon>
         <template v-if="selectedTaxon?.id === taxon.id">
           <slot name="selectedIcon" />
         </template>
       </template>
     </ToggleButton>
-    <TaxonTreeSelect v-model="selectedTaxonOnTree" placeholder="Other taxon" :disabled="disabled"
-      @on-change="(value) => { selectedTaxon = value }">
+    <TaxonTreeSelect
+      v-model="selectedTaxonOnTree"
+      placeholder="Other taxon"
+      :disabled="disabled"
+      @on-change="
+        (value) => {
+          selectedTaxon = value
+        }
+      "
+    >
       <template #value="{ value, placeholder }">
         <template v-if="value && value.length">
           <div v-for="node of value" :key="node.key">
@@ -33,30 +50,28 @@
       </template>
     </TaxonTreeSelect>
   </div>
-
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref, watch, watchEffect, computed } from 'vue'
 
-import { onMounted, ref, watch, watchEffect, computed } from 'vue';
+import type { SimpleTaxon, Taxon } from 'mosquito-alert'
+import { SimpleTaxonRank } from 'mosquito-alert'
 
-import type { SimpleTaxon, Taxon } from 'mosquito-alert';
-import { SimpleTaxonRank } from 'mosquito-alert';
+import TaxonTreeSelect from './TaxonTreeSelect.vue'
 
-import TaxonTreeSelect from './TaxonTreeSelect.vue';
+import { useTaxaStore } from '@/stores/taxaStore'
 
-import { useTaxaStore } from '@/stores/taxaStore';
+const taxaStore = useTaxaStore()
 
-const taxaStore = useTaxaStore();
+const relevantTaxa = ref<Taxon[]>([])
+const selectedTaxonOnTree = ref<Taxon>()
+const selectedTaxon = ref<Taxon>()
 
-const relevantTaxa = ref<Taxon[]>([]);
-const selectedTaxonOnTree = ref<Taxon>();
-const selectedTaxon = ref<Taxon>();
-
-const props = defineProps<({
-  modelValue?: Taxon | SimpleTaxon | null;
+const props = defineProps<{
+  modelValue?: Taxon | SimpleTaxon | null
   disabled?: boolean
-})>();
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Taxon | undefined): void
@@ -69,34 +84,31 @@ watch(selectedTaxon, (newValue) => {
 watchEffect(() => {
   const modelValue = props.modelValue
 
-  const isInRelevantTaxa = relevantTaxa.value.some(
-    taxon => taxon.id === modelValue?.id
-  )
+  const isInRelevantTaxa = relevantTaxa.value.some((taxon) => taxon.id === modelValue?.id)
 
-  selectedTaxon.value = modelValue ? modelValue as Taxon : undefined
+  selectedTaxon.value = modelValue ? (modelValue as Taxon) : undefined
   selectedTaxonOnTree.value = isInRelevantTaxa ? undefined : selectedTaxon.value
 })
 
 onMounted(async () => {
   if (taxaStore.relevant.length === 0) {
-    await taxaStore.fetchRelevant();
+    await taxaStore.fetchRelevant()
   }
-  relevantTaxa.value = taxaStore.relevant as Taxon[];
+  relevantTaxa.value = taxaStore.relevant as Taxon[]
 })
 
 const sortedRelevantTaxa = computed(() => {
   // Complex at the end, sorted by name
   return [...relevantTaxa.value].sort((a, b) => {
-    const aIsComplex = a.rank === SimpleTaxonRank.SpeciesComplex;
-    const bIsComplex = b.rank === SimpleTaxonRank.SpeciesComplex;
+    const aIsComplex = a.rank === SimpleTaxonRank.SpeciesComplex
+    const bIsComplex = b.rank === SimpleTaxonRank.SpeciesComplex
 
     // Sort by isComplex ascending (true last)
-    if (aIsComplex && !bIsComplex) return 1;
-    if (!aIsComplex && bIsComplex) return -1;
+    if (aIsComplex && !bIsComplex) return 1
+    if (!aIsComplex && bIsComplex) return -1
 
     // Then sort by name ascending
-    return a.name.localeCompare(b.name);
-  });
-});
-
+    return a.name.localeCompare(b.name)
+  })
+})
 </script>
