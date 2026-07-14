@@ -117,8 +117,10 @@
                 variant="text"
                 rounded
                 @click="
-                  isVisible = !isVisible
-                  isFlagged = false
+                  () => {
+                    isVisible = !isVisible
+                    isFlagged = false
+                  }
                 "
                 v-tooltip.top="isVisible ? 'Mark as hidden' : 'Mark as visible'"
               />
@@ -128,8 +130,10 @@
                 variant="text"
                 rounded
                 @click="
-                  isFlagged = !isFlagged
-                  isVisible = true
+                  () => {
+                    isFlagged = !isFlagged
+                    isVisible = true
+                  }
                 "
                 v-tooltip.top="isFlagged ? 'Mark as unflagged' : 'Mark as flagged'"
               />
