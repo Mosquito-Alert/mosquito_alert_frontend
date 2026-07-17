@@ -78,7 +78,7 @@ import { MessagesListMineSentOrderByParameter } from 'mosquito-alert'
 import MessagesDataTable from '@/components/messages/MessagesDataTable.vue'
 import type { DataTablePageEvent } from 'primevue'
 import UserAutocomplete from '@/components/users/UserAutocomplete.vue'
-import MessagesCreateForm from '@/components/messages/MessagesCreateForm.vue'
+import MessagesCreateForm from '@/components/messages/MessagesCreateForm/MessagesCreateForm.vue'
 
 const pageSelected = ref<number>(0)
 const messagesTotalCount = ref<number>(0)

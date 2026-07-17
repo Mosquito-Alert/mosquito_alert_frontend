@@ -431,7 +431,7 @@ import IdentificationTaskResultTag from '@/components/identificationTasks/Identi
 import IdentificationTaskReviewTag from '@/components/identificationTasks/IdentificationTaskReviewTag.vue'
 import IdentificationTaskReviewActionMessage from '@/components/identificationTasks/IdentificationTaskReviewActionMessage.vue'
 import IdentificationTaskStatusTag from '@/components/identificationTasks/IdentificationTaskStatusTag.vue'
-import MessagesCreateForm from '@/components/messages/MessagesCreateForm.vue'
+import MessagesCreateForm from '@/components/messages/MessagesCreateForm/MessagesCreateForm.vue'
 import ObservationInfoData from '@/components/observations/ObservationInfoData.vue'
 import BestPhotoTag from '@/components/photos/BestPhotoTag.vue'
 import PhotoPredictionBbox from '@/components/predictions/PhotoPredictionBbox.vue'
