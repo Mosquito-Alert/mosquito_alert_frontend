@@ -1,16 +1,26 @@
-import type {
-  LocalizedAudienceMessageBodyRequest,
-  LocalizedAudienceMessageTitleRequest,
-  LocalizedMessageBodyRequest,
-  LocalizedMessageTitleRequest,
-  User,
+import {
+  MessagesListMineSentOrderByParameter,
+  type LocalizedAudienceMessageBodyRequest,
+  type LocalizedAudienceMessageTitleRequest,
+  type LocalizedMessageBodyRequest,
+  type LocalizedMessageTitleRequest,
+  type Message,
+  type User,
 } from 'mosquito-alert'
 import { MessageTarget } from 'mosquito-alert/models'
 import { defineStore } from 'pinia'
 import type { LanguageKey } from '../types/types'
+import { messagesApi } from '../services/apiService'
 
 export const useMessagesStore = defineStore('messages', {
   state: () => ({
+    // * ################ List ################
+    messages: [] as Message[], // The list of messages
+    messagesTotalCount: 0, // The total number of messages
+    loadingMessages: false, // Whether the messages are being loaded
+    pageSelected: 0, // The selected page for the messages list
+    numRows: 25, // The number of rows per page for the messages list
+    // * ################ Creation ################
     userRecipients: null as User[] | null, // The selected recipients (users or audience)
     target: MessageTarget.Users as MessageTarget, // The selected target for the message being created
     bodyByLanguage: {} as Record<
@@ -24,10 +34,19 @@ export const useMessagesStore = defineStore('messages', {
     selectedLanguage: null as LanguageKey | null, // The selected language for the message being created
   }),
   getters: {
+    // * ################ List ################
+    listRequest: (state) => ({
+      orderBy: [MessagesListMineSentOrderByParameter.MinusCreatedAt],
+      page: state.pageSelected + 1,
+      pageSize: state.numRows,
+      recipientUuids: state.userRecipients
+        ? state.userRecipients.map((r: User) => r.uuid)
+        : undefined,
+    }),
+    // * ################ Creation ################
     // Check if the message creation form should be shown (i.e., if there are recipients selected)
-    showMessageCreationDetails: (state): boolean => {
-      return state.userRecipients !== null && state.userRecipients.length > 0
-    },
+    showMessageCreationDetails: (state): boolean =>
+      state.userRecipients !== null && state.userRecipients.length > 0,
     // Get the list of available languages for the message being created, based on the subject and body by language
     availableLanguages: (state): LanguageKey[] => {
       const languages = new Set<LanguageKey>()
@@ -55,6 +74,24 @@ export const useMessagesStore = defineStore('messages', {
     },
   },
   actions: {
+    // * ################ List ################
+    async fetchMessages() {
+      this.loadingMessages = true
+      try {
+        const response = await messagesApi.listMineSent(this.listRequest)
+        this.messages = response.data.results
+        this.messagesTotalCount = response.data.count
+      } catch (error) {
+        console.error('Error fetching messages:', error)
+      } finally {
+        this.loadingMessages = false
+      }
+    },
+    onPageChange(event: { page: number; rows: number }) {
+      this.pageSelected = event.page
+      this.numRows = event.rows
+    },
+    // * ################ Creation ################
     // Set the selected recipients (users or audience)
     setRecipients(recipients: User[] | null) {
       this.userRecipients = recipients

@@ -1,15 +1,15 @@
 <template>
   <div class="flex-1 h-full overflow-hidden flex border border-surface rounded-2xl">
     <DataTable
-      :value="messages"
+      :value="messagesStore.messages"
       dataKey="id"
-      :loading="loading"
+      :loading="messagesStore.loadingMessages"
       v-model:rows="numRows"
-      :total-records="messagesTotalCount"
+      :total-records="messagesStore.messagesTotalCount"
       lazy
       paginator
       :rowsPerPageOptions="[5, 10, 25, 50]"
-      @page="$emit('page', $event)"
+      @page="messagesStore.onPageChange"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
       currentPageReportTemplate="({totalRecords} items)"
       tableStyle="min-width: 50rem"
@@ -57,24 +57,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { DataTablePageEvent, DataTableRowSelectEvent } from 'primevue'
 import { htmlToText } from 'html-to-text'
+import type { DataTableRowSelectEvent } from 'primevue'
+import { Column, DataTable } from 'primevue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import type { Message } from 'mosquito-alert'
-import { formatLocalDateTime } from '@/utils/DateUtils'
 import UserAvatar from '@/components/users/UserAvatar.vue'
+import { formatLocalDateTime } from '@/utils/DateUtils'
+import type { Message } from 'mosquito-alert'
+import { useMessagesStore } from '../../stores/messagesStore'
 
-defineProps<{
-  messages?: Message[]
-  loading: boolean
-  messagesTotalCount: number
-}>()
-
-defineEmits<{
-  (e: 'page', event: DataTablePageEvent): void
-}>()
+const messagesStore = useMessagesStore()
 
 const router = useRouter()
 const numRows = ref<number>(25)
