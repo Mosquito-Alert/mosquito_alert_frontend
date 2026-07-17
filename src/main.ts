@@ -52,12 +52,13 @@ const MosquitoAlertPreset = definePreset(Aura, {
 app.use(PrimeVue, {
   theme: {
     preset: MosquitoAlertPreset,
-    // options: {
-    //   cssLayer: {
-    //     name: 'primevue',
-    //     order: 'theme, base, primevue, utilities',
-    //   },
-    // },
+    options: {
+      darkModeSelector: false || 'none',
+      //   cssLayer: {
+      //     name: 'primevue',
+      //     order: 'theme, base, primevue, utilities',
+      //   },
+    },
   },
 })
 app.use(ToastService)
