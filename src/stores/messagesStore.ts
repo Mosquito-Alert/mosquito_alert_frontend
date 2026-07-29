@@ -14,6 +14,7 @@ import { messagesApi } from '../services/apiService'
 
 export const useMessagesStore = defineStore('messages', {
   state: () => ({
+    showSendMessageDialog: false, // Whether the send message dialog is visible
     // * ################ List ################
     messages: [] as Message[], // The list of messages
     messagesTotalCount: 0, // The total number of messages
@@ -121,6 +122,10 @@ export const useMessagesStore = defineStore('messages', {
       }
 
       return true
+    },
+    onMessageSent() {
+      this.showSendMessageDialog = false
+      this.fetchMessages()
     },
   },
 })

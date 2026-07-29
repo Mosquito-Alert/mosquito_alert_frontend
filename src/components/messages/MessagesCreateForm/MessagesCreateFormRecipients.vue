@@ -76,24 +76,22 @@
         </InputGroup>
       </div>
       <!-- * AUDIENCE -->
-      <div
+      <MessagesCreateFormAudienceRecipients
         v-else-if="messagesStore.target === MessageTarget.Audience"
-        class="audience-target flex flex-row w-full items-center gap-2"
-      >
-        <!-- TODO: -->
-      </div>
+      />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import UserAutocomplete from '../../users/UserAutocomplete.vue'
+import MessagesCreateFormAudienceRecipients from './MessagesCreateFormAudienceRecipients.vue'
+
 import { getLanguageName } from '@/utils/Utils'
 import { MessageTarget } from 'mosquito-alert'
-import { onMounted, ref } from 'vue'
-
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
+import { onMounted, ref } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore.ts'
 import type { LanguageKey } from '../../../types/types.ts'
-import UserAutocomplete from '../../users/UserAutocomplete.vue'
 
 const messagesStore = useMessagesStore()
 

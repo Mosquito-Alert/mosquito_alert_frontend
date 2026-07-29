@@ -9,7 +9,7 @@
             v-if="$can('add', 'Message')"
             icon="pi pi-plus"
             label="New"
-            @click="showSendMessageDialog = true"
+            @click="messagesStore.showSendMessageDialog = true"
           />
         </div>
         <div class="flex items-center gap-2 ml-auto">
@@ -55,15 +55,8 @@
     <MessagesDataTable />
   </div>
 
-  <Dialog v-model:visible="showSendMessageDialog" modal header="Send message">
-    <MessagesCreateForm
-      @onMessageSent="
-        () => {
-          showSendMessageDialog = false
-          messagesStore.fetchMessages()
-        }
-      "
-    />
+  <Dialog v-model:visible="messagesStore.showSendMessageDialog" modal header="Send message">
+    <MessagesCreateForm />
   </Dialog>
 </template>
 <script setup lang="ts">
@@ -77,8 +70,6 @@ import { useMessagesStore } from '../../stores/messagesStore'
 const messagesStore = useMessagesStore()
 
 const showFilters = ref<boolean>(false)
-
-const showSendMessageDialog = ref<boolean>(false)
 
 onMounted(async () => {
   await messagesStore.fetchMessages()

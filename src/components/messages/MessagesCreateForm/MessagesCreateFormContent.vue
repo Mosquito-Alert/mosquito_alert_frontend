@@ -43,7 +43,6 @@ const messagesStore = useMessagesStore()
 const toast = useToast()
 
 // *  Props & emits */
-const emit = defineEmits(['onMessageSent'])
 const props = defineProps<{
   dialogRef: DynamicDialogInstance | undefined
 }>()
@@ -80,8 +79,8 @@ async function handleSend() {
       detail: 'Your message has been sent successfully.',
       life: 3000,
     })
-    // Emit event to parent to refresh message list
-    emit('onMessageSent')
+    // Emit event to refresh message list
+    messagesStore.onMessageSent()
     // Close dialog
     props.dialogRef?.close()
   } catch (error) {
