@@ -7,38 +7,27 @@
         :suggestions="geometrySuggestions"
         optionLabel="label"
         :loading="isSearchingGeometry"
-        @item-select="onGeometrySelect"
+        @option-select="onGeometrySelect"
         @complete="searchGeometry"
         :delay="350"
         placeholder="Search country, city or region..."
         class="min-w-64 flex-1"
       />
       <!-- Locale filter -->
-      <!-- <MultiSelect
-      v-model="selectedLocales"
-      :options="localeOptions"
-      placeholder="Any locale"
-      class="w-40"
-      display="chip"
-      @change="runFilterQuery"
-      /> -->
-      <!-- Last login filter -->
-      <!-- <Select
-      v-model="selectedLastLogin"
-      :options="lastLoginOptions"
-      optionLabel="label"
-      class="w-48"
-      @change="runFilterQuery"
-      /> -->
-      <!-- Hashtag filter -->
-      <!-- <MultiSelect
-        v-model="selectedHashtags"
-        :options="hashtagOptions"
-        placeholder="Hashtag"
-        class="w-40"
-        display="chip"
-        @change="runFilterQuery"
-      /> -->
+      <FloatLabel class="w-full md:w-60" variant="on">
+        <MultiSelect
+          id="locale-select"
+          v-model="selectedLocales"
+          :options="localeOptions"
+          optionLabel="label"
+          display="chip"
+          filter
+          showClear
+          :maxSelectedLabels="1"
+          class="w-full"
+        />
+        <label for="locale-select">Filter by locales</label>
+      </FloatLabel>
     </div>
 
     <!-- <div v-if="activeFilters.length" class="flex flex-wrap gap-2">
@@ -58,10 +47,29 @@
 </template>
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { AutoComplete, MultiSelect, Select, Chip } from 'primevue'
+import { AutoComplete, Select, Chip, MultiSelect, FloatLabel } from 'primevue'
 
+const lastLoginOptions = [
+  { label: 'Any time', value: null },
+  { label: 'Last 30 days', value: '30d' },
+  { label: 'Last 90 days', value: '90d' },
+  { label: 'Last year', value: '1y' },
+]
+
+const baseNominatimUrl = 'https://nominatim.openstreetmap.org/'
+
+// * Refs */
+// GEOMETRY
+const geometryQuery = ref('')
+// NOTE: https://nominatim.org/release-docs/develop/api/Output/#place_id-is-not-a-persistent-id
+const geometrySuggestions = ref<{ label: string; class: string; osmtype: string; osmid: string }[]>(
+  [],
+) // All the suggestions of the regions returned by Nominatim
+const isSearchingGeometry = ref(false) // Loading
+const selectedGeometry = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
+// LOCALES
 const localeOptions = [
-  { label: 'Any locale', value: null },
+  // { label: 'Any locale', value: null },
   { label: 'English', value: 'en' },
   { label: 'Spanish', value: 'es' },
   { label: 'Catalan', value: 'ca' },
@@ -87,23 +95,7 @@ const localeOptions = [
   { label: 'Turkish', value: 'tr' },
   { label: 'Chinese', value: 'zh-cn' },
 ]
-const lastLoginOptions = [
-  { label: 'Any time', value: null },
-  { label: 'Last 30 days', value: '30d' },
-  { label: 'Last 90 days', value: '90d' },
-  { label: 'Last year', value: '1y' },
-]
-
-const baseNominatimUrl = 'https://nominatim.openstreetmap.org/'
-
-// * Refs */
-const geometryQuery = ref('')
-// NOTE: https://nominatim.org/release-docs/develop/api/Output/#place_id-is-not-a-persistent-id
-const geometrySuggestions = ref<{ label: string; class: string; osmtype: string; osmid: string }[]>(
-  [],
-) // All the suggestions of the regions returned by Nominatim
-const isSearchingGeometry = ref(false) // Loading
-const selectedGeometry = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
+const selectedLocales = ref<string[]>([]) // The locales selected by the user
 
 // * Methods */
 const searchGeometry = async (event: { query: string }) => {
