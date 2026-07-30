@@ -1,17 +1,17 @@
 <template>
-  <div class="audience-target flex flex-col w-full items-center gap-3 pt-2">
+  <div class="audience-target flex flex-col w-full items-start gap-3 pt-2">
     <div class="flex flex-wrap gap-2">
       <!-- Search country, city or region -->
       <AutoComplete
-        v-model="geometryQuery"
-        :suggestions="geometrySuggestions"
+        v-model="regionQuery"
+        :suggestions="regionSuggestions"
         optionLabel="label"
-        :loading="isSearchingGeometry"
-        @option-select="onGeometrySelect"
-        @complete="searchGeometry"
+        :loading="isSearchingRegion"
+        @option-select="onRegionSelect"
+        @complete="searchRegion"
         :delay="350"
         placeholder="Search country, city or region..."
-        class="min-w-64 flex-1"
+        class="min-w-64"
       />
       <!-- Locale filter -->
       <FloatLabel class="w-full md:w-60" variant="on">
@@ -28,9 +28,21 @@
         />
         <label for="locale-select">Filter by locales</label>
       </FloatLabel>
+      <!-- Last Login filter -->
+      <FloatLabel class="w-full md:w-60" variant="on">
+        <Select
+          id="last-login-select"
+          v-model="selectedLastLogin"
+          :options="lastLoginOptions"
+          optionLabel="label"
+          class="w-full md:w-60"
+        />
+        <label for="last-login-select">Filter by last login</label>
+      </FloatLabel>
+      <!-- TODO: Hashtags filter -->
     </div>
 
-    <!-- <div v-if="activeFilters.length" class="flex flex-wrap gap-2">
+    <div v-if="activeFilters.length" class="flex flex-wrap gap-2">
       <Chip
         v-for="chip in activeFilters"
         :key="chip.key"
@@ -38,7 +50,7 @@
         removable
         @remove="removeFilter(chip)"
       />
-    </div> -->
+    </div>
 
     <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
       <!-- TODO: -->
@@ -49,27 +61,27 @@
 import { ref, computed } from 'vue'
 import { AutoComplete, Select, Chip, MultiSelect, FloatLabel } from 'primevue'
 
-const lastLoginOptions = [
-  { label: 'Any time', value: null },
-  { label: 'Last 30 days', value: '30d' },
-  { label: 'Last 90 days', value: '90d' },
-  { label: 'Last year', value: '1y' },
-]
-
 const baseNominatimUrl = 'https://nominatim.openstreetmap.org/'
+
+enum ChipKey {
+  GEOMETRY = 'geometry',
+  LAST_LOGIN = 'lastLogin',
+  LOCALE_PREFIX = 'locale:',
+  LOCALE_ALL = 'locale:all',
+  TAG_PREFIX = 'tag:',
+}
 
 // * Refs */
 // GEOMETRY
-const geometryQuery = ref('')
+const regionQuery = ref('')
 // NOTE: https://nominatim.org/release-docs/develop/api/Output/#place_id-is-not-a-persistent-id
-const geometrySuggestions = ref<{ label: string; class: string; osmtype: string; osmid: string }[]>(
+const regionSuggestions = ref<{ label: string; class: string; osmtype: string; osmid: string }[]>(
   [],
 ) // All the suggestions of the regions returned by Nominatim
-const isSearchingGeometry = ref(false) // Loading
+const isSearchingRegion = ref(false) // Loading
 const selectedGeometry = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
 // LOCALES
 const localeOptions = [
-  // { label: 'Any locale', value: null },
   { label: 'English', value: 'en' },
   { label: 'Spanish', value: 'es' },
   { label: 'Catalan', value: 'ca' },
@@ -95,11 +107,50 @@ const localeOptions = [
   { label: 'Turkish', value: 'tr' },
   { label: 'Chinese', value: 'zh-cn' },
 ]
-const selectedLocales = ref<string[]>([]) // The locales selected by the user
+const selectedLocales = ref<{ label: string; value: string }[]>([]) // The locales selected by the user
+// LAST LOGIN
+const lastLoginOptions = [
+  { label: 'Any time', daysSince: 0 },
+  { label: 'Last 7 days', daysSince: 7 },
+  { label: 'Last 30 days', daysSince: 30 },
+  { label: 'Last 90 days', daysSince: 90 },
+  { label: 'Last year', daysSince: 365 },
+]
+const selectedLastLogin = ref<{ label: string; daysSince: number } | null>(null) // The last login filter selected by the user
+// OTHERS
+// Active filters as removable chips
+const activeFilters = computed(() => {
+  console.log('activeFilters computed called')
+  console.log(selectedGeometry.value)
+  console.log(selectedLocales.value)
+  console.log(selectedLastLogin.value)
+  const chips: { key: string; label: string }[] = []
+  // Geometry
+  if (selectedGeometry.value) {
+    chips.push({
+      key: ChipKey.GEOMETRY,
+      label: selectedGeometry.value.localname || 'Selected region',
+    })
+  }
+  // Locales
+  if (selectedLocales.value.length === localeOptions.length) {
+    chips.push({ key: ChipKey.LOCALE_ALL, label: 'All locales' })
+  } else {
+    selectedLocales.value.forEach((l) =>
+      chips.push({ key: `${ChipKey.LOCALE_PREFIX}${l.value}`, label: l.label }),
+    )
+  }
+  // Last login
+  if (selectedLastLogin.value && selectedLastLogin.value.daysSince > 0) {
+    chips.push({ key: ChipKey.LAST_LOGIN, label: selectedLastLogin.value.label })
+  }
+  // TODO: selectedHashtags.value.forEach((h) => chips.push({ key: `tag:${h}`, label: `#${h}` }))
+  return chips
+})
 
 // * Methods */
-const searchGeometry = async (event: { query: string }) => {
-  isSearchingGeometry.value = true
+const searchRegion = async (event: { query: string }) => {
+  isSearchingRegion.value = true
 
   // Minimun data response (we want only the names)
   const url =
@@ -112,7 +163,7 @@ const searchGeometry = async (event: { query: string }) => {
     const response = await fetch(url)
     const data = await response.json()
     selectedGeometry.value = null // Clear the selected geometry when searching again
-    geometrySuggestions.value = data.map((item: any) => ({
+    regionSuggestions.value = data.map((item: any) => ({
       label: item.display_name,
       class: item.class,
       osmtype: item.osm_type.charAt(0).toUpperCase(), // Convert to uppercase (Nominatim returns lowercase, but we want uppercase)
@@ -121,14 +172,14 @@ const searchGeometry = async (event: { query: string }) => {
   } catch (error) {
     console.error('Error searching geometry:', error)
   } finally {
-    isSearchingGeometry.value = false
+    isSearchingRegion.value = false
   }
 }
 
-const onGeometrySelect = async (event: {
+const onRegionSelect = async (event: {
   value: { class: string; osmtype: string; osmid: string }
 }) => {
-  isSearchingGeometry.value = true
+  isSearchingRegion.value = true
 
   const selectedRegion = event.value
 
@@ -145,12 +196,30 @@ const onGeometrySelect = async (event: {
   try {
     const response = await fetch(url)
     const data = await response.json()
-    selectedGeometry.value = data?.geometry || null
-    geometrySuggestions.value = [] // Clear suggestions after selection
+    selectedGeometry.value = data || null
+    regionSuggestions.value = [] // Clear suggestions after selection
   } catch (error) {
     console.error('Error fetching geometry details:', error)
   } finally {
-    isSearchingGeometry.value = false
+    isSearchingRegion.value = false
   }
+}
+
+const removeFilter = (chip: { key: string; label: string }) => {
+  if (chip.key === ChipKey.GEOMETRY) selectedGeometry.value = null
+  else if (chip.key === ChipKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
+  else if (chip.key.startsWith(ChipKey.LOCALE_PREFIX)) {
+    if (chip.key === ChipKey.LOCALE_ALL) selectedLocales.value = []
+    else {
+      const val = chip.key.replace(ChipKey.LOCALE_PREFIX, '')
+      selectedLocales.value = selectedLocales.value.filter(({ value }) => value !== val)
+    }
+  }
+  // TODO:
+  // else if (chip.key.startsWith('tag:')) {
+  //   const val = chip.key.replace('tag:', '')
+  //   selectedHashtags.value = selectedHashtags.value.filter((h) => h !== val)
+  // }
+  // runFilterQuery()
 }
 </script>
