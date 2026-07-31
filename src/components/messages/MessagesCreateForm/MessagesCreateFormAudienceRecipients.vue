@@ -11,7 +11,9 @@
         @complete="searchRegion"
         :delay="350"
         placeholder="Search country, city or region..."
-        class="min-w-64"
+        :pt="{
+          root: 'w-full md:w-60',
+        }"
       />
       <!-- Locale filter -->
       <FloatLabel class="w-full md:w-60" variant="on">
@@ -52,14 +54,31 @@
       />
     </div>
 
-    <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-      <!-- TODO: -->
+    <div class="w-full h-96 md:h-150">
+      <l-map
+        :zoom="defaultMapZoom"
+        ref="map"
+        @ready="onMapReady"
+        :center="regionCenter"
+        class="rounded-xl"
+      >
+        <l-tile-layer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          layer-type="base"
+          name="OpenStreetMap"
+        />
+
+        <l-geo-json v-if="regionGeojson" :geojson="regionGeojson" />
+      </l-map>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { AutoComplete, Select, Chip, MultiSelect, FloatLabel } from 'primevue'
+import { LGeoJson, LMap, LTileLayer } from '@vue-leaflet/vue-leaflet'
+import type { PointTuple } from 'leaflet'
+import L from 'leaflet'
+import { AutoComplete, Chip, FloatLabel, MultiSelect, Select } from 'primevue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 const baseNominatimUrl = 'https://nominatim.openstreetmap.org/'
 
@@ -72,6 +91,21 @@ enum ChipKey {
 }
 
 // * Refs */
+// MAP
+const map = ref<InstanceType<typeof LMap> | null>(null) // The map instance
+const mapReady = ref(false)
+
+const defaultMapCenter = [40, -3] as PointTuple // Default center (Madrid, Spain)
+const defaultMapZoom = 6 // Default zoom (Spain)
+const regionGeojson = computed(() => {
+  if (!selectedRegion.value) return null
+  return selectedRegion.value.geometry || null
+})
+const regionCenter = computed<PointTuple>(() => {
+  if (!selectedRegion.value) return defaultMapCenter // Default center
+  const { lat, lon } = selectedRegion.value.centroid || {}
+  return lat && lon ? ([lat, lon] as PointTuple) : defaultMapCenter
+})
 // GEOMETRY
 const regionQuery = ref('')
 // NOTE: https://nominatim.org/release-docs/develop/api/Output/#place_id-is-not-a-persistent-id
@@ -79,7 +113,7 @@ const regionSuggestions = ref<{ label: string; class: string; osmtype: string; o
   [],
 ) // All the suggestions of the regions returned by Nominatim
 const isSearchingRegion = ref(false) // Loading
-const selectedGeometry = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
+const selectedRegion = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
 // LOCALES
 const localeOptions = [
   { label: 'English', value: 'en' },
@@ -117,19 +151,15 @@ const lastLoginOptions = [
   { label: 'Last year', daysSince: 365 },
 ]
 const selectedLastLogin = ref<{ label: string; daysSince: number } | null>(null) // The last login filter selected by the user
-// OTHERS
+
 // Active filters as removable chips
 const activeFilters = computed(() => {
-  console.log('activeFilters computed called')
-  console.log(selectedGeometry.value)
-  console.log(selectedLocales.value)
-  console.log(selectedLastLogin.value)
   const chips: { key: string; label: string }[] = []
   // Geometry
-  if (selectedGeometry.value) {
+  if (selectedRegion.value) {
     chips.push({
       key: ChipKey.GEOMETRY,
-      label: selectedGeometry.value.localname || 'Selected region',
+      label: selectedRegion.value.localname || 'Selected region',
     })
   }
   // Locales
@@ -162,7 +192,7 @@ const searchRegion = async (event: { query: string }) => {
   try {
     const response = await fetch(url)
     const data = await response.json()
-    selectedGeometry.value = null // Clear the selected geometry when searching again
+    selectedRegion.value = null // Clear the selected geometry when searching again
     regionSuggestions.value = data.map((item: any) => ({
       label: item.display_name,
       class: item.class,
@@ -181,22 +211,22 @@ const onRegionSelect = async (event: {
 }) => {
   isSearchingRegion.value = true
 
-  const selectedRegion = event.value
+  const selectedSuggestion = event.value
 
   // We want now to fetch the geometry details for the selected item
   const url =
     baseNominatimUrl +
     'details' +
-    `?osmtype=${selectedRegion.osmtype}` +
-    `&osmid=${selectedRegion.osmid}` +
-    `&class=${selectedRegion.class}` +
+    `?osmtype=${selectedSuggestion.osmtype}` +
+    `&osmid=${selectedSuggestion.osmid}` +
+    `&class=${selectedSuggestion.class}` +
     `&polygon_geojson=1` +
     `&polygon_threshold=0.005` // Simplify the polygon
 
   try {
     const response = await fetch(url)
     const data = await response.json()
-    selectedGeometry.value = data || null
+    selectedRegion.value = data || null
     regionSuggestions.value = [] // Clear suggestions after selection
   } catch (error) {
     console.error('Error fetching geometry details:', error)
@@ -205,9 +235,35 @@ const onRegionSelect = async (event: {
   }
 }
 
+const onMapReady = (mapInstance: InstanceType<typeof LMap>) => {
+  if (!mapInstance) return
+  map.value = mapInstance
+  mapReady.value = true
+}
+
+watch(
+  [mapReady, regionGeojson],
+  async ([ready, geojson]) => {
+    if (!ready || !geojson || !map.value?.leafletObject) return
+
+    await nextTick() // Wait for the map to be fully rendered before fitting bounds
+
+    const bounds = L.geoJSON(geojson).getBounds()
+
+    if (bounds.isValid()) {
+      map.value.leafletObject.fitBounds(bounds, {
+        padding: [20, 20],
+      })
+    }
+  },
+  { immediate: true },
+)
+
 const removeFilter = (chip: { key: string; label: string }) => {
-  if (chip.key === ChipKey.GEOMETRY) selectedGeometry.value = null
-  else if (chip.key === ChipKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
+  if (chip.key === ChipKey.GEOMETRY) {
+    selectedRegion.value = null
+    map.value?.leafletObject?.setView(defaultMapCenter, defaultMapZoom) // Reset to default view
+  } else if (chip.key === ChipKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
   else if (chip.key.startsWith(ChipKey.LOCALE_PREFIX)) {
     if (chip.key === ChipKey.LOCALE_ALL) selectedLocales.value = []
     else {
