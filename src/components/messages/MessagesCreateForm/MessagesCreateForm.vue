@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4 w-full p2">
+  <div class="flex flex-col gap-4 w-full p-2">
     <div>
       <SelectButton
         v-model="messagesStore.target"
@@ -55,7 +55,7 @@ watch(
     // Clear recipients when form type changes
     messagesStore.setRecipients(null)
     // Clear audience when form type changes
-    // TODO: topicRecipient.value = null
+    messagesStore.clearAudience()
     messagesStore.subjectByLanguage = {} as Record<
       keyof LocalizedMessageTitleRequest | keyof LocalizedAudienceMessageTitleRequest,
       string | undefined

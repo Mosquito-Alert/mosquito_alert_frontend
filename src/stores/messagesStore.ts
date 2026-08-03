@@ -1,16 +1,18 @@
 import {
   MessagesListMineSentOrderByParameter,
+  type AudienceFilterRequest,
   type LocalizedAudienceMessageBodyRequest,
   type LocalizedAudienceMessageTitleRequest,
   type LocalizedMessageBodyRequest,
   type LocalizedMessageTitleRequest,
   type Message,
+  type MetaCreateMessageRequest,
   type User,
 } from 'mosquito-alert'
 import { MessageTarget } from 'mosquito-alert/models'
 import { defineStore } from 'pinia'
-import type { LanguageKey } from '../types/types'
 import { messagesApi } from '../services/apiService'
+import type { LanguageKey } from '../types/types'
 
 export const useMessagesStore = defineStore('messages', {
   state: () => ({
@@ -23,6 +25,7 @@ export const useMessagesStore = defineStore('messages', {
     numRows: 25, // The number of rows per page for the messages list
     // * ################ Creation ################
     userRecipients: null as User[] | null, // The selected recipients (users or audience)
+    audience: null as AudienceFilterRequest | null, // The selected audience for the message being created
     target: MessageTarget.Users as MessageTarget, // The selected target for the message being created
     bodyByLanguage: {} as Record<
       keyof LocalizedMessageBodyRequest | keyof LocalizedAudienceMessageBodyRequest,
@@ -73,6 +76,23 @@ export const useMessagesStore = defineStore('messages', {
       }
       return Array.from(languages)
     },
+    messageRequest: (state): MetaCreateMessageRequest => {
+      const req = {
+        target: state.target as any, // as MessageTarget,
+        content: {
+          title: state.subjectByLanguage,
+          body: state.bodyByLanguage,
+        },
+      } as any // as MetaCreateMessageRequest
+      if (state.target === MessageTarget.Users) {
+        req['user_uuids'] = state.userRecipients
+          ? state.userRecipients.map((r: User) => r.uuid as string)
+          : []
+      } else {
+        req['audience'] = state.audience
+      }
+      return req as MetaCreateMessageRequest
+    },
   },
   actions: {
     // * ################ List ################
@@ -96,6 +116,33 @@ export const useMessagesStore = defineStore('messages', {
     // Set the selected recipients (users or audience)
     setRecipients(recipients: User[] | null) {
       this.userRecipients = recipients
+    },
+    // Set the selected audience for the message being created
+    setAudience({
+      geometry,
+      daysSinceLastLogin,
+      locales,
+    }: {
+      geometry: any
+      daysSinceLastLogin: number | null
+      locales: string[] | null
+    }) {
+      this.audience = {} as AudienceFilterRequest
+      if (geometry) {
+        this.audience.in_area = geometry
+      }
+      if (daysSinceLastLogin) {
+        const date = new Date()
+        date.setDate(date.getDate() - daysSinceLastLogin)
+        this.audience.last_login_after = date.toISOString()
+      }
+      if (locales) {
+        this.audience.locale = locales[0] as any // TODO: Handle multiple locales if needed
+      }
+      console.log(this.audience)
+    },
+    clearAudience() {
+      this.audience = null
     },
     // Check if the message subject is complete for a given language (i.e., if it is not empty or whitespace)
     isSubjectComplete(lang: LanguageKey) {

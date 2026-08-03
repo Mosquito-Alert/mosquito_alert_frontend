@@ -49,30 +49,8 @@ const props = defineProps<{
 
 async function handleSend() {
   try {
-    if (messagesStore.target === MessageTarget.Users) {
-      await messagesApi.create({
-        metaCreateMessageRequest: {
-          target: MessageTarget.Users,
-          user_uuids: messagesStore.userRecipients?.map((user) => user.uuid) || [],
-          content: {
-            title: messagesStore.subjectByLanguage,
-            body: messagesStore.bodyByLanguage,
-          },
-        },
-      })
-    }
-    // else if (selectedFormType.value === 'audience' && topicRecipient.value) {
-    //   await messagesApi.create({
-    //     metaCreateMessageRequest: {
-    //       target: CreateAudienceMessageRequestTarget.Audience,
-    //       content: {
-    //         title: subjectByLanguage.value as LocalizedAudienceMessageTitleRequest,
-    //         body: bodyByLanguage.value as LocalizedAudienceMessageBodyRequest,
-    //       },
-    //       audience: {},
-    //     },
-    //   })
-    // }
+    await messagesApi.create({ metaCreateMessageRequest: messagesStore.messageRequest })
+
     toast.add({
       severity: 'success',
       summary: 'Message sent',

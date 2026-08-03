@@ -44,9 +44,9 @@
       <!-- TODO: Hashtags filter -->
     </div>
 
-    <div v-if="activeFilters.length" class="flex flex-wrap gap-2">
+    <div v-if="activeFiltersAsChips.length" class="flex flex-wrap gap-2 max-w-2xl">
       <Chip
-        v-for="chip in activeFilters"
+        v-for="chip in activeFiltersAsChips"
         :key="chip.key"
         :label="chip.label"
         removable
@@ -71,6 +71,10 @@
         <l-geo-json v-if="regionGeojson" :geojson="regionGeojson" />
       </l-map>
     </div>
+
+    <div class="flex justify-end gap-2">
+      <Button label="Select Audience" variant="outlined" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -79,6 +83,9 @@ import type { PointTuple } from 'leaflet'
 import L from 'leaflet'
 import { AutoComplete, Chip, FloatLabel, MultiSelect, Select } from 'primevue'
 import { computed, nextTick, ref, watch } from 'vue'
+import { useMessagesStore } from '../../../stores/messagesStore'
+
+const messagesStore = useMessagesStore()
 
 const baseNominatimUrl = 'https://nominatim.openstreetmap.org/'
 
@@ -144,16 +151,16 @@ const localeOptions = [
 const selectedLocales = ref<{ label: string; value: string }[]>([]) // The locales selected by the user
 // LAST LOGIN
 const lastLoginOptions = [
-  { label: 'Any time', daysSince: 0 },
+  { label: 'Any time', daysSince: null },
   { label: 'Last 7 days', daysSince: 7 },
   { label: 'Last 30 days', daysSince: 30 },
   { label: 'Last 90 days', daysSince: 90 },
   { label: 'Last year', daysSince: 365 },
 ]
-const selectedLastLogin = ref<{ label: string; daysSince: number } | null>(null) // The last login filter selected by the user
+const selectedLastLogin = ref<{ label: string; daysSince: number | null } | null>(null) // The last login filter selected by the user
 
 // Active filters as removable chips
-const activeFilters = computed(() => {
+const activeFiltersAsChips = computed(() => {
   const chips: { key: string; label: string }[] = []
   // Geometry
   if (selectedRegion.value) {
@@ -171,7 +178,7 @@ const activeFilters = computed(() => {
     )
   }
   // Last login
-  if (selectedLastLogin.value && selectedLastLogin.value.daysSince > 0) {
+  if (selectedLastLogin.value && selectedLastLogin.value.daysSince !== null) {
     chips.push({ key: ChipKey.LAST_LOGIN, label: selectedLastLogin.value.label })
   }
   // TODO: selectedHashtags.value.forEach((h) => chips.push({ key: `tag:${h}`, label: `#${h}` }))
@@ -241,24 +248,6 @@ const onMapReady = (mapInstance: InstanceType<typeof LMap>) => {
   mapReady.value = true
 }
 
-watch(
-  [mapReady, regionGeojson],
-  async ([ready, geojson]) => {
-    if (!ready || !geojson || !map.value?.leafletObject) return
-
-    await nextTick() // Wait for the map to be fully rendered before fitting bounds
-
-    const bounds = L.geoJSON(geojson).getBounds()
-
-    if (bounds.isValid()) {
-      map.value.leafletObject.fitBounds(bounds, {
-        padding: [20, 20],
-      })
-    }
-  },
-  { immediate: true },
-)
-
 const removeFilter = (chip: { key: string; label: string }) => {
   if (chip.key === ChipKey.GEOMETRY) {
     selectedRegion.value = null
@@ -278,4 +267,36 @@ const removeFilter = (chip: { key: string; label: string }) => {
   // }
   // runFilterQuery()
 }
+
+watch(
+  [mapReady, regionGeojson],
+  async ([ready, geojson]) => {
+    if (!ready || !geojson || !map.value?.leafletObject) return
+
+    await nextTick() // Wait for the map to be fully rendered before fitting bounds
+
+    const bounds = L.geoJSON(geojson).getBounds()
+
+    if (bounds.isValid()) {
+      map.value.leafletObject.fitBounds(bounds, {
+        padding: [20, 20],
+      })
+    }
+  },
+  { immediate: true },
+)
+
+// Watch all the filter
+watch(
+  [selectedRegion, selectedLocales, selectedLastLogin],
+  () => {
+    // Update the store with the new audience filter
+    messagesStore.setAudience({
+      geometry: selectedRegion.value?.geometry || null,
+      locales: selectedLocales.value.length ? selectedLocales.value.map((l) => l.value) : null,
+      daysSinceLastLogin: selectedLastLogin.value?.daysSince || null,
+    })
+  },
+  { deep: true },
+)
 </script>
