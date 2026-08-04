@@ -1,6 +1,6 @@
 <template>
   <div class="audience-target flex flex-col w-full items-start gap-3 pt-2">
-    <div class="flex flex-wrap gap-2">
+    <div v-if="!messagesStore.audienceSelected" class="select-filters flex flex-wrap gap-2">
       <!-- Search country, city or region -->
       <InputGroup
         :pt="{
@@ -65,27 +65,47 @@
       <!-- TODO: Hashtags filter -->
     </div>
 
-    <div v-if="activeFiltersAsChips.length" class="flex flex-wrap gap-2">
-      <Chip
-        v-for="chip in activeFiltersAsChips"
-        :key="chip.key"
-        :label="chip.label"
-        removable
-        @remove="removeFilter(chip)"
-        :pt="{
-          root:
-            chip.key === ChipKey.GEOMETRY
-              ? 'bg-indigo-100! '
-              : chip.key === ChipKey.LAST_LOGIN
-                ? 'bg-teal-100! '
-                : chip.key.startsWith(ChipKey.LOCALE_PREFIX)
-                  ? 'bg-cyan-100! '
-                  : '',
+    <div class="flex flex-row w-full items-center gap-2">
+      <div
+        v-if="activeFiltersAsChips.length"
+        class="active-filters flex flex-col gap-1 w-full"
+        :class="{
+          'bg-gray-100 py-1 px-3 rounded-lg': messagesStore.audienceSelected,
         }"
+      >
+        <span v-if="messagesStore.audienceSelected" class="text-sm font-medium italic text-gray-600"
+          >Active filters:</span
+        >
+        <div class="chips flex flex-wrap gap-1.5">
+          <Chip
+            v-for="chip in activeFiltersAsChips"
+            :key="chip.key"
+            :label="chip.label"
+            :removable="!messagesStore.audienceSelected"
+            @remove="removeFilter(chip)"
+            :pt="{
+              root:
+                chip.key === ChipKey.GEOMETRY
+                  ? 'bg-indigo-100! '
+                  : chip.key === ChipKey.LAST_LOGIN
+                    ? 'bg-teal-100! '
+                    : chip.key.startsWith(ChipKey.LOCALE_PREFIX)
+                      ? 'bg-cyan-100! '
+                      : '',
+            }"
+          />
+        </div>
+      </div>
+      <!-- Language selector -->
+      <CreateFormLanguageSelector
+        v-if="
+          messagesStore.showMessageCreationDetails && messagesStore.availableLanguages.length > 0
+        "
+        class="ml-auto"
       />
     </div>
 
-    <div class="w-full h-96 md:h-150">
+    <div v-if="!messagesStore.audienceSelected" class="audience-map w-full h-96 md:h-150">
       <l-map
         :zoom="defaultMapZoom"
         ref="map"
@@ -103,13 +123,13 @@
       </l-map>
     </div>
 
-    <div class="flex justify-end gap-2">
-      <Button
-        label="Select Audience"
-        variant="outlined"
-        @click="messagesStore.audienceSelected = true"
-      />
-    </div>
+    <Button
+      v-if="!messagesStore.audienceSelected && activeFiltersAsChips.length > 0"
+      label="Select Audience"
+      variant="outlined"
+      @click="messagesStore.audienceSelected = true"
+      class="justify-end"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -120,13 +140,15 @@ import {
   AutoComplete,
   Chip,
   FloatLabel,
-  MultiSelect,
-  Select,
   InputGroup,
   InputGroupAddon,
+  MultiSelect,
+  Select,
 } from 'primevue'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore'
+import CreateFormLanguageSelector from './MessageCreateFormLanguageSelector.vue'
+import { localeOptions } from '../../../utils/constants.ts'
 
 const messagesStore = useMessagesStore()
 
@@ -165,32 +187,6 @@ const regionSuggestions = ref<{ label: string; class: string; osmtype: string; o
 const isSearchingRegion = ref(false) // Loading
 const selectedRegion = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
 // LOCALES
-const localeOptions = [
-  { label: 'English', value: 'en' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'Catalan', value: 'ca' },
-  { label: 'Basque', value: 'eu' },
-  { label: 'Bengali', value: 'bn' },
-  { label: 'Swedish', value: 'sv' },
-  { label: 'German', value: 'de' },
-  { label: 'Albanian', value: 'sq' },
-  { label: 'Greek', value: 'el' },
-  { label: 'Galician', value: 'gl' },
-  { label: 'Hungarian', value: 'hu' },
-  { label: 'Portuguese', value: 'pt' },
-  { label: 'Slovenian', value: 'sl' },
-  { label: 'Italian', value: 'it' },
-  { label: 'French', value: 'fr' },
-  { label: 'Bulgarian', value: 'bg' },
-  { label: 'Romanian', value: 'ro' },
-  { label: 'Croatian', value: 'hr' },
-  { label: 'Macedonian', value: 'mk' },
-  { label: 'Serbian', value: 'sr' },
-  { label: 'Letzeburgesch', value: 'lb' },
-  { label: 'Dutch', value: 'nl' },
-  { label: 'Turkish', value: 'tr' },
-  { label: 'Chinese', value: 'zh-cn' },
-]
 const selectedLocales = ref<{ label: string; value: string }[]>([]) // The locales selected by the user
 // LAST LOGIN
 const lastLoginOptions = [

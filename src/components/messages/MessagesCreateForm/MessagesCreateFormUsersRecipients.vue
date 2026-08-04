@@ -18,65 +18,18 @@
     </InputGroup>
 
     <!-- Language selector -->
-    <InputGroup
+    <CreateFormLanguageSelector
       v-if="messagesStore.showMessageCreationDetails && messagesStore.availableLanguages.length > 0"
-      class="w-64!"
-    >
-      <InputGroupAddon>
-        <i class="pi pi-language" />
-      </InputGroupAddon>
-      <Select
-        :options="
-          messagesStore.availableLanguages.sort((a, b) =>
-            getLanguageName(a).localeCompare(getLanguageName(b)),
-          )
-        "
-        v-model="messagesStore.selectedLanguage"
-      >
-        <template #value="slotProps">
-          <div v-if="slotProps.value" class="flex gap-2 items-center">
-            <span :class="languageIsRequired(slotProps.value) ? 'font-bold' : ''">{{
-              getLanguageName(slotProps.value) ?? slotProps.value
-            }}</span>
-            <div v-if="languageIsRequired(slotProps.value)">
-              <i
-                v-if="!messagesStore.isLanguageComplete(slotProps.value)"
-                class="pi pi-times-circle text-red-500"
-              />
-              <i v-else class="pi pi-check-circle text-green-500" />
-            </div>
-          </div>
-          <span v-else>
-            {{ slotProps.placeholder }}
-          </span>
-        </template>
-        <template #option="slotProps">
-          <div class="flex gap-2 items-center">
-            <span :class="languageIsRequired(slotProps.option) ? 'font-bold' : ''">
-              {{ getLanguageName(slotProps.option) }}
-            </span>
-            <div v-if="languageIsRequired(slotProps.option)">
-              <i
-                v-if="!messagesStore.isLanguageComplete(slotProps.option)"
-                class="pi pi-times-circle text-red-500"
-              />
-              <i v-else class="pi pi-check-circle text-green-500" />
-            </div>
-          </div>
-        </template>
-      </Select>
-    </InputGroup>
+    />
   </div>
 </template>
 <script setup lang="ts">
 import UserAutocomplete from '../../users/UserAutocomplete.vue'
+import CreateFormLanguageSelector from './MessageCreateFormLanguageSelector.vue'
 
-import { getLanguageName } from '@/utils/Utils'
-import { MessageTarget } from 'mosquito-alert'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { onMounted, ref } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore.ts'
-import type { LanguageKey } from '../../../types/types.ts'
 
 const messagesStore = useMessagesStore()
 
@@ -97,8 +50,4 @@ onMounted(() => {
     disableRecipientSelect.value = true
   }
 })
-
-const languageIsRequired = (lang: LanguageKey | string) => {
-  return messagesStore.requiredLanguages.includes(lang as LanguageKey)
-}
 </script>

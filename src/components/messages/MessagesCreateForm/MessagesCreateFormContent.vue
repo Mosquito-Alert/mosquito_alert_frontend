@@ -19,14 +19,23 @@
       :invalid="!messagesStore.isBodyComplete(messagesStore.selectedLanguage)"
       editorStyle="height: 320px"
     />
-    <Button
-      class="ml-auto"
-      :disabled="!messagesStore.canSubmit"
-      severity="primary"
-      label="Send"
-      icon="pi pi-send"
-      @click="handleSend"
-    />
+
+    <div class="flex justify-end gap-2">
+      <Button
+        v-if="messagesStore.target === MessageTarget.Audience && messagesStore.audienceSelected"
+        label="Change Audience"
+        variant="outlined"
+        @click="messagesStore.audienceSelected = false"
+      />
+      <Button
+        class="ml-auto"
+        :disabled="!messagesStore.canSubmit"
+        severity="primary"
+        label="Send"
+        icon="pi pi-send"
+        @click="handleSend"
+      />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -37,6 +46,7 @@ import { watch } from 'vue'
 import { messagesApi } from '../../../services/apiService'
 import { useMessagesStore } from '../../../stores/messagesStore'
 import type { LanguageKey } from '../../../types/types'
+import { locales } from '../../../utils/constants'
 
 const messagesStore = useMessagesStore()
 
@@ -47,6 +57,7 @@ const props = defineProps<{
   dialogRef: DynamicDialogInstance | undefined
 }>()
 
+// * Methods */
 async function handleSend() {
   try {
     await messagesApi.create({ metaCreateMessageRequest: messagesStore.messageRequest })
@@ -96,17 +107,16 @@ watch(
           }
         })
       }
+    } else {
+      locales.forEach((lang: LanguageKey) => {
+        if (!messagesStore.subjectByLanguage[lang]) {
+          messagesStore.subjectByLanguage[lang] = undefined
+        }
+        if (!messagesStore.bodyByLanguage[lang]) {
+          messagesStore.bodyByLanguage[lang] = undefined
+        }
+      })
     }
-    //  else {
-    //   TOPIC_LANGUAGES.forEach((lang: LanguageKey) => {
-    //     if (!messagesStore.subjectByLanguage[lang]) {
-    //       messagesStore.subjectByLanguage[lang] = undefined
-    //     }
-    //     if (!messagesStore.bodyByLanguage[lang]) {
-    //       messagesStore.bodyByLanguage[lang] = undefined
-    //     }
-    //   })
-    // }
 
     // Set first language as selected if none selected
     if (!messagesStore.selectedLanguage && newLanguages.length > 0) {

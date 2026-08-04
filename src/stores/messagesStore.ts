@@ -66,13 +66,18 @@ export const useMessagesStore = defineStore('messages', {
     },
     // Get the list of required languages for the message being created, based on the recipients
     requiredLanguages: (state): LanguageKey[] => {
-      if (!state.userRecipients || state.userRecipients.length === 0) {
-        return []
-      }
       const languages = new Set<LanguageKey>()
-      for (const recipient of state.userRecipients) {
-        if (recipient.locale) {
-          languages.add(recipient.locale as LanguageKey)
+      if (!state.userRecipients || state.userRecipients.length === 0) {
+        languages.add('en' as LanguageKey)
+        if (state.audience && state.audience.locale) {
+          // TODO: Array of locales
+          languages.add(state.audience.locale as LanguageKey)
+        }
+      } else {
+        for (const recipient of state.userRecipients) {
+          if (recipient.locale) {
+            languages.add(recipient.locale as LanguageKey)
+          }
         }
       }
       return Array.from(languages)
@@ -157,6 +162,10 @@ export const useMessagesStore = defineStore('messages', {
     isLanguageComplete(lang: LanguageKey) {
       return this.isSubjectComplete(lang) && this.isBodyComplete(lang)
     },
+    // Check if a given language is required for the message being created (i.e., if it is in the list of required languages)
+    isLanguageRequired(lang: LanguageKey) {
+      return this.requiredLanguages.includes(lang)
+    },
     // Check if the message can be submitted (i.e., if there are recipients selected and all required languages are complete)
     canSubmit() {
       if (!this.showMessageCreationDetails) {
@@ -173,6 +182,8 @@ export const useMessagesStore = defineStore('messages', {
     },
     onMessageSent() {
       this.showSendMessageDialog = false
+      this.setRecipients(null)
+      this.clearAudience()
       this.fetchMessages()
     },
   },
