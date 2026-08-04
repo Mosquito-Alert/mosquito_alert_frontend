@@ -17,7 +17,17 @@
       </SelectButton>
     </div>
     <div class="flex flex-col gap-4 w-full">
-      <MessagesCreateFormRecipients :dialogRef="dialogRef" />
+      <!-- * RECIPIENTS -->
+      <!-- Users -->
+      <MessagesCreateFormUsersRecipients
+        v-if="messagesStore.target === MessageTarget.Users"
+        :dialogRef="dialogRef"
+      />
+      <!-- Audience -->
+      <MessagesCreateFormAudienceRecipients
+        v-else-if="messagesStore.target === MessageTarget.Audience"
+      />
+      <!-- * CONTENT -->
       <MessagesCreateFormContent
         v-if="messagesStore.showMessageCreationDetails"
         :dialogRef="dialogRef"
@@ -27,7 +37,8 @@
 </template>
 <script setup lang="ts">
 import MessagesCreateFormContent from './MessagesCreateFormContent.vue'
-import MessagesCreateFormRecipients from './MessagesCreateFormRecipients.vue'
+import MessagesCreateFormUsersRecipients from './MessagesCreateFormUsersRecipients.vue'
+import MessagesCreateFormAudienceRecipients from './MessagesCreateFormAudienceRecipients.vue'
 
 import {
   MessageTarget,

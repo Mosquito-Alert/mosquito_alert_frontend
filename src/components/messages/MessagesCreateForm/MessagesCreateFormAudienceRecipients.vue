@@ -104,7 +104,11 @@
     </div>
 
     <div class="flex justify-end gap-2">
-      <Button label="Select Audience" variant="outlined" />
+      <Button
+        label="Select Audience"
+        variant="outlined"
+        @click="messagesStore.audienceSelected = true"
+      />
     </div>
   </div>
 </template>

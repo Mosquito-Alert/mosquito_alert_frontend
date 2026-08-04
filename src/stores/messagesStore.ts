@@ -26,6 +26,7 @@ export const useMessagesStore = defineStore('messages', {
     // * ################ Creation ################
     userRecipients: null as User[] | null, // The selected recipients (users or audience)
     audience: null as AudienceFilterRequest | null, // The selected audience for the message being created
+    audienceSelected: false, // Whether an audience has been selected for the message being created
     target: MessageTarget.Users as MessageTarget, // The selected target for the message being created
     bodyByLanguage: {} as Record<
       keyof LocalizedMessageBodyRequest | keyof LocalizedAudienceMessageBodyRequest,
@@ -50,7 +51,7 @@ export const useMessagesStore = defineStore('messages', {
     // * ################ Creation ################
     // Check if the message creation form should be shown (i.e., if there are recipients selected)
     showMessageCreationDetails: (state): boolean =>
-      state.userRecipients !== null && state.userRecipients.length > 0,
+      (state.userRecipients !== null && state.userRecipients.length > 0) || state.audienceSelected,
     // Get the list of available languages for the message being created, based on the subject and body by language
     availableLanguages: (state): LanguageKey[] => {
       const languages = new Set<LanguageKey>()
@@ -142,6 +143,7 @@ export const useMessagesStore = defineStore('messages', {
     },
     clearAudience() {
       this.audience = null
+      this.audienceSelected = false
     },
     // Check if the message subject is complete for a given language (i.e., if it is not empty or whitespace)
     isSubjectComplete(lang: LanguageKey) {
