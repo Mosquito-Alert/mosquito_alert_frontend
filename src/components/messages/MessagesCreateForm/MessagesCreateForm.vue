@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4 w-full p-2">
+  <div class="flex flex-col gap-4 w-4xl p-2">
     <div>
       <SelectButton
         v-model="messagesStore.target"
@@ -16,7 +16,7 @@
         </template>
       </SelectButton>
     </div>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 w-full">
       <MessagesCreateFormRecipients :dialogRef="dialogRef" />
       <MessagesCreateFormContent
         v-if="messagesStore.showMessageCreationDetails"

@@ -139,7 +139,6 @@ export const useMessagesStore = defineStore('messages', {
       if (locales) {
         this.audience.locale = locales[0] as any // TODO: Handle multiple locales if needed
       }
-      console.log(this.audience)
     },
     clearAudience() {
       this.audience = null

@@ -2,55 +2,86 @@
   <div class="audience-target flex flex-col w-full items-start gap-3 pt-2">
     <div class="flex flex-wrap gap-2">
       <!-- Search country, city or region -->
-      <AutoComplete
-        v-model="regionQuery"
-        :suggestions="regionSuggestions"
-        optionLabel="label"
-        :loading="isSearchingRegion"
-        @option-select="onRegionSelect"
-        @complete="searchRegion"
-        :delay="350"
-        placeholder="Search country, city or region..."
+      <InputGroup
         :pt="{
-          root: 'w-full md:w-60',
+          root: 'w-full! md:w-75!',
         }"
-      />
+      >
+        <InputGroupAddon> <i class="pi pi-map-marker"></i> </InputGroupAddon>
+        <AutoComplete
+          v-model="regionQuery"
+          :suggestions="regionSuggestions"
+          optionLabel="label"
+          :loading="isSearchingRegion"
+          @option-select="onRegionSelect"
+          @complete="searchRegion"
+          :delay="350"
+          placeholder="Search country, city or region..."
+          :pt="{
+            root: 'w-full',
+          }"
+        />
+      </InputGroup>
       <!-- Locale filter -->
-      <FloatLabel class="w-full md:w-60" variant="on">
-        <MultiSelect
-          id="locale-select"
-          v-model="selectedLocales"
-          :options="localeOptions"
-          optionLabel="label"
-          display="chip"
-          filter
-          showClear
-          :maxSelectedLabels="1"
-          class="w-full"
-        />
-        <label for="locale-select">Filter by locales</label>
-      </FloatLabel>
+      <InputGroup
+        :pt="{
+          root: 'w-full! md:w-70!',
+        }"
+      >
+        <InputGroupAddon> <i class="pi pi-globe"></i> </InputGroupAddon>
+        <FloatLabel class="w-full" variant="on">
+          <MultiSelect
+            id="locale-select"
+            v-model="selectedLocales"
+            :options="localeOptions"
+            optionLabel="label"
+            display="chip"
+            filter
+            showClear
+            :maxSelectedLabels="1"
+            class="w-full"
+          />
+          <label for="locale-select">Filter by locales</label>
+        </FloatLabel>
+      </InputGroup>
       <!-- Last Login filter -->
-      <FloatLabel class="w-full md:w-60" variant="on">
-        <Select
-          id="last-login-select"
-          v-model="selectedLastLogin"
-          :options="lastLoginOptions"
-          optionLabel="label"
-          class="w-full md:w-60"
-        />
-        <label for="last-login-select">Filter by last login</label>
-      </FloatLabel>
+      <InputGroup
+        :pt="{
+          root: 'w-full! md:w-70!',
+        }"
+      >
+        <InputGroupAddon> <i class="pi pi-history"></i> </InputGroupAddon>
+        <FloatLabel class="w-full" variant="on">
+          <Select
+            id="last-login-select"
+            v-model="selectedLastLogin"
+            :options="lastLoginOptions"
+            optionLabel="label"
+            class="w-full md:w-60"
+          />
+          <label for="last-login-select">Filter by last login</label>
+        </FloatLabel>
+      </InputGroup>
       <!-- TODO: Hashtags filter -->
     </div>
 
-    <div v-if="activeFiltersAsChips.length" class="flex flex-wrap gap-2 max-w-2xl">
+    <div v-if="activeFiltersAsChips.length" class="flex flex-wrap gap-2">
       <Chip
         v-for="chip in activeFiltersAsChips"
         :key="chip.key"
         :label="chip.label"
         removable
         @remove="removeFilter(chip)"
+        :pt="{
+          root:
+            chip.key === ChipKey.GEOMETRY
+              ? 'bg-indigo-100! '
+              : chip.key === ChipKey.LAST_LOGIN
+                ? 'bg-teal-100! '
+                : chip.key.startsWith(ChipKey.LOCALE_PREFIX)
+                  ? 'bg-cyan-100! '
+                  : '',
+        }"
       />
     </div>
 
@@ -81,7 +112,15 @@
 import { LGeoJson, LMap, LTileLayer } from '@vue-leaflet/vue-leaflet'
 import type { PointTuple } from 'leaflet'
 import L from 'leaflet'
-import { AutoComplete, Chip, FloatLabel, MultiSelect, Select } from 'primevue'
+import {
+  AutoComplete,
+  Chip,
+  FloatLabel,
+  MultiSelect,
+  Select,
+  InputGroup,
+  InputGroupAddon,
+} from 'primevue'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore'
 
