@@ -82,6 +82,7 @@ export const useMessagesStore = defineStore('messages', {
       }
       return Array.from(languages)
     },
+    // Get the message request object for creating a new message, based on the current state
     messageRequest: (state): MetaCreateMessageRequest => {
       const req = {
         target: state.target as any, // as MessageTarget,
@@ -168,7 +169,14 @@ export const useMessagesStore = defineStore('messages', {
     },
     // Check if the message can be submitted (i.e., if there are recipients selected and all required languages are complete)
     canSubmit() {
-      if (!this.showMessageCreationDetails) {
+      if (
+        !this.showMessageCreationDetails ||
+        // If the target is users, check if there are user recipients selected
+        (this.target === MessageTarget.Users &&
+          (!this.userRecipients || this.userRecipients.length === 0)) ||
+        // If the target is audience, check if an audience has been selected
+        (this.target === MessageTarget.Audience && (!this.audienceSelected || !this.audience))
+      ) {
         return false
       }
 

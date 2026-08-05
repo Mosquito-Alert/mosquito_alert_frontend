@@ -29,7 +29,7 @@
       />
       <Button
         class="ml-auto"
-        :disabled="!messagesStore.canSubmit"
+        :disabled="!messagesStore.canSubmit()"
         severity="primary"
         label="Send"
         icon="pi pi-send"
