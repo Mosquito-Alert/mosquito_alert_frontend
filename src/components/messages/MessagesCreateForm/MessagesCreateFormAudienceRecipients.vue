@@ -30,15 +30,13 @@
       >
         <InputGroupAddon> <i class="pi pi-globe"></i> </InputGroupAddon>
         <FloatLabel class="w-full" variant="on">
-          <MultiSelect
+          <Select
             id="locale-select"
-            v-model="selectedLocales"
+            v-model="selectedLocale"
             :options="localeOptions"
             optionLabel="label"
-            display="chip"
             filter
             showClear
-            :maxSelectedLabels="1"
             class="w-full"
           />
           <label for="locale-select">Filter by locales</label>
@@ -56,6 +54,7 @@
             id="last-login-select"
             v-model="selectedLastLogin"
             :options="lastLoginOptions"
+            showClear
             optionLabel="label"
             class="w-full md:w-60"
           />
@@ -136,19 +135,12 @@
 import { LGeoJson, LMap, LTileLayer } from '@vue-leaflet/vue-leaflet'
 import type { PointTuple } from 'leaflet'
 import L from 'leaflet'
-import {
-  AutoComplete,
-  Chip,
-  FloatLabel,
-  InputGroup,
-  InputGroupAddon,
-  MultiSelect,
-  Select,
-} from 'primevue'
+import { AutoComplete, Chip, FloatLabel, InputGroup, InputGroupAddon, Select } from 'primevue'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore'
 import CreateFormLanguageSelector from './MessageCreateFormLanguageSelector.vue'
 import { localeOptions } from '../../../utils/constants.ts'
+import type { AudienceFilterLocale } from 'mosquito-alert'
 
 const messagesStore = useMessagesStore()
 
@@ -158,7 +150,6 @@ enum ChipKey {
   GEOMETRY = 'geometry',
   LAST_LOGIN = 'lastLogin',
   LOCALE_PREFIX = 'locale:',
-  LOCALE_ALL = 'locale:all',
   TAG_PREFIX = 'tag:',
 }
 
@@ -187,10 +178,9 @@ const regionSuggestions = ref<{ label: string; class: string; osmtype: string; o
 const isSearchingRegion = ref(false) // Loading
 const selectedRegion = ref<any>(null) // The geometry of the region selected // TODO: Make it type Geometry
 // LOCALES
-const selectedLocales = ref<{ label: string; value: string }[]>([]) // The locales selected by the user
+const selectedLocale = ref<{ label: string; value: AudienceFilterLocale } | null>(null) // The locale selected by the user
 // LAST LOGIN
 const lastLoginOptions = [
-  { label: 'Any time', daysSince: null },
   { label: 'Last 7 days', daysSince: 7 },
   { label: 'Last 30 days', daysSince: 30 },
   { label: 'Last 90 days', daysSince: 90 },
@@ -209,12 +199,11 @@ const activeFiltersAsChips = computed(() => {
     })
   }
   // Locales
-  if (selectedLocales.value.length === localeOptions.length) {
-    chips.push({ key: ChipKey.LOCALE_ALL, label: 'All locales' })
-  } else {
-    selectedLocales.value.forEach((l) =>
-      chips.push({ key: `${ChipKey.LOCALE_PREFIX}${l.value}`, label: l.label }),
-    )
+  if (selectedLocale.value) {
+    chips.push({
+      key: `${ChipKey.LOCALE_PREFIX}${selectedLocale.value.value}`,
+      label: selectedLocale.value.label,
+    })
   }
   // Last login
   if (selectedLastLogin.value && selectedLastLogin.value.daysSince !== null) {
@@ -292,13 +281,8 @@ const removeFilter = (chip: { key: string; label: string }) => {
     selectedRegion.value = null
     map.value?.leafletObject?.setView(defaultMapCenter, defaultMapZoom) // Reset to default view
   } else if (chip.key === ChipKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
-  else if (chip.key.startsWith(ChipKey.LOCALE_PREFIX)) {
-    if (chip.key === ChipKey.LOCALE_ALL) selectedLocales.value = []
-    else {
-      const val = chip.key.replace(ChipKey.LOCALE_PREFIX, '')
-      selectedLocales.value = selectedLocales.value.filter(({ value }) => value !== val)
-    }
-  }
+  else if (chip.key.startsWith(ChipKey.LOCALE_PREFIX)) selectedLocale.value = null
+
   // TODO:
   // else if (chip.key.startsWith('tag:')) {
   //   const val = chip.key.replace('tag:', '')
@@ -327,12 +311,12 @@ watch(
 
 // Watch all the filter
 watch(
-  [selectedRegion, selectedLocales, selectedLastLogin],
+  [selectedRegion, selectedLocale, selectedLastLogin],
   () => {
     // Update the store with the new audience filter
     messagesStore.setAudience({
       geometry: selectedRegion.value?.geometry || null,
-      locales: selectedLocales.value.length ? selectedLocales.value.map((l) => l.value) : null,
+      locale: selectedLocale.value ? selectedLocale.value.value : null,
       daysSinceLastLogin: selectedLastLogin.value?.daysSince || null,
     })
   },

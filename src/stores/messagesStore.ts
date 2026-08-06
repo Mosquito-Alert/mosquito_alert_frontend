@@ -1,4 +1,5 @@
 import {
+  AudienceFilterLocale,
   MessagesListMineSentOrderByParameter,
   type AudienceFilterRequest,
   type LocalizedAudienceMessageBodyRequest,
@@ -128,11 +129,11 @@ export const useMessagesStore = defineStore('messages', {
     setAudience({
       geometry,
       daysSinceLastLogin,
-      locales,
+      locale,
     }: {
       geometry: any
       daysSinceLastLogin: number | null
-      locales: string[] | null
+      locale: AudienceFilterLocale | null
     }) {
       this.audience = {} as AudienceFilterRequest
       if (geometry) {
@@ -143,8 +144,8 @@ export const useMessagesStore = defineStore('messages', {
         date.setDate(date.getDate() - daysSinceLastLogin)
         this.audience.last_login_after = date.toISOString()
       }
-      if (locales) {
-        this.audience.locale = locales[0] as any // TODO: Handle multiple locales if needed
+      if (locale) {
+        this.audience.locale = locale
       }
     },
     clearAudience() {
