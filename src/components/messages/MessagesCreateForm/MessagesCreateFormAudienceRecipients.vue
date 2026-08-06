@@ -39,7 +39,7 @@
             showClear
             class="w-full"
           />
-          <label for="locale-select">Filter by locales</label>
+          <label for="locale-select">Filter by locale</label>
         </FloatLabel>
       </InputGroup>
       <!-- Last Login filter -->
@@ -306,7 +306,7 @@ watch(
       })
     }
   },
-  { immediate: true },
+  { immediate: true, flush: 'post' },
 )
 
 // Watch all the filter
