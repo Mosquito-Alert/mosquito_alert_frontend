@@ -1,19 +1,25 @@
 <template>
-  <div class="flex items-center justify-between mr-4 border rounded-full border-gray-300">
+  <div class="flex items-center mr-4 border rounded-full border-gray-300">
     <UserAvatar :user="null" />
-    <div class="flex mx-2 relative gap-1 items-center">
+    <div class="flex items-center w-full mx-2 gap-1">
       <div class="leading-6 font-medium">
-        {{ user.uuid }}
+        {{ userUuid }}
       </div>
-      <slot></slot>
+      <div class="ml-auto">
+        <slot></slot>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { MinimalUser, SimpleUser, User } from 'mosquito-alert'
+import { computed } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   user: MinimalUser | SimpleUser | User
 }>()
+
+// Compute the user UUID in lowercase and remove any leading or trailing whitespace for consistent display and comparison.
+const userUuid = computed(() => props.user.uuid.toLowerCase().trim())
 </script>

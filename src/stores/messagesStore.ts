@@ -5,9 +5,13 @@ import {
   type LocalizedAudienceMessageBodyRequest,
   type LocalizedAudienceMessageTitleRequest,
   type LocalizedMessageBodyRequest,
+  type LocalizedMessageTitle,
   type LocalizedMessageTitleRequest,
   type Message,
+  type MessageRecipient,
+  type MessageRecipientStats,
   type MetaCreateMessageRequest,
+  type PaginatedMessageRecipientList,
   type User,
 } from 'mosquito-alert'
 import { MessageTarget } from 'mosquito-alert/models'
@@ -38,6 +42,11 @@ export const useMessagesStore = defineStore('messages', {
       string | undefined
     >, // The message subject by language
     selectedLanguage: null as LanguageKey | null, // The selected language for the message being created
+    // * ################ Detail ################
+    recipientsPagination: { results: [], count: 0 } as PaginatedMessageRecipientList,
+    loadingRecipients: false, // Whether the recipients are being loaded
+    recipientsStats: { total: 0, read: 0, unread: 0 } as MessageRecipientStats, // The recipients stats
+    messageDetail: null as Message | null, // The message detail
   }),
   getters: {
     // * ################ List ################
@@ -100,6 +109,31 @@ export const useMessagesStore = defineStore('messages', {
         req['audience'] = state.audience
       }
       return req as MetaCreateMessageRequest
+    },
+    // * ################ Detail ################
+    // Get the list of recipients for the message detail view, based on the current state
+    recipients: (state): MessageRecipient[] => state.recipientsPagination.results,
+    recipientsTotalCount: (state): number => state.recipientsStats.total,
+    recipientsTotalReadCount: (state): number => state.recipientsStats.read,
+    // The selected language for the message detail
+    messageDetailSelectedLanguage: (state): keyof LocalizedMessageTitle => {
+      const titles = state.messageDetail?.content?.title
+      if (!titles) {
+        return 'en' as keyof LocalizedMessageTitle
+      }
+      return (
+        (Object.keys(titles).find(
+          (key) => titles[key as keyof typeof titles],
+        ) as keyof LocalizedMessageTitle) ?? ('en' as keyof LocalizedMessageTitle)
+      )
+    },
+    // The available languages for the message detail, based on the message content
+    messageDetailAvailableLanguages: (state): (keyof LocalizedMessageTitle)[] => {
+      const titles = state.messageDetail?.content?.title
+      if (!titles) {
+        return []
+      }
+      return (Object.keys(titles) as (keyof LocalizedMessageTitle)[]).filter((key) => titles[key])
     },
   },
   actions: {
@@ -194,6 +228,32 @@ export const useMessagesStore = defineStore('messages', {
       this.setRecipients(null)
       this.clearAudience()
       this.fetchMessages()
+    },
+    // * ################ Detail ################
+    async fetchMessageDetail(messageUuid: number) {
+      try {
+        const response = await messagesApi.retrieve({ id: messageUuid })
+        this.messageDetail = response.data
+      } catch (error) {
+        console.error('Error fetching message detail:', error)
+      }
+    },
+    async fetchRecipients(messageUuid: number, page?: number, pageSize?: number) {
+      this.loadingRecipients = true
+      try {
+        const responseRecipients = await messagesApi.recipientsList({
+          id: messageUuid,
+          page: page ?? 1,
+          pageSize: pageSize ?? 25,
+        })
+        this.recipientsPagination = responseRecipients.data
+        const responseStats = await messagesApi.recipientsStatsRetrieve({ id: messageUuid })
+        this.recipientsStats = responseStats.data
+      } catch (error) {
+        console.error('Error fetching recipients:', error)
+      } finally {
+        this.loadingRecipients = false
+      }
     },
   },
 })
