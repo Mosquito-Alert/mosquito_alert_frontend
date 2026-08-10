@@ -72,11 +72,9 @@
     <Divider />
     <div v-if="messagesStore.messageDetail">
       <h2 class="text-2xl font-bold mb-4">
-        {{ getTitle(messagesStore.messageDetail, messagesStore.messageDetailSelectedLanguage) }}
+        {{ getTitle() }}
       </h2>
-      <div
-        v-html="getBody(messagesStore.messageDetail, messagesStore.messageDetailSelectedLanguage)"
-      ></div>
+      <div v-html="getBody()"></div>
     </div>
     <div v-else class="flex items-center justify-center h-full w-full py-10">
       <ProgressSpinner />
@@ -89,7 +87,6 @@ import MessageRecipientChip from '@/components/messages/MessageRecipientChip.vue
 import UserAvatar from '@/components/users/UserAvatar.vue'
 import { formatLocalDateTime } from '@/utils/DateUtils'
 import { getLanguageName } from '@/utils/Utils'
-import type { LocalizedMessageTitle, Message } from 'mosquito-alert'
 import { onMounted } from 'vue'
 import { useMessagesStore } from '../../stores/messagesStore'
 
@@ -99,13 +96,13 @@ const props = defineProps<{
   messageId: number
 }>()
 
-function getTitle(message: Message, language: keyof LocalizedMessageTitle) {
-  return messagesStore.messageDetail?.content?.title?.[language] || 'No title'
-}
+const getTitle = () =>
+  messagesStore.messageDetail?.content?.title?.[messagesStore.messageDetailSelectedLanguage] ||
+  'No title'
 
-function getBody(message: Message, language: keyof LocalizedMessageTitle) {
-  return messagesStore.messageDetail?.content?.body?.[language] || 'No content'
-}
+const getBody = () =>
+  messagesStore.messageDetail?.content?.body?.[messagesStore.messageDetailSelectedLanguage] ||
+  'No content'
 
 onMounted(async () => {
   try {

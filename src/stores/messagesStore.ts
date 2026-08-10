@@ -16,7 +16,7 @@ import {
 } from 'mosquito-alert'
 import { MessageTarget } from 'mosquito-alert/models'
 import { defineStore } from 'pinia'
-import { messagesApi } from '../services/apiService'
+import { messagesApi, userApi } from '../services/apiService'
 import type { LanguageKey } from '../types/types'
 
 export const useMessagesStore = defineStore('messages', {
@@ -32,6 +32,7 @@ export const useMessagesStore = defineStore('messages', {
     userRecipients: null as User[] | null, // The selected recipients (users or audience)
     audience: null as AudienceFilterRequest | null, // The selected audience for the message being created
     audienceSelected: false, // Whether an audience has been selected for the message being created
+    usersAffectedByAudience: null as number | null, // The number of users affected by the audience filters applied
     target: MessageTarget.Users as MessageTarget, // The selected target for the message being created
     bodyByLanguage: {} as Record<
       keyof LocalizedMessageBodyRequest | keyof LocalizedAudienceMessageBodyRequest,
@@ -201,6 +202,25 @@ export const useMessagesStore = defineStore('messages', {
     // Check if a given language is required for the message being created (i.e., if it is in the list of required languages)
     isLanguageRequired(lang: LanguageKey) {
       return this.requiredLanguages.includes(lang)
+    },
+    // Fetch the list of users based on the selected audience filters (geometry, last login, and locale)
+    // ? Should I move this to the user store? It is related to users, but it is used in the context of message creation
+    async fetchUsersByAudience() {
+      if (!this.audience || Object.keys(this.audience).length === 0) {
+        this.usersAffectedByAudience = null
+        return
+      }
+      try {
+        const response = await userApi.audienceFilter({
+          page: 1,
+          pageSize: 1,
+          audienceFilterRequest: this.audience,
+        })
+        this.usersAffectedByAudience = response.data.count
+      } catch (error) {
+        console.error('Error fetching users by audience:', error)
+        this.usersAffectedByAudience = null
+      }
     },
     // Check if the message can be submitted (i.e., if there are recipients selected and all required languages are complete)
     canSubmit() {

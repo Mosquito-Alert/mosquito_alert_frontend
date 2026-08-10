@@ -72,9 +72,17 @@
           'bg-gray-100 py-1 px-3 rounded-lg': messagesStore.audienceSelected,
         }"
       >
-        <span v-if="messagesStore.audienceSelected" class="text-sm font-medium italic text-gray-600"
-          >Active filters:</span
+        <div
+          v-if="messagesStore.audienceSelected"
+          class="text-sm font-medium italic text-gray-600 flex justify-between"
         >
+          <span>
+            {{ activeFiltersAsChips.length }} active filter{{
+              activeFiltersAsChips.length > 1 ? 's' : ''
+            }}:
+          </span>
+          <span>({{ `${messagesStore.usersAffectedByAudience}` }} users match)</span>
+        </div>
         <div class="chips flex flex-wrap gap-1.5">
           <Chip
             v-for="chip in activeFiltersAsChips"
@@ -104,7 +112,10 @@
       />
     </div>
 
-    <div v-if="!messagesStore.audienceSelected" class="audience-map w-full h-96 md:h-150">
+    <div
+      v-if="!messagesStore.audienceSelected"
+      class="audience-map w-full h-96 md:h-150 relative flex items-center justify-center rounded-xl border border-surface-200 bg-surface-50"
+    >
       <l-map
         :zoom="defaultMapZoom"
         ref="map"
@@ -120,6 +131,21 @@
 
         <l-geo-json v-if="regionGeojson" :geojson="regionGeojson" />
       </l-map>
+      <div
+        class="absolute bottom-2 left-2 flex items-center gap-2 rounded-md border border-surface-200 bg-surface-0 px-3 py-1.5 text-sm text-surface-600 z-400"
+      >
+        <i class="pi pi-filter text-xs" />
+        <span
+          >{{ activeFiltersAsChips.length }} filters
+          <span v-if="messagesStore.usersAffectedByAudience" class="ml-1">
+            —
+            <span class="font-bold text-surface-800">{{
+              ` ${messagesStore.usersAffectedByAudience} `
+            }}</span>
+            users match
+          </span>
+        </span>
+      </div>
     </div>
 
     <Button
@@ -312,13 +338,15 @@ watch(
 // Watch all the filter
 watch(
   [selectedRegion, selectedLocale, selectedLastLogin],
-  () => {
+  async () => {
     // Update the store with the new audience filter
     messagesStore.setAudience({
       geometry: selectedRegion.value?.geometry || null,
       locale: selectedLocale.value ? selectedLocale.value.value : null,
       daysSinceLastLogin: selectedLastLogin.value?.daysSince || null,
     })
+    // Update the number of affected users by the filters applied
+    await messagesStore.fetchUsersByAudience()
   },
   { deep: true },
 )
