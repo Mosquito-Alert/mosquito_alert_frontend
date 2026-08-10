@@ -43,12 +43,23 @@
         <FloatLabel variant="on">
           <UserAutocomplete
             id="recipients_filter"
-            v-model="messagesStore.userRecipients"
+            v-model="messagesStore.filterByRecipients"
             multiple
           />
           <label for="recipients_filter">Recipients</label>
         </FloatLabel>
-        <Button icon="pi pi-filter-slash" label="Clear" @click="clearFilters" />
+        <FloatLabel variant="on">
+          <Select
+            id="target_filter"
+            v-model="messagesStore.filterByTarget"
+            :options="messagesStore.messageTargetOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-48"
+          />
+          <label for="target_filter">Target</label>
+        </FloatLabel>
+        <Button icon="pi pi-filter-slash" label="Clear" @click="messagesStore.clearFilters" />
       </Panel>
     </div>
 
@@ -60,7 +71,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 import MessagesCreateForm from '@/components/messages/MessagesCreateForm/MessagesCreateForm.vue'
 import MessagesDataTable from '@/components/messages/MessagesDataTable.vue'
@@ -75,12 +86,12 @@ onMounted(async () => {
   await messagesStore.fetchMessages()
 })
 
-const clearFilters = () => {
-  messagesStore.setRecipients(null)
-}
+onUnmounted(() => {
+  messagesStore.clearFilters()
+})
 
 watch(
-  () => messagesStore.listRequest,
+  () => messagesStore.pageListRequest,
   async () => {
     await messagesStore.fetchMessages()
   },

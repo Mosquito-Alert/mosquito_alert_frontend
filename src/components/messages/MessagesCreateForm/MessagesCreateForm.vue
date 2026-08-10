@@ -3,7 +3,7 @@
     <div>
       <SelectButton
         v-model="messagesStore.target"
-        :options="messageTargetOptions"
+        :options="messagesStore.messageTargetOptions"
         optionLabel="label"
         optionValue="value"
         aria-labelledby="basic"
@@ -54,11 +54,6 @@ import { useMessagesStore } from '../../../stores/messagesStore'
 const messagesStore = useMessagesStore()
 
 const dialogRef = inject<ComputedRef<DynamicDialogInstance>>('dialogRef')
-
-const messageTargetOptions = [
-  { label: 'Specific users', icon: 'pi pi-user', value: MessageTarget.Users },
-  { label: 'Filtered audience', icon: 'pi pi-megaphone', value: MessageTarget.Audience },
-]
 
 watch(
   () => messagesStore.target,

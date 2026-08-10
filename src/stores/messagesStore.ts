@@ -21,14 +21,20 @@ import type { LanguageKey } from '../types/types'
 
 export const useMessagesStore = defineStore('messages', {
   state: () => ({
-    showSendMessageDialog: false, // Whether the send message dialog is visible
+    messageTargetOptions: [
+      { label: 'Specific users', icon: 'pi pi-user', value: MessageTarget.Users },
+      { label: 'Filtered audience', icon: 'pi pi-users', value: MessageTarget.Audience },
+    ],
     // * ################ List ################
     messages: [] as Message[], // The list of messages
     messagesTotalCount: 0, // The total number of messages
     loadingMessages: false, // Whether the messages are being loaded
     pageSelected: 0, // The selected page for the messages list
     numRows: 25, // The number of rows per page for the messages list
+    filterByRecipients: null as User[] | null, // The selected recipients for filtering the messages list
+    filterByTarget: null as MessageTarget | null, // The selected target for filtering the messages list
     // * ################ Creation ################
+    showSendMessageDialog: false, // Whether the send message dialog is visible
     userRecipients: null as User[] | null, // The selected recipients (users or audience)
     audience: null as AudienceFilterRequest | null, // The selected audience for the message being created
     audienceSelected: false, // Whether an audience has been selected for the message being created
@@ -51,13 +57,14 @@ export const useMessagesStore = defineStore('messages', {
   }),
   getters: {
     // * ################ List ################
-    listRequest: (state) => ({
+    pageListRequest: (state) => ({
       orderBy: [MessagesListMineSentOrderByParameter.MinusCreatedAt],
       page: state.pageSelected + 1,
       pageSize: state.numRows,
-      recipientUuids: state.userRecipients
-        ? state.userRecipients.map((r: User) => r.uuid)
+      recipientUuids: state.filterByRecipients
+        ? state.filterByRecipients.map((r: User) => r.uuid)
         : undefined,
+      target: state.filterByTarget ?? undefined,
     }),
     // * ################ Creation ################
     // Check if the message creation form should be shown (i.e., if there are recipients selected)
@@ -142,7 +149,8 @@ export const useMessagesStore = defineStore('messages', {
     async fetchMessages() {
       this.loadingMessages = true
       try {
-        const response = await messagesApi.listMineSent(this.listRequest)
+        const response = await messagesApi.listMineSent(this.pageListRequest)
+        console.log(response.data)
         this.messages = response.data.results
         this.messagesTotalCount = response.data.count
       } catch (error) {
@@ -154,6 +162,10 @@ export const useMessagesStore = defineStore('messages', {
     onPageChange(event: { page: number; rows: number }) {
       this.pageSelected = event.page
       this.numRows = event.rows
+    },
+    clearFilters() {
+      this.filterByRecipients = null
+      this.filterByTarget = null
     },
     // * ################ Creation ################
     // Set the selected recipients (users or audience)
