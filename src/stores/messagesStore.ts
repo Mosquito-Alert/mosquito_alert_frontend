@@ -54,6 +54,7 @@ export const useMessagesStore = defineStore('messages', {
     loadingRecipients: false, // Whether the recipients are being loaded
     recipientsStats: { total: 0, read: 0, unread: 0 } as MessageRecipientStats, // The recipients stats
     messageDetail: null as Message | null, // The message detail
+    loadingMessageDetail: false, // Whether the message detail is being loaded
   }),
   getters: {
     // * ################ List ################
@@ -150,7 +151,6 @@ export const useMessagesStore = defineStore('messages', {
       this.loadingMessages = true
       try {
         const response = await messagesApi.listMineSent(this.pageListRequest)
-        console.log(response.data)
         this.messages = response.data.results
         this.messagesTotalCount = response.data.count
       } catch (error) {
@@ -263,14 +263,28 @@ export const useMessagesStore = defineStore('messages', {
     },
     // * ################ Detail ################
     async fetchMessageDetail(messageUuid: number) {
+      this.loadingMessageDetail = true
       try {
         const response = await messagesApi.retrieve({ id: messageUuid })
         this.messageDetail = response.data
+        const statsResponse = await messagesApi.recipientsStatsRetrieve({ id: messageUuid })
+        this.recipientsStats = statsResponse.data
       } catch (error) {
         console.error('Error fetching message detail:', error)
+      } finally {
+        this.loadingMessageDetail = false
       }
     },
-    async fetchRecipients(messageUuid: number, page?: number, pageSize?: number) {
+    async fetchRecipients({
+      messageUuid,
+      page,
+      pageSize,
+    }: {
+      messageUuid: number
+      page?: number
+      pageSize?: number
+    }) {
+      if (this.loadingRecipients) return
       this.loadingRecipients = true
       try {
         const responseRecipients = await messagesApi.recipientsList({
@@ -279,8 +293,6 @@ export const useMessagesStore = defineStore('messages', {
           pageSize: pageSize ?? 25,
         })
         this.recipientsPagination = responseRecipients.data
-        const responseStats = await messagesApi.recipientsStatsRetrieve({ id: messageUuid })
-        this.recipientsStats = responseStats.data
       } catch (error) {
         console.error('Error fetching recipients:', error)
       } finally {
