@@ -3,14 +3,7 @@
     <InputGroupAddon>
       <i class="pi pi-language" />
     </InputGroupAddon>
-    <Select
-      :options="
-        messagesStore.availableLanguages.sort((a, b) =>
-          getLanguageName(a).localeCompare(getLanguageName(b)),
-        )
-      "
-      v-model="messagesStore.selectedLanguage"
-    >
+    <Select :options="availableLanguagesSorted" v-model="messagesStore.selectedLanguage">
       <template #value="slotProps">
         <div v-if="slotProps.value" class="flex gap-2 items-center">
           <span :class="messagesStore.isLanguageRequired(slotProps.value) ? 'font-bold' : ''">{{
@@ -43,11 +36,31 @@
         </div>
       </template>
     </Select>
+    <InputGroupAddon
+      v-if="!messagesStore.isEveryLanguageComplete()"
+      v-tooltip.right="{
+        value:
+          'Some required languages are incomplete. Please complete all required languages before sending the message.',
+        class: 'text-sm rounded py-1 px-2',
+      }"
+    >
+      <i class="pi pi-exclamation-triangle text-yellow-500" />
+    </InputGroupAddon>
   </InputGroup>
 </template>
 <script setup lang="ts">
 import { getLanguageName } from '@/utils/Utils'
+import { computed } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore.ts'
 
 const messagesStore = useMessagesStore()
+
+// Sort available languages: required languages first, then optional languages, both sorted alphabetically by language name
+const availableLanguagesSorted = computed(() => {
+  return messagesStore.availableLanguages.slice().sort((a, b) => {
+    const reqA = messagesStore.isLanguageRequired(a) ? 0 : 1
+    const reqB = messagesStore.isLanguageRequired(b) ? 0 : 1
+    return reqA - reqB || getLanguageName(a).localeCompare(getLanguageName(b))
+  })
+})
 </script>

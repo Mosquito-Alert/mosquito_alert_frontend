@@ -222,6 +222,15 @@ export const useMessagesStore = defineStore('messages', {
     isLanguageRequired(lang: LanguageKey) {
       return this.requiredLanguages.includes(lang)
     },
+    // Is every language complete for the message being created
+    isEveryLanguageComplete() {
+      for (const lang of this.requiredLanguages) {
+        if (!this.isLanguageComplete(lang)) {
+          return false
+        }
+      }
+      return true
+    },
     // Fetch the list of users based on the selected audience filters (geometry, last login, and locale)
     // ? Should I move this to the user store? It is related to users, but it is used in the context of message creation
     async fetchUsersByAudience() {
@@ -254,13 +263,7 @@ export const useMessagesStore = defineStore('messages', {
         return false
       }
 
-      for (const lang of this.requiredLanguages) {
-        if (!this.isLanguageComplete(lang)) {
-          return false
-        }
-      }
-
-      return true
+      return this.isEveryLanguageComplete()
     },
     onMessageSent() {
       this.showSendMessageDialog = false
