@@ -25,7 +25,7 @@
 </template>
 <script setup lang="ts">
 import UserAutocomplete from '../../users/UserAutocomplete.vue'
-import CreateFormLanguageSelector from './MessageCreateFormLanguageSelector.vue'
+import CreateFormLanguageSelector from './MessagesCreateFormLanguageSelector.vue'
 
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { onMounted, ref } from 'vue'

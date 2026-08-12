@@ -88,6 +88,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   messagesStore.clearFilters()
+  messagesStore.clearMessageList()
 })
 
 watch(

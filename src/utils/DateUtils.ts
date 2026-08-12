@@ -9,3 +9,11 @@ export function formatLocalDateTime(isoString: string): string {
     second: '2-digit',
   })
 }
+export function formatLocalDateTimeShort(isoString: string): string {
+  const date = new Date(isoString)
+  return date.toLocaleString('default', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  })
+}

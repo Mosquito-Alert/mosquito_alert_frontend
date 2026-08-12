@@ -91,14 +91,7 @@
             :removable="!messagesStore.audienceSelected"
             @remove="removeFilter(chip)"
             :pt="{
-              root:
-                chip.key === ChipKey.GEOMETRY
-                  ? 'bg-indigo-100! '
-                  : chip.key === ChipKey.LAST_LOGIN
-                    ? 'bg-teal-100! '
-                    : chip.key.startsWith(ChipKey.LOCALE_PREFIX)
-                      ? 'bg-cyan-100! '
-                      : '',
+              root: getChipMessageStyle(chip.key),
             }"
           />
         </div>
@@ -116,21 +109,7 @@
       v-if="!messagesStore.audienceSelected"
       class="audience-map w-full h-96 md:h-150 relative flex items-center justify-center rounded-xl border border-surface-200 bg-surface-50"
     >
-      <l-map
-        :zoom="defaultMapZoom"
-        ref="map"
-        @ready="onMapReady"
-        :center="regionCenter"
-        class="rounded-xl"
-      >
-        <l-tile-layer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          layer-type="base"
-          name="OpenStreetMap"
-        />
-
-        <l-geo-json v-if="regionGeojson" :geojson="regionGeojson" />
-      </l-map>
+      <MessageMapFilter ref="messageMapFilter" :selectedRegion="selectedRegion" />
       <div
         class="absolute bottom-2 left-2 flex items-center gap-2 rounded-md border border-surface-200 bg-surface-0 px-3 py-1.5 text-sm text-surface-600 z-400"
       >
@@ -158,43 +137,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import { LGeoJson, LMap, LTileLayer } from '@vue-leaflet/vue-leaflet'
-import type { PointTuple } from 'leaflet'
-import L from 'leaflet'
 import { AutoComplete, Chip, FloatLabel, InputGroup, InputGroupAddon, Select } from 'primevue'
-import { computed, nextTick, ref, watch } from 'vue'
-import { useMessagesStore } from '../../../stores/messagesStore'
-import CreateFormLanguageSelector from './MessageCreateFormLanguageSelector.vue'
-import { localeOptions } from '../../../utils/constants.ts'
+import { computed, ref, watch } from 'vue'
+
 import type { AudienceFilterLocale } from 'mosquito-alert'
+import { useMessagesStore } from '../../../stores/messagesStore'
+import { ChipMessageKey } from '../../../types/types.ts'
+import { getChipMessageStyle, localeOptions } from '../../../utils/constants.ts'
+import MessageMapFilter from '../MessageMapFilter.vue'
+import CreateFormLanguageSelector from './MessagesCreateFormLanguageSelector.vue'
 
 const messagesStore = useMessagesStore()
 
 const baseNominatimUrl = 'https://nominatim.openstreetmap.org/'
 
-enum ChipKey {
-  GEOMETRY = 'geometry',
-  LAST_LOGIN = 'lastLogin',
-  LOCALE_PREFIX = 'locale:',
-  TAG_PREFIX = 'tag:',
-}
-
 // * Refs */
-// MAP
-const map = ref<InstanceType<typeof LMap> | null>(null) // The map instance
-const mapReady = ref(false)
-
-const defaultMapCenter = [40, -3] as PointTuple // Default center (Madrid, Spain)
-const defaultMapZoom = 6 // Default zoom (Spain)
-const regionGeojson = computed(() => {
-  if (!selectedRegion.value) return null
-  return selectedRegion.value.geometry || null
-})
-const regionCenter = computed<PointTuple>(() => {
-  if (!selectedRegion.value) return defaultMapCenter // Default center
-  const { lat, lon } = selectedRegion.value.centroid || {}
-  return lat && lon ? ([lat, lon] as PointTuple) : defaultMapCenter
-})
+const messageMapFilter = ref<InstanceType<typeof MessageMapFilter> | null>(null)
 // GEOMETRY
 const regionQuery = ref('')
 // NOTE: https://nominatim.org/release-docs/develop/api/Output/#place_id-is-not-a-persistent-id
@@ -220,20 +178,20 @@ const activeFiltersAsChips = computed(() => {
   // Geometry
   if (selectedRegion.value) {
     chips.push({
-      key: ChipKey.GEOMETRY,
+      key: ChipMessageKey.GEOMETRY,
       label: selectedRegion.value.localname || 'Selected region',
     })
   }
   // Locales
   if (selectedLocale.value) {
     chips.push({
-      key: `${ChipKey.LOCALE_PREFIX}${selectedLocale.value.value}`,
+      key: `${ChipMessageKey.LOCALE_PREFIX}${selectedLocale.value.value}`,
       label: selectedLocale.value.label,
     })
   }
   // Last login
   if (selectedLastLogin.value && selectedLastLogin.value.daysSince !== null) {
-    chips.push({ key: ChipKey.LAST_LOGIN, label: selectedLastLogin.value.label })
+    chips.push({ key: ChipMessageKey.LAST_LOGIN, label: selectedLastLogin.value.label })
   }
   // TODO: selectedHashtags.value.forEach((h) => chips.push({ key: `tag:${h}`, label: `#${h}` }))
   return chips
@@ -296,44 +254,19 @@ const onRegionSelect = async (event: {
   }
 }
 
-const onMapReady = (mapInstance: InstanceType<typeof LMap>) => {
-  if (!mapInstance) return
-  map.value = mapInstance
-  mapReady.value = true
-}
-
 const removeFilter = (chip: { key: string; label: string }) => {
-  if (chip.key === ChipKey.GEOMETRY) {
+  if (chip.key === ChipMessageKey.GEOMETRY) {
     selectedRegion.value = null
-    map.value?.leafletObject?.setView(defaultMapCenter, defaultMapZoom) // Reset to default view
-  } else if (chip.key === ChipKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
-  else if (chip.key.startsWith(ChipKey.LOCALE_PREFIX)) selectedLocale.value = null
+    messageMapFilter.value?.resetView() // Reset to default view (Madrid, Spain)
+  } else if (chip.key === ChipMessageKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
+  else if (chip.key.startsWith(ChipMessageKey.LOCALE_PREFIX)) selectedLocale.value = null
 
   // TODO:
   // else if (chip.key.startsWith('tag:')) {
   //   const val = chip.key.replace('tag:', '')
   //   selectedHashtags.value = selectedHashtags.value.filter((h) => h !== val)
   // }
-  // runFilterQuery()
 }
-
-watch(
-  [mapReady, regionGeojson],
-  async ([ready, geojson]) => {
-    if (!ready || !geojson || !map.value?.leafletObject) return
-
-    await nextTick() // Wait for the map to be fully rendered before fitting bounds
-
-    const bounds = L.geoJSON(geojson).getBounds()
-
-    if (bounds.isValid()) {
-      map.value.leafletObject.fitBounds(bounds, {
-        padding: [20, 20],
-      })
-    }
-  },
-  { immediate: true, flush: 'post' },
-)
 
 // Watch all the filter
 watch(

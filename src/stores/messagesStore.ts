@@ -1,6 +1,7 @@
 import {
   AudienceFilterLocale,
   MessagesListMineSentOrderByParameter,
+  type AudienceFilter,
   type AudienceFilterRequest,
   type LocalizedAudienceMessageBodyRequest,
   type LocalizedAudienceMessageTitleRequest,
@@ -55,6 +56,8 @@ export const useMessagesStore = defineStore('messages', {
     recipientsStats: { total: 0, read: 0, unread: 0 } as MessageRecipientStats, // The recipients stats
     messageDetail: null as Message | null, // The message detail
     loadingMessageDetail: false, // Whether the message detail is being loaded
+    messageDetailAudience: null as AudienceFilter | null, // The audience for the message detail
+    loadingMessageDetailAudience: false, // Whether the message detail audience is being loaded
   }),
   getters: {
     // * ################ List ################
@@ -167,6 +170,10 @@ export const useMessagesStore = defineStore('messages', {
       this.filterByRecipients = null
       this.filterByTarget = null
     },
+    clearMessageList() {
+      this.messages = []
+      this.messagesTotalCount = 0
+    },
     // * ################ Creation ################
     // Set the selected recipients (users or audience)
     setRecipients(recipients: User[] | null) {
@@ -261,6 +268,20 @@ export const useMessagesStore = defineStore('messages', {
       this.clearAudience()
       this.fetchMessages()
     },
+    clearMessageCreation() {
+      this.showSendMessageDialog = false
+      this.setRecipients(null)
+      this.clearAudience()
+      this.bodyByLanguage = {} as Record<
+        keyof LocalizedMessageBodyRequest | keyof LocalizedAudienceMessageBodyRequest,
+        string | undefined
+      >
+      this.subjectByLanguage = {} as Record<
+        keyof LocalizedMessageTitleRequest | keyof LocalizedAudienceMessageTitleRequest,
+        string | undefined
+      >
+      this.selectedLanguage = null
+    },
     // * ################ Detail ################
     async fetchMessageDetail(messageUuid: number) {
       this.loadingMessageDetail = true
@@ -298,6 +319,23 @@ export const useMessagesStore = defineStore('messages', {
       } finally {
         this.loadingRecipients = false
       }
+    },
+    async fetchAudienceForMessage(messageUuid: number) {
+      this.loadingMessageDetailAudience = true
+      try {
+        const response = await messagesApi.targetingRetrieve({ id: messageUuid })
+        this.messageDetailAudience = response.data.audience ?? null
+      } catch (error) {
+        console.error('Error fetching audience for message:', error)
+      } finally {
+        this.loadingMessageDetailAudience = false
+      }
+    },
+    clearMessageDetail() {
+      this.messageDetail = null
+      this.recipientsPagination = { results: [], count: 0 }
+      this.recipientsStats = { total: 0, read: 0, unread: 0 }
+      this.messageDetailAudience = null
     },
   },
 })

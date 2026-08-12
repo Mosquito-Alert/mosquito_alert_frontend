@@ -1,4 +1,4 @@
-import type { LanguageKey } from '../types/types'
+import { ChipMessageKey, type LanguageKey } from '../types/types'
 import { getLanguageName } from './Utils'
 
 export const locales: LanguageKey[] = [
@@ -32,3 +32,19 @@ export const localeOptions: { label: string; value: LanguageKey }[] = locales.ma
   label: getLanguageName(locale),
   value: locale,
 }))
+
+export const chipMessageKeyStyles: Record<string, string> = {
+  [ChipMessageKey.GEOMETRY]: 'bg-indigo-100! ',
+  [ChipMessageKey.LAST_LOGIN]: 'bg-teal-100! ',
+  [ChipMessageKey.LOCALE_PREFIX]: 'bg-cyan-100! ',
+}
+
+export const getChipMessageStyle = (chipKey: string): string => {
+  return (
+    chipMessageKeyStyles[chipKey] ||
+    chipMessageKeyStyles[
+      Object.keys(chipMessageKeyStyles).find((key) => chipKey.startsWith(key)) || ''
+    ] ||
+    ''
+  )
+}

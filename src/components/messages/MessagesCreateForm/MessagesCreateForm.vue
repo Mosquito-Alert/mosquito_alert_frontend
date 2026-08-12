@@ -48,12 +48,16 @@ import {
 } from 'mosquito-alert'
 import { SelectButton } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
-import { inject, watch, type ComputedRef } from 'vue'
+import { inject, onUnmounted, watch, type ComputedRef } from 'vue'
 import { useMessagesStore } from '../../../stores/messagesStore'
 
 const messagesStore = useMessagesStore()
 
 const dialogRef = inject<ComputedRef<DynamicDialogInstance>>('dialogRef')
+
+onUnmounted(() => {
+  messagesStore.clearMessageCreation()
+})
 
 watch(
   () => messagesStore.target,
