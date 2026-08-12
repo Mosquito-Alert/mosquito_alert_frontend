@@ -55,7 +55,10 @@
                 :itemSize="itemSize"
                 :loading="messagesStore.loadingRecipients"
                 @scroll="onScroll"
-                class="border border-surface-200 dark:border-surface-700 rounded w-full h-48!"
+                class="border border-surface-200 dark:border-surface-700 rounded w-full h-10!"
+                :class="{
+                  'h-48!': recipients.length > 1,
+                }"
               >
                 <template v-slot:item="{ item }">
                   <Skeleton v-if="!item" height="40px" class="m-1" />
