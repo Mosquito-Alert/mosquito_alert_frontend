@@ -72,13 +72,25 @@ async function handleSend() {
     messagesStore.onMessageSent()
     // Close dialog
     props.dialogRef?.close()
-  } catch (error) {
-    console.error('Error sending message:', error)
+  } catch (error: any) {
+    let errorMessage = 'There was an error sending your message.'
+    let life = 3000
+    const errors = error.response.data.errors
+    if (errors && errors.length > 0) {
+      const audienceError = errors.find(
+        (err: any) => err.attr === 'audience' && err.code === 'invalid',
+      )
+      if (audienceError) {
+        errorMessage +=
+          ' Audience geometry is outside the scope of your workspace collaboration groups.'
+        life = 5000
+      }
+    }
     toast.add({
       severity: 'error',
       summary: 'Message not sent',
-      detail: 'There was an error sending your message.',
-      life: 3000,
+      detail: errorMessage,
+      life: life,
     })
   }
 }
