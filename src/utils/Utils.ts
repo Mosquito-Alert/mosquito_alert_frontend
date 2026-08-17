@@ -17,3 +17,7 @@ export function getLanguageName(localeCode: string): string {
 
   return displayNames.of(languageCode) || localeCode
 }
+
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
