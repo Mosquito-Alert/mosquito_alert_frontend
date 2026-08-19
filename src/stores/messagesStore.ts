@@ -184,10 +184,12 @@ export const useMessagesStore = defineStore('messages', {
       geometry,
       daysSinceLastLogin,
       locale,
+      topic,
     }: {
       geometry: any
       daysSinceLastLogin: number | null
       locale: AudienceFilterLocale | null
+      topic: string | null
     }) {
       this.audience = {} as AudienceFilterRequest
       if (geometry) {
@@ -200,6 +202,9 @@ export const useMessagesStore = defineStore('messages', {
       }
       if (locale) {
         this.audience.locale = locale
+      }
+      if (topic) {
+        this.audience.notification_topics = [topic]
       }
     },
     clearAudience() {

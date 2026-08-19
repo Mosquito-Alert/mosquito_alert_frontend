@@ -37,6 +37,7 @@ export const chipMessageKeyStyles: Record<string, string> = {
   [ChipMessageKey.GEOMETRY]: 'bg-indigo-100! ',
   [ChipMessageKey.LAST_LOGIN]: 'bg-teal-100! ',
   [ChipMessageKey.LOCALE_PREFIX]: 'bg-cyan-100! ',
+  [ChipMessageKey.TOPIC_PREFIX]: 'bg-orange-100! ',
 }
 
 export const getChipMessageStyle = (chipKey: string): string => {

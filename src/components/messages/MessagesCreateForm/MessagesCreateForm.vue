@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4 w-4xl p-2">
+  <div class="flex flex-col gap-4 w-5xl p-2">
     <div>
       <SelectButton
         v-model="messagesStore.target"

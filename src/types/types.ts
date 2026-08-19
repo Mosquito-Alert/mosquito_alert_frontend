@@ -6,5 +6,5 @@ export enum ChipMessageKey {
   GEOMETRY = 'geometry',
   LAST_LOGIN = 'lastLogin',
   LOCALE_PREFIX = 'locale:',
-  TAG_PREFIX = 'tag:',
+  TOPIC_PREFIX = 'topic:',
 }
