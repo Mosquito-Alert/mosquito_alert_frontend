@@ -191,7 +191,8 @@ const filtersAsChips = computed(() => {
   const chips: { key: string; label: string }[] = []
   if (!messagesStore.messageDetailAudience) return chips
 
-  const { in_area, last_login_after, locale } = messagesStore.messageDetailAudience
+  const { in_area, last_login_after, locale, notification_topics } =
+    messagesStore.messageDetailAudience
 
   if (in_area) {
     chips.push({ key: ChipMessageKey.GEOMETRY, label: 'Spatial Filter' })
@@ -204,6 +205,11 @@ const filtersAsChips = computed(() => {
   }
   if (locale) {
     chips.push({ key: `${ChipMessageKey.LOCALE_PREFIX}${locale}`, label: getLanguageName(locale) })
+  }
+  if (notification_topics?.length) {
+    notification_topics.forEach((topic: string) => {
+      chips.push({ key: `${ChipMessageKey.TOPIC_PREFIX}${topic}`, label: topic })
+    })
   }
 
   return chips

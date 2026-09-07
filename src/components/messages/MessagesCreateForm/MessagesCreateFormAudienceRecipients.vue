@@ -4,28 +4,31 @@
       <!-- Search country, city or region -->
       <InputGroup
         :pt="{
-          root: 'w-full! md:w-75!',
+          root: 'w-full! md:w-70!',
         }"
       >
         <InputGroupAddon> <i class="pi pi-map-marker"></i> </InputGroupAddon>
-        <AutoComplete
-          v-model="regionQuery"
-          :suggestions="regionSuggestions"
-          optionLabel="label"
-          :loading="isSearchingRegion"
-          @option-select="onRegionSelect"
-          @complete="searchRegion"
-          :delay="350"
-          placeholder="Search country, city or region..."
-          :pt="{
-            root: 'w-full',
-          }"
-        />
+        <FloatLabel class="w-full" variant="on">
+          <AutoComplete
+            id="region-input"
+            v-model="regionQuery"
+            :suggestions="regionSuggestions"
+            optionLabel="label"
+            :loading="isSearchingRegion"
+            @option-select="onRegionSelect"
+            @complete="searchRegion"
+            :delay="350"
+            :pt="{
+              root: 'w-full',
+            }"
+          />
+          <label for="region-input">Search country, city or region...</label>
+        </FloatLabel>
       </InputGroup>
       <!-- Locale filter -->
       <InputGroup
         :pt="{
-          root: 'w-full! md:w-70!',
+          root: 'w-full! md:w-55!',
         }"
       >
         <InputGroupAddon> <i class="pi pi-globe"></i> </InputGroupAddon>
@@ -45,7 +48,7 @@
       <!-- Last Login filter -->
       <InputGroup
         :pt="{
-          root: 'w-full! md:w-70!',
+          root: 'w-full! md:w-55!',
         }"
       >
         <InputGroupAddon> <i class="pi pi-history"></i> </InputGroupAddon>
@@ -56,12 +59,31 @@
             :options="lastLoginOptions"
             showClear
             optionLabel="label"
-            class="w-full md:w-60"
+            class="w-full md:w-55"
           />
           <label for="last-login-select">Filter by last login</label>
         </FloatLabel>
       </InputGroup>
-      <!-- TODO: Hashtags filter -->
+      <!-- Topics filter -->
+      <InputGroup
+        :pt="{
+          root: 'w-full! md:w-65!',
+        }"
+      >
+        <InputGroupAddon> <i class="pi pi-megaphone"></i> </InputGroupAddon>
+        <FloatLabel class="w-full" variant="on">
+          <AutoComplete
+            id="topic-input"
+            v-model="selectedTopic"
+            @complete="changeAudience"
+            :delay="450"
+            :pt="{
+              root: 'w-full',
+            }"
+          />
+          <label for="topic-input">Filter by topic</label>
+        </FloatLabel>
+      </InputGroup>
     </div>
 
     <div class="flex flex-row w-full items-center gap-2">
@@ -171,6 +193,8 @@ const lastLoginOptions = [
   { label: 'Last year', daysSince: 365 },
 ]
 const selectedLastLogin = ref<{ label: string; daysSince: number | null } | null>(null) // The last login filter selected by the user
+// TOPICS
+const selectedTopic = ref<string | null>(null) // The topic selected by the user
 
 // Active filters as removable chips
 const activeFiltersAsChips = computed(() => {
@@ -193,7 +217,13 @@ const activeFiltersAsChips = computed(() => {
   if (selectedLastLogin.value && selectedLastLogin.value.daysSince !== null) {
     chips.push({ key: ChipMessageKey.LAST_LOGIN, label: selectedLastLogin.value.label })
   }
-  // TODO: selectedHashtags.value.forEach((h) => chips.push({ key: `tag:${h}`, label: `#${h}` }))
+  // Topics
+  if (selectedTopic.value) {
+    chips.push({
+      key: `${ChipMessageKey.TOPIC_PREFIX}${selectedTopic.value}`,
+      label: `${selectedTopic.value}`,
+    })
+  }
   return chips
 })
 
@@ -260,27 +290,23 @@ const removeFilter = (chip: { key: string; label: string }) => {
     messageMapFilter.value?.resetView() // Reset to default view (Madrid, Spain)
   } else if (chip.key === ChipMessageKey.LAST_LOGIN) selectedLastLogin.value = lastLoginOptions[0]
   else if (chip.key.startsWith(ChipMessageKey.LOCALE_PREFIX)) selectedLocale.value = null
+  else if (chip.key.startsWith(ChipMessageKey.TOPIC_PREFIX)) selectedTopic.value = null
+}
 
-  // TODO:
-  // else if (chip.key.startsWith('tag:')) {
-  //   const val = chip.key.replace('tag:', '')
-  //   selectedHashtags.value = selectedHashtags.value.filter((h) => h !== val)
-  // }
+const changeAudience = async () => {
+  // Update the store with the new audience filter
+  messagesStore.setAudience({
+    geometry: selectedRegion.value?.geometry || null,
+    locale: selectedLocale.value ? selectedLocale.value.value : null,
+    daysSinceLastLogin: selectedLastLogin.value?.daysSince || null,
+    topic: selectedTopic.value ? selectedTopic.value : null,
+  })
+  // Update the number of affected users by the filters applied
+  await messagesStore.fetchUsersByAudience()
 }
 
 // Watch all the filter
-watch(
-  [selectedRegion, selectedLocale, selectedLastLogin],
-  async () => {
-    // Update the store with the new audience filter
-    messagesStore.setAudience({
-      geometry: selectedRegion.value?.geometry || null,
-      locale: selectedLocale.value ? selectedLocale.value.value : null,
-      daysSinceLastLogin: selectedLastLogin.value?.daysSince || null,
-    })
-    // Update the number of affected users by the filters applied
-    await messagesStore.fetchUsersByAudience()
-  },
-  { deep: true },
-)
+watch([selectedRegion, selectedLocale, selectedLastLogin], async () => await changeAudience(), {
+  deep: true,
+})
 </script>
