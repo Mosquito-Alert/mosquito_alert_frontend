@@ -4,6 +4,7 @@ import AppLayout from '@/layout/AppLayout.vue'
 import { useUserStore } from '@/stores/userStore'
 import LegalView from '@/views/legal/LegalView.vue'
 import InfoView from '@/views/info/InfoView.vue'
+import ForbiddenView from '@/views/ForbiddenView.vue'
 import { usePermissionsStore } from '../stores/permissionsStore'
 
 const router = createRouter({
@@ -56,6 +57,7 @@ const router = createRouter({
         },
         {
           path: 'messages',
+          meta: { requiresAbility: ['view', 'Message'] },
           children: [
             {
               path: '',
@@ -110,6 +112,18 @@ const router = createRouter({
         requiresAuth: false,
       },
     },
+    // ------------------------
+    // Forbidden Pages
+    {
+      path: '/:lang?/forbidden',
+      name: 'forbidden',
+      component: ForbiddenView,
+      props: (route) => ({ lang: route.params.lang }),
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    // ------------------------
   ],
 })
 
