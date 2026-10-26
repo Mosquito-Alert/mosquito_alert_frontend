@@ -7,6 +7,7 @@ import {
   IdentificationTasksApi,
   MessagesApi,
   PermissionsApi,
+  StatsApi,
   TaxaApi,
   UsersApi,
   WorkspacesApi,
@@ -40,3 +41,4 @@ export const permissionsApi = new PermissionsApi(apiConfig, undefined, axiosInst
 export const taxaApi = new TaxaApi(apiConfig, undefined, axiosInstance)
 export const userApi = new UsersApi(apiConfig, undefined, axiosInstance)
 export const workspaceApi = new WorkspacesApi(apiConfig, undefined, axiosInstance)
+export const statsApi = new StatsApi(apiConfig, undefined, axiosInstance)

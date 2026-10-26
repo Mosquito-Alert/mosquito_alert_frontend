@@ -21,3 +21,10 @@ export function getLanguageName(localeCode: string): string {
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
+// Normalize a string for comparison: remove diacritics and convert to lowercase.
+export function normalize(s: string) {
+  return s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+}

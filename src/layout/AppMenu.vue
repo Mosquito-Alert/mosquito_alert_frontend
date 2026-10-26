@@ -49,6 +49,24 @@ const model = ref<MenuItem[]>([
         },
       ]
     : []),
+  ...(ability.rulesFor('view', 'Statistics').length > 0
+    ? [
+        {
+          label: 'Statistics',
+          items: [
+            ...(ability.rulesFor('view', 'Statistics').length > 0
+              ? [
+                  {
+                    label: 'Citizen Participation',
+                    icon: 'pi pi-users',
+                    to: { name: 'participation_statistics' },
+                  },
+                ]
+              : []),
+          ],
+        },
+      ]
+    : []),
 ])
 </script>
 
