@@ -127,7 +127,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authRequired = to.meta.requiresAuth !== false
   // Check if the user is authenticated
   const userStore = useUserStore()
@@ -141,6 +141,9 @@ router.beforeEach((to, from, next) => {
     })
   } else if (authRequired) {
     const permissionsStore = usePermissionsStore()
+
+    // Make sure permissions are loaded before checking abilities (e.g. after a hard refresh).
+    await permissionsStore.ensurePermissionsLoaded()
     // Check if the user has the required ability
     const required = to.meta.requiresAbility
     if (required && !permissionsStore.ability.can(...required)) {

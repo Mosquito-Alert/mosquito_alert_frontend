@@ -22,6 +22,12 @@ export const usePermissionsStore = defineStore('permissions', {
         throw error
       }
     },
+    ensurePermissionsLoaded() {
+      if (!this.permissions) {
+        return this.fetchPermissions()
+      }
+      return Promise.resolve()
+    },
     clearPermissions() {
       this.permissions = null
       this.ability.update(defineAbilityFor(null).rules)
