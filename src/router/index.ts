@@ -4,6 +4,7 @@ import AppLayout from '@/layout/AppLayout.vue'
 import { useUserStore } from '@/stores/userStore'
 import LegalView from '@/views/legal/LegalView.vue'
 import InfoView from '@/views/info/InfoView.vue'
+import { usePermissionsStore } from '../stores/permissionsStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,6 +72,17 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: 'statistics',
+          children: [
+            {
+              path: '',
+              name: 'participation_statistics',
+              meta: { requiresAbility: ['view', 'Statistics'] },
+              component: () => import('@/views/statistics/ParticipationView.vue'),
+            },
+          ],
+        },
       ],
     },
     // ------------------------
@@ -113,6 +125,15 @@ router.beforeEach((to, from, next) => {
         next: to.fullPath,
       },
     })
+  } else if (authRequired) {
+    const permissionsStore = usePermissionsStore()
+    // Check if the user has the required ability
+    const required = to.meta.requiresAbility
+    if (required && !permissionsStore.ability.can(...required)) {
+      next({ name: 'forbidden' })
+      return
+    }
+    next()
   } else {
     // Proceed to the requested route
     next()

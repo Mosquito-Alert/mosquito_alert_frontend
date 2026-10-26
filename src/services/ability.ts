@@ -14,10 +14,11 @@ import {
   type Country,
   type IdentificationTask,
   type Message,
+  type StatisticsPermission,
 } from 'mosquito-alert'
 
-type Actions = 'add' | 'view' | 'change' | 'delete'
-type Subjects =
+export type Actions = 'add' | 'view' | 'change' | 'delete'
+export type Subjects =
   | Annotation
   | Country
   | IdentificationTask
@@ -27,6 +28,7 @@ type Subjects =
   | 'Country'
   | 'IdentificationTask'
   | 'Message'
+  | 'Statistics'
 export type AppAbility = MongoAbility<[Actions, Subjects | ForcedSubject<Exclude<Subjects, 'all'>>]>
 
 export default function defineAbilityFor(permissions: Permissions | null) {
@@ -75,12 +77,20 @@ export default function defineAbilityFor(permissions: Permissions | null) {
     if (perms.delete) can('delete', 'Message')
   }
 
+  function grantStatisticsPermissions(perms: StatisticsPermission) {
+    if (perms.add) can('add', 'Statistics')
+    if (perms.change) can('change', 'Statistics')
+    if (perms.view) can('view', 'Statistics')
+    if (perms.delete) can('delete', 'Statistics')
+  }
+
   if (!permissions) return build()
 
   grantAnnotationPermissions(permissions.annotation)
   grantIdentificationTaskPermissions(permissions.identification_task)
   grantReviewPermissions(permissions.review)
   grantMessagePermissions(permissions.message)
+  grantStatisticsPermissions(permissions.statistics)
 
   return build()
 }
