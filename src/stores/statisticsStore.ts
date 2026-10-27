@@ -9,6 +9,9 @@ const flatten = (nodes: StatsArea[]): StatsArea[] =>
 
 export const useStatisticsStore = defineStore('statistics', () => {
   // ! #################### State ####################
+  // Filters date range
+  const dateFrom = ref<string | null>(null)
+  const dateTo = ref<string | null>(null)
   // * ********** Area State **********
   const areaTree = ref<StatsArea[]>([])
   const areaSelectedKey = ref<string | null>(null)
@@ -32,6 +35,10 @@ export const useStatisticsStore = defineStore('statistics', () => {
   )
 
   // ! #################### Actions ####################
+  const setDateRange = (from: string | null, to: string | null) => {
+    dateFrom.value = from
+    dateTo.value = to
+  }
   // * ********** Area State **********
   // Idempotent: safe to call from every component that needs the areas.
   const loadAreas = async (force = false) => {
@@ -79,8 +86,10 @@ export const useStatisticsStore = defineStore('statistics', () => {
     return keys
   }
 
-  // Call on logout so the next user doesn't inherit this user's areas.
+  // ! RESET
   const $reset = () => {
+    dateFrom.value = null
+    dateTo.value = null
     areaTree.value = []
     areaSelectedKey.value = null
     loadedArea.value = false
@@ -88,6 +97,9 @@ export const useStatisticsStore = defineStore('statistics', () => {
   }
 
   return {
+    dateFrom,
+    dateTo,
+    setDateRange,
     areaTree,
     areaSelectedKey,
     loadingArea,
