@@ -5,7 +5,7 @@
     selection-mode="range"
     :min-date="MIN_DATE"
     :max-date="today"
-    :manual-input="false"
+    :manual-input="true"
     :pt="{ panel: { class: 'flex flex-row' } }"
     @update:model-value="onUpdate"
   >
