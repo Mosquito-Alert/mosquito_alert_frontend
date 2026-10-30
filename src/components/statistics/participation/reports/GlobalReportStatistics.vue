@@ -45,6 +45,7 @@ import { StatsReportsListGroupByParameter, type ReportStatsRow } from 'mosquito-
 import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
+import { useLatestRequest } from '../../../../composables/useLatestRequest'
 import { statsApi } from '../../../../services/apiService'
 import { useStatisticsStore } from '../../../../stores/statisticsStore'
 import {
@@ -71,52 +72,45 @@ const { selectedArea, dateFrom, dateTo } = storeToRefs(statisticsStore)
 const totals = ref<ReportStatsRow[]>([])
 const regions = ref<ReportStatsRow[]>([])
 const series = ref<ReportStatsRow[]>([])
-const loading = ref(false)
-const error = ref(false)
+const { loading, error, run } = useLatestRequest()
 
 // `level` must be strictly finer than the area's level; NUTS3 has nothing below.
 const regionLevel = computed(() => getSubRegionLevel(selectedArea.value))
 
-let requestId = 0
 // Load the report statistics for the selected area and date range.
 const load = async () => {
   const area = selectedArea.value
   if (!area || !dateFrom.value || !dateTo.value) return
 
-  const id = ++requestId // ignore responses from superseded requests
-  loading.value = true
-  error.value = false
-
   const base = { area: area.key, dateFrom: dateFrom.value, dateTo: dateTo.value }
-  try {
-    const [t, r, s] = await Promise.all([
-      statsApi.reportsList({ ...base, groupBy: [StatsReportsListGroupByParameter.Type] }),
-      regionLevel.value
-        ? statsApi.reportsList({
-            ...base,
-            groupBy: [
-              StatsReportsListGroupByParameter.Type,
-              StatsReportsListGroupByParameter.Region,
-            ],
-            level: regionLevel.value,
-          })
-        : null,
-      statsApi.reportsList({
-        ...base,
-        groupBy: [StatsReportsListGroupByParameter.Type, StatsReportsListGroupByParameter.Date],
-        interval: pickInterval(dateFrom.value, dateTo.value),
-        cumulative: true,
-      }),
-    ])
-    if (id !== requestId) return
-    totals.value = t.data.data as ReportStatsRow[]
-    regions.value = (r?.data.data as ReportStatsRow[] | undefined) ?? []
-    series.value = s.data.data as ReportStatsRow[]
-  } catch {
-    if (id === requestId) error.value = true
-  } finally {
-    if (id === requestId) loading.value = false
-  }
+  const interval = pickInterval(dateFrom.value, dateTo.value)
+  await run(
+    () =>
+      Promise.all([
+        statsApi.reportsList({ ...base, groupBy: [StatsReportsListGroupByParameter.Type] }),
+        regionLevel.value
+          ? statsApi.reportsList({
+              ...base,
+              groupBy: [
+                StatsReportsListGroupByParameter.Type,
+                StatsReportsListGroupByParameter.Region,
+              ],
+              level: regionLevel.value,
+            })
+          : null,
+        statsApi.reportsList({
+          ...base,
+          groupBy: [StatsReportsListGroupByParameter.Type, StatsReportsListGroupByParameter.Date],
+          interval,
+          cumulative: true,
+        }),
+      ]),
+    ([t, r, s]) => {
+      totals.value = t.data.data as ReportStatsRow[]
+      regions.value = (r?.data.data as ReportStatsRow[] | undefined) ?? []
+      series.value = s.data.data as ReportStatsRow[]
+    },
+  )
 }
 // Wait for the area and both dates, so the first load is a single fetch.
 watch([selectedArea, dateFrom, dateTo], load, { immediate: true })
