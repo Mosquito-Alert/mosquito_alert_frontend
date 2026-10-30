@@ -49,9 +49,3 @@ export const getChipMessageStyle = (chipKey: string): string => {
     ''
   )
 }
-
-export const STATS_REPORTS_TYPES = [
-  { key: 'adult', label: 'Adults', color: '#fbc800' },
-  { key: 'bite', label: 'Bites', color: '#f44336' },
-  { key: 'site', label: 'Breeding sites', color: '#2196f3' },
-] as const

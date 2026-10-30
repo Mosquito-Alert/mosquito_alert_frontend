@@ -2,6 +2,7 @@
   <div>
     <h3 class="card-title my-4">Report Statistics</h3>
     <GlobalReportStatistics />
+    <hr class="my-8" />
     <ByTypeReportStatistics />
   </div>
 </template>

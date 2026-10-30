@@ -1,5 +1,5 @@
 <template>
-  <h4 class="card-title my-4">Global Report Statistics</h4>
+  <h4 class="card-title my-8">Global Report Statistics</h4>
 
   <Message v-if="error" severity="error" :closable="false">Could not load the statistics.</Message>
 
@@ -41,18 +41,19 @@ import { BarChart, LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import {
-  AreaMetaLevel,
-  StatsReportsListGroupByParameter,
-  StatsReportsListIntervalParameter,
-  type ReportStatsRow,
-} from 'mosquito-alert'
+import { StatsReportsListGroupByParameter, type ReportStatsRow } from 'mosquito-alert'
 import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { statsApi } from '../../../../services/apiService'
 import { useStatisticsStore } from '../../../../stores/statisticsStore'
-import { STATS_REPORTS_TYPES } from '../../../../utils/constants'
+import {
+  STATS_REPORTS_TYPES,
+  formatNumber,
+  getSubRegionLevel,
+  pickInterval,
+  stackedTooltip,
+} from '../../../../utils/statsChartsUtils'
 
 use([
   CanvasRenderer,
@@ -74,20 +75,7 @@ const loading = ref(false)
 const error = ref(false)
 
 // `level` must be strictly finer than the area's level; NUTS3 has nothing below.
-const regionLevel = computed(() => {
-  const level = selectedArea.value?.level
-  return level === AreaMetaLevel.Country ? 2 : level === AreaMetaLevel.Nuts2 ? 3 : null
-})
-
-// Keep the timeseries under the backend's row cap.
-const pickInterval = (from: string, to: string) => {
-  const days = (new Date(to).getTime() - new Date(from).getTime()) / 86_400_000
-  return days <= 62
-    ? StatsReportsListIntervalParameter.Day
-    : days <= 730
-      ? StatsReportsListIntervalParameter.Week
-      : StatsReportsListIntervalParameter.Month
-}
+const regionLevel = computed(() => getSubRegionLevel(selectedArea.value))
 
 let requestId = 0
 // Load the report statistics for the selected area and date range.
@@ -134,37 +122,6 @@ const load = async () => {
 watch([selectedArea, dateFrom, dateTo], load, { immediate: true })
 
 // * ################# CHARTS #################
-// Format numbers with commas for thousands
-const formatNumber = (n: number) => n.toLocaleString('en-US')
-// Tooltip for stacked charts: one line per series plus the total.
-const stackedTooltip = (params: unknown): string => {
-  const items = params as {
-    axisValueLabel: string
-    marker: string
-    seriesName: string
-    value: number
-  }[]
-  if (!items.length) return ''
-
-  const total = items.reduce((sum, i) => sum + (i.value ?? 0), 0)
-  const lines = items
-    .map(
-      (i) =>
-        `<div style="display:flex;justify-content:space-between;gap:16px">
-           <span>${i.marker}${i.seriesName}</span><b>${formatNumber(i.value)}</b>
-         </div>`,
-    )
-    .join('')
-
-  return `
-    <div style="margin-bottom:4px">${items[0].axisValueLabel}</div>
-    ${lines}
-    <div style="display:flex;justify-content:space-between;gap:16px;margin-top:4px;
-                padding-top:4px;border-top:1px solid #ccc">
-      <span>Total</span><b>${formatNumber(total)}</b>
-    </div>`
-}
-
 // ---------- 1. Half doughnut ----------
 // We have to create a half doughnut manually by adding an invisible slice for the bottom half, since 'endAngle' has a bug.
 const doughnutOption = computed<EChartsOption>(() => {
