@@ -1,5 +1,13 @@
 <template>
-  <h4 class="card-title my-8">Global Report Statistics</h4>
+  <h4 class="card-title mt-8">Report Statistics: Type Breakdown</h4>
+
+  <!-- * INFORMATION -->
+  <div class="my-4">
+    <p>
+      Overview of the report statistics for the selected area and date range, broken down by report
+      type.
+    </p>
+  </div>
 
   <Message v-if="error" severity="error" :closable="false">Could not load the statistics.</Message>
 
@@ -68,9 +76,10 @@ use([
 ])
 
 const statisticsStore = useStatisticsStore()
-const { dateFrom, dateTo, areaParam, scopeReady, regionBreakdown, worldMode } =
+const { dateFrom, dateTo, areaParam, scopeReady, regionBreakdown, worldMode, selectedArea } =
   storeToRefs(statisticsStore)
 
+const where = computed(() => (worldMode.value ? 'World' : selectedArea.value?.name || ''))
 const totals = ref<ReportStatsRow[]>([])
 const regions = ref<ReportStatsRow[]>([])
 const series = ref<ReportStatsRow[]>([])

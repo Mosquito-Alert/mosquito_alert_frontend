@@ -1,6 +1,7 @@
 <template>
-  <div class="flex flex-wrap items-center justify-between gap-3 my-8">
-    <h4 class="card-title m-0">Filtered By Report Type Statistics</h4>
+  <div class="flex flex-wrap items-center justify-between gap-3 mt-8">
+    <h4 class="card-title m-0">Report Statistics: Filtered By {{ typeInfo.label }}</h4>
+
     <SelectButton
       v-model="selectedType"
       :options="typeOptions"
@@ -9,6 +10,16 @@
       :allow-empty="false"
       aria-label="Report type"
     />
+  </div>
+
+  <!-- * INFORMATION -->
+  <div class="my-4">
+    <p>
+      Overview of the report statistics for the selected area and date range, filtered by
+      <strong>{{ typeInfo.label }}</strong
+      >.
+    </p>
+    <p>You can use the controls above on the right to change the report type.</p>
   </div>
 
   <Message v-if="error" severity="error" :closable="false">Could not load the statistics.</Message>
@@ -48,7 +59,6 @@ import {
   STATS_REPORTS_TYPES,
   TOP_N,
   formatNumber,
-  getSubRegionLevel,
   pickInterval,
   stackedTooltip,
   topWithOthers,
