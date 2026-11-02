@@ -71,3 +71,25 @@ export const stackedTooltip = (params: unknown): string => {
       <span>Total</span><b>${formatNumber(total)}</b>
     </div>`
 }
+
+// Number of top items to display in charts
+export const TOP_N = 15
+
+export interface RankedEntry {
+  name: string
+  counts: Record<string, number> // per type, e.g. { adult: 3, bite: 1 }
+  total: number
+}
+
+// Largest first; everything beyond `n` is summed into one "Others" entry (last).
+export function topWithOthers(entries: RankedEntry[], n = TOP_N, label = 'Others'): RankedEntry[] {
+  const sorted = [...entries].sort((a, b) => b.total - a.total)
+  if (sorted.length <= n) return sorted
+  const counts: Record<string, number> = {}
+  let total = 0
+  for (const e of sorted.slice(n)) {
+    total += e.total
+    for (const [k, v] of Object.entries(e.counts)) counts[k] = (counts[k] ?? 0) + v
+  }
+  return [...sorted.slice(0, n), { name: label, counts, total }]
+}

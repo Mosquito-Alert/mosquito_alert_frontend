@@ -13,7 +13,7 @@
 
   <Message v-if="error" severity="error" :closable="false">Could not load the statistics.</Message>
 
-  <Message v-else-if="!regionLevel" severity="info" :closable="false">
+  <Message v-else-if="!regionBreakdown" severity="info" :closable="false">
     This area has no subdivisions to compare.
   </Message>
 
@@ -46,10 +46,13 @@ import { useLatestRequest } from '@/composables/useLatestRequest'
 import { useStatisticsStore } from '@/stores/statisticsStore'
 import {
   STATS_REPORTS_TYPES,
+  TOP_N,
   formatNumber,
   getSubRegionLevel,
   pickInterval,
   stackedTooltip,
+  topWithOthers,
+  type RankedEntry,
   type TypeKey,
 } from '@/utils/statsChartsUtils'
 import { StatsReportsListGroupByParameter, type ReportStatsRow } from 'mosquito-alert'
@@ -58,7 +61,8 @@ import { statsApi } from '../../../../services/apiService'
 use([CanvasRenderer, BarChart, LineChart, GridComponent, LegendComponent, TooltipComponent])
 
 const statisticsStore = useStatisticsStore()
-const { selectedArea, dateFrom, dateTo } = storeToRefs(statisticsStore)
+const { dateFrom, dateTo, areaParam, scopeReady, regionBreakdown, worldMode } =
+  storeToRefs(statisticsStore)
 
 const selectedType = ref<TypeKey>('adult')
 const typeOptions = STATS_REPORTS_TYPES.map((t) => ({ label: t.label, value: t.key }))
@@ -68,12 +72,8 @@ const byRegion = ref<ReportStatsRow[]>([])
 const byRegionDate = ref<ReportStatsRow[]>([])
 const { loading, error, run, cancel } = useLatestRequest()
 
-// `level` must be strictly finer than the area's level; NUTS3 has nothing below.
-const regionLevel = computed(() => getSubRegionLevel(selectedArea.value))
-
 const load = async () => {
-  const area = selectedArea.value
-  if (!area || !regionLevel.value || !dateFrom.value || !dateTo.value) {
+  if (!scopeReady.value || !regionBreakdown.value || !dateFrom.value || !dateTo.value) {
     cancel()
     byRegion.value = []
     byRegionDate.value = []
@@ -81,11 +81,11 @@ const load = async () => {
   }
 
   const base = {
-    area: area.key,
+    area: areaParam.value,
     dateFrom: dateFrom.value,
     dateTo: dateTo.value,
     type: [selectedType.value],
-    level: regionLevel.value,
+    level: regionBreakdown.value.level,
   }
   const interval = pickInterval(dateFrom.value, dateTo.value, 62, 365)
   await run(
@@ -106,21 +106,25 @@ const load = async () => {
   )
 }
 
-watch([selectedArea, dateFrom, dateTo, selectedType], load, { immediate: true })
+watch([areaParam, worldMode, dateFrom, dateTo, selectedType], load, { immediate: true })
 
 // * ################# CHARTS #################
 // ---------- 1. Horizontal bars by region ----------
-const sortedRegions = computed(() =>
-  // ascending: ECharts draws the first category at the bottom
-  [...byRegion.value].sort((a, b) => a.count - b.count),
-)
+const sortedRegions = computed(() => {
+  const entries: RankedEntry[] = byRegion.value.map((r) => ({
+    name: r.region_name ?? '',
+    counts: { count: r.count },
+    total: r.count,
+  }))
+  const list = worldMode.value ? topWithOthers(entries) : entries.sort((a, b) => b.total - a.total)
+  return list.reverse()
+})
 
 const barHeight = computed(() => `${Math.max(240, sortedRegions.value.length * 28 + 80)}px`)
 
 const barOption = computed<EChartsOption>(() => ({
   tooltip: {
     trigger: 'axis',
-    axisPointer: { type: 'shadow' },
     confine: true,
     formatter: (params: any) => {
       const p = Array.isArray(params) ? params[0] : params
@@ -129,13 +133,13 @@ const barOption = computed<EChartsOption>(() => ({
   },
   grid: { left: 8, right: 24, top: 16, bottom: 8, containLabel: true },
   xAxis: { type: 'value', axisLabel: { formatter: (v: number) => formatNumber(v) } },
-  yAxis: { type: 'category', data: sortedRegions.value.map((r) => r.region_name ?? '') },
+  yAxis: { type: 'category', data: sortedRegions.value.map((r) => r.name) },
   series: [
     {
       name: typeInfo.value.label,
       type: 'bar',
       itemStyle: { color: typeInfo.value.color },
-      data: sortedRegions.value.map((r) => r.count),
+      data: sortedRegions.value.map((r) => r.total),
     },
   ],
 }))
@@ -149,19 +153,28 @@ const areaSeries = computed(() => {
   // region_id -> { name, data[] }, one slot per date
   const regions = new Map<number, { name: string; data: number[] }>()
   for (const r of byRegionDate.value) {
-    const { date, count } = r
-    const region_id = r.region_id as number
-    const region_name = r.region_name as string
-    let entry = regions.get(region_id)
+    const id = r.region_id as number
+    let entry = regions.get(id)
     if (!entry) {
-      entry = { name: region_name, data: new Array(dates.value.length).fill(0) }
-      regions.set(region_id, entry)
+      entry = { name: r.region_name as string, data: new Array(dates.value.length).fill(0) }
+      regions.set(id, entry)
     }
-    entry.data[index.get(date!)!] = count
+    entry.data[index.get(r.date!)!] = r.count
+  }
+
+  let list = [...regions.values()]
+  if (worldMode.value && list.length > TOP_N) {
+    list.sort((a, b) => b.data.at(-1)! - a.data.at(-1)!) // by final cumulative value
+    const rest = list.slice(TOP_N)
+    const others = {
+      name: 'Others',
+      data: dates.value.map((_, i) => rest.reduce((sum, r) => sum + r.data[i], 0)),
+    }
+    list = [...list.slice(0, TOP_N), others]
   }
 
   return (
-    [...regions.values()]
+    list
       // This sorting will order the regions by their final cumulative value in descending order
       // .sort((a, b) => b.data.at(-1)! - a.data.at(-1)!)
       .map(({ name, data }) => ({

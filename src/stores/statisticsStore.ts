@@ -1,17 +1,20 @@
-import { AreaMetaLevel, type StatsArea } from 'mosquito-alert'
+import { AreaMetaLevel, StatsReportsListGroupByParameter, type StatsArea } from 'mosquito-alert'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { statsApi } from '../services/apiService'
 import { normalize } from '../utils/Utils'
+import { getSubRegionLevel } from '../utils/statsChartsUtils'
 
 const flatten = (nodes: StatsArea[]): StatsArea[] =>
   nodes.flatMap((n) => [n, ...flatten(n.children)])
 
 export const useStatisticsStore = defineStore('statistics', () => {
   // ! #################### State ####################
+  // ************** General State **************
   // Filters date range
   const dateFrom = ref<string | null>(null)
   const dateTo = ref<string | null>(null)
+  const worldMode = ref(false) // Whether the statistics are shown for the world or a specific area
   // * ********** Area State **********
   const areaTree = ref<StatsArea[]>([])
   const areaSelectedKey = ref<string | null>(null)
@@ -20,7 +23,17 @@ export const useStatisticsStore = defineStore('statistics', () => {
   const errorArea = ref<unknown>(null)
 
   // ! #################### Getters ####################
-  // * ********** Area State **********
+  // ************** General Getters **************
+  // What every chart sends as ?area= (undefined = whole world).
+  const areaParam = computed(() => (worldMode.value ? undefined : selectedArea.value?.key))
+  const scopeReady = computed(() => worldMode.value || !!selectedArea.value)
+  // What every chart sends as `level`. (null = nothing to break down by) (In world mode `level` is undefined and the backend breaks down by country)
+  const regionBreakdown = computed(() => {
+    if (worldMode.value) return { level: undefined }
+    const level = getSubRegionLevel(selectedArea.value)
+    return level ? { level } : null
+  })
+  // * ********** Area Getters **********
   const flat = computed(() => flatten(areaTree.value))
   const selectedArea = computed(
     () => flat.value.find((a) => a.key === areaSelectedKey.value) ?? null,
@@ -35,11 +48,12 @@ export const useStatisticsStore = defineStore('statistics', () => {
   )
 
   // ! #################### Actions ####################
+  // ************** General Actions **************
   const setDateRange = (from: string | null, to: string | null) => {
     dateFrom.value = from
     dateTo.value = to
   }
-  // * ********** Area State **********
+  // * ********** Area Actions **********
   // Idempotent: safe to call from every component that needs the areas.
   const loadAreas = async (force = false) => {
     if (loadedArea.value && !force) return
@@ -86,10 +100,11 @@ export const useStatisticsStore = defineStore('statistics', () => {
     return keys
   }
 
-  // ! RESET
+  // ! #################### RESET ####################
   const $reset = () => {
     dateFrom.value = null
     dateTo.value = null
+    worldMode.value = false
     areaTree.value = []
     areaSelectedKey.value = null
     loadedArea.value = false
@@ -105,6 +120,10 @@ export const useStatisticsStore = defineStore('statistics', () => {
     loadingArea,
     loadedArea,
     errorArea,
+    worldMode,
+    areaParam,
+    scopeReady,
+    regionBreakdown,
     flat,
     selectedArea,
     defaultArea,

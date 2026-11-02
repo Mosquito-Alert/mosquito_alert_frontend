@@ -29,6 +29,7 @@ export type Subjects =
   | 'IdentificationTask'
   | 'Message'
   | 'Statistics'
+  | 'WorldStatistics'
 export type AppAbility = MongoAbility<[Actions, Subjects | ForcedSubject<Exclude<Subjects, 'all'>>]>
 
 export default function defineAbilityFor(permissions: Permissions | null) {
@@ -81,6 +82,7 @@ export default function defineAbilityFor(permissions: Permissions | null) {
     if (perms.add) can('add', 'Statistics')
     if (perms.change) can('change', 'Statistics')
     if (perms.view) can('view', 'Statistics')
+    if (perms.view_world) can('view', 'WorldStatistics')
     if (perms.delete) can('delete', 'Statistics')
   }
 

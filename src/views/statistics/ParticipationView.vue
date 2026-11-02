@@ -57,24 +57,23 @@
     <!-- TODO: Sampling Effort charts -->
     <!-- TODO: User Downloads charts -->
     <!-- TODO: User profiling charts -->
+    <Divider class="my-8" />
+
+    <!-- SAMPLING EFFORT CHARTS -->
+    <!-- TODO: -->
+
+    <!-- USER DOWNLOAD CHARTS -->
+    <DownloadStatistics />
+    <Divider class="my-8" />
+
+    <!-- USER PROFILING CHARTS -->
+    <!-- TODO: -->
   </div>
 </template>
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { watch } from 'vue'
+import Divider from 'primevue/divider'
 import AreaSelector from '@/components/statistics/AreaSelector.vue'
 import DateRangePickerWithPresets from '@/components/statistics/DateRangePickerWithPresets.vue'
-import { useStatisticsStore } from '@/stores/statisticsStore'
 import ReportStatistics from '../../components/statistics/participation/reports/ReportStatistics.vue'
-
-const { areaSelectedKey } = storeToRefs(useStatisticsStore())
-
-// null until the areas load, so skip fetching until there is a key.
-watch(
-  areaSelectedKey,
-  (areaSelectedKey) => {
-    // if (areaSelectedKey) fetchCharts(areaSelectedKey)
-  },
-  { immediate: true },
-)
+import DownloadStatistics from '../../components/statistics/participation/users/DownloadStatistics.vue'
 </script>

@@ -14,7 +14,7 @@
     <Card class="col-span-12 lg:col-span-7">
       <template #title>Reports by region</template>
       <template #content>
-        <small v-if="!regionLevel" class="text-color-secondary">
+        <small v-if="!regionBreakdown" class="text-color-secondary">
           This area has no subdivisions to compare.
         </small>
         <v-chart
@@ -51,9 +51,10 @@ import { useStatisticsStore } from '../../../../stores/statisticsStore'
 import {
   STATS_REPORTS_TYPES,
   formatNumber,
-  getSubRegionLevel,
   pickInterval,
   stackedTooltip,
+  topWithOthers,
+  type RankedEntry,
 } from '../../../../utils/statsChartsUtils'
 
 use([
@@ -67,35 +68,32 @@ use([
 ])
 
 const statisticsStore = useStatisticsStore()
-const { selectedArea, dateFrom, dateTo } = storeToRefs(statisticsStore)
+const { dateFrom, dateTo, areaParam, scopeReady, regionBreakdown, worldMode } =
+  storeToRefs(statisticsStore)
 
 const totals = ref<ReportStatsRow[]>([])
 const regions = ref<ReportStatsRow[]>([])
 const series = ref<ReportStatsRow[]>([])
 const { loading, error, run } = useLatestRequest()
 
-// `level` must be strictly finer than the area's level; NUTS3 has nothing below.
-const regionLevel = computed(() => getSubRegionLevel(selectedArea.value))
-
 // Load the report statistics for the selected area and date range.
 const load = async () => {
-  const area = selectedArea.value
-  if (!area || !dateFrom.value || !dateTo.value) return
+  if (!scopeReady.value || !dateFrom.value || !dateTo.value) return
 
-  const base = { area: area.key, dateFrom: dateFrom.value, dateTo: dateTo.value }
+  const base = { area: areaParam.value, dateFrom: dateFrom.value, dateTo: dateTo.value }
   const interval = pickInterval(dateFrom.value, dateTo.value)
   await run(
     () =>
       Promise.all([
         statsApi.reportsList({ ...base, groupBy: [StatsReportsListGroupByParameter.Type] }),
-        regionLevel.value
+        regionBreakdown.value
           ? statsApi.reportsList({
               ...base,
               groupBy: [
                 StatsReportsListGroupByParameter.Type,
                 StatsReportsListGroupByParameter.Region,
               ],
-              level: regionLevel.value,
+              level: regionBreakdown.value.level,
             })
           : null,
         statsApi.reportsList({
@@ -113,7 +111,7 @@ const load = async () => {
   )
 }
 // Wait for the area and both dates, so the first load is a single fetch.
-watch([selectedArea, dateFrom, dateTo], load, { immediate: true })
+watch([areaParam, worldMode, dateFrom, dateTo], load, { immediate: true })
 
 // * ################# CHARTS #################
 // ---------- 1. Half doughnut ----------
@@ -171,31 +169,45 @@ const doughnutOption = computed<EChartsOption>(() => {
 })
 
 // ---------- 2. Stacked horizontal bars by region ----------
-const regionNames = computed(() => {
-  const sums = new Map<string, number>()
+// const regionNames = computed(() => {
+//   const sums = new Map<string, number>()
+//   for (const r of regions.value) {
+//     sums.set(r.region_name!, (sums.get(r.region_name!) ?? 0) + r.count)
+//   }
+//   // ascending: ECharts draws the first category at the bottom
+//   return [...sums.entries()].sort((a, b) => a[1] - b[1]).map(([name]) => name)
+// })
+
+// One entry per region/country, with counts per type. Top 10 + Others in world mode.
+const regionRows = computed(() => {
+  const byName = new Map<string, RankedEntry>()
   for (const r of regions.value) {
-    sums.set(r.region_name!, (sums.get(r.region_name!) ?? 0) + r.count)
+    const name = r.region_name ?? ''
+    const e = byName.get(name) ?? { name, counts: {}, total: 0 }
+    e.counts[r.type!] = r.count
+    e.total += r.count
+    byName.set(name, e)
   }
-  // ascending: ECharts draws the first category at the bottom
-  return [...sums.entries()].sort((a, b) => a[1] - b[1]).map(([name]) => name)
+  const entries = [...byName.values()]
+  const list = worldMode.value ? topWithOthers(entries) : entries.sort((a, b) => b.total - a.total)
+  // ECharts draws the first category at the bottom: the biggest ends up on top.
+  return list.reverse()
 })
 
-const barHeight = computed(() => `${Math.max(240, regionNames.value.length * 28 + 80)}px`)
+const barHeight = computed(() => `${Math.max(240, regionRows.value.length * 28 + 80)}px`)
 
 const barOption = computed<EChartsOption>(() => ({
-  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: stackedTooltip },
+  tooltip: { trigger: 'axis', formatter: stackedTooltip },
   legend: { top: 0 },
   grid: { left: 8, right: 24, top: 40, bottom: 8, containLabel: true },
   xAxis: { type: 'value' },
-  yAxis: { type: 'category', data: regionNames.value },
+  yAxis: { type: 'category', data: regionRows.value.map((r) => r.name) },
   series: STATS_REPORTS_TYPES.map((t) => ({
     name: t.label,
     type: 'bar',
     stack: 'total',
     itemStyle: { color: t.color },
-    data: regionNames.value.map(
-      (name) => regions.value.find((r) => r.region_name === name && r.type === t.key)?.count ?? 0,
-    ),
+    data: regionRows.value.map((r) => r.counts[t.key] ?? 0),
   })),
 }))
 
@@ -203,7 +215,7 @@ const barOption = computed<EChartsOption>(() => ({
 const dates = computed(() => [...new Set(series.value.map((r) => r.date!))].sort())
 
 const areaOption = computed<EChartsOption>(() => ({
-  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: stackedTooltip },
+  tooltip: { trigger: 'axis', formatter: stackedTooltip },
   legend: { top: 0 },
   grid: { left: 8, right: 24, top: 40, bottom: 8, containLabel: true },
   xAxis: { type: 'category', boundaryGap: false, data: dates.value },
